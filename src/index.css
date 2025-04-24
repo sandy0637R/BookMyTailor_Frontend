@@ -1,1 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import "tailwindcss";
+
+* {
+  font-family: "Inter", sans-serif;
+  scrollbar-width: none;
+  list-style: none;
+  box-sizing: border-box;
+}
+:root {
+  --primary: #222831;
+  --secondary: #393e46;
+  --highlight-color: #00adb5;
+  --content-color: #eeeeee;
+}
+
+@theme {
+  --font-manrope: "Inter", sans-serif;
+}
+
+.drawer-btn {
+  @apply mb-2 border-b-2 border-[var(--secondary)] p-2 hover:text-[var(--highlight-color)] hover:border-[var(--highlight-color)] hover:bg-[var(--secondary)] hover:rounded-sm transition-all duration-200 ease-in-out;
+}
+
+.nav-btn {
+  @apply ml-2 mr-2  p-1 pr-3 pl-3 hover:text-[var(--highlight-color)]  hover:bg-[var(--secondary)] hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_var(--highlight-color)];
+}
