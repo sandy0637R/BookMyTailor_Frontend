@@ -1,12 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
 import { IoMdArrowDropright } from "react-icons/io";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Notification from "../utils/Notification"; // Your notification component
 
 export default function Drawer() {
   const [open, setOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [notification, setNotification] = useState(""); // State for notification message
   const drawerRef = useRef();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+
+    window.addEventListener("storage", checkAuth); // Listen for changes
+    return () => window.removeEventListener("storage", checkAuth);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -28,6 +42,16 @@ export default function Drawer() {
     return location.pathname === path
       ? "drawer-btn bg-[var(--secondary)] text-[var(--highlight-color)] rounded-sm"
       : "drawer-btn";
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    setNotification("Logged out successfully!"); // Show logout notification
+    window.dispatchEvent(new Event("storage")); // Trigger update
+    setTimeout(() => {
+      navigate("/"); // Redirect to home after 2 seconds
+    }, 2000);
   };
 
   return (
@@ -54,23 +78,32 @@ export default function Drawer() {
         />
         <h2 className="text-xl font-bold mb-4">Menu</h2>
         <ul>
-          <Link to="/">
-            <li className={getLinkClass("/")}>Home</li>
-          </Link>
-          <Link to="/login">
-            <li className={getLinkClass("/login")}>Login</li>
-          </Link>
-          <Link to="/register">
-            <li className={getLinkClass("/register")}>Register</li>
-          </Link>
-          <Link to="/profile">
-            <li className={getLinkClass("/profile")}>Profile</li>
-          </Link>
-          <Link to="/tailors">
-            <li className={getLinkClass("/tailors")}>Tailors</li>
-          </Link>
+          <Link to="/"><li className={getLinkClass("/")}>Home</li></Link>
+
+          {!isLoggedIn && (
+            <>
+              <Link to="/login"><li className={getLinkClass("/login")}>Login</li></Link>
+              <Link to="/register"><li className={getLinkClass("/register")}>Register</li></Link>
+            </>
+          )}
+
+          {isLoggedIn && (
+            <>
+              <Link to="/profile"><li className={getLinkClass("/profile")}>Profile</li></Link>
+              <li className="drawer-btn hover:bg-red-400 hover:text-white" onClick={handleLogout}>Logout</li>
+            </>
+          )}
+
+          <Link to="/tailors"><li className={getLinkClass("/tailors")}>Tailors</li></Link>
         </ul>
       </div>
+
+      {notification && (
+        <Notification
+          message={notification}
+          onClose={() => setNotification("")}
+        />
+      )}
     </div>
   );
 }
