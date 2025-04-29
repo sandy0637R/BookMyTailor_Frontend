@@ -9,16 +9,20 @@ import Tailors from "./pages/Tailors";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 import PrivateRoute from "./utils/PrivateRoute";
+import ToastContainer from "./containers/ToastContainer";
 
 const App = () => {
   return (
     <div className="relative min-h-screen">
+      {/* 🔔 Toaster for notifications */}
+      <ToastContainer />
+
       {/* Drawer overlays above content */}
       <div className="fixed top-0 left-0 z-50">
         <Drawer />
       </div>
 
-      {/* Full-screen main content behind drawer */}
+      {/* Main content behind drawer */}
       <div className="flex flex-col w-full min-h-screen">
         <Navbar />
 
@@ -44,6 +48,7 @@ const App = () => {
   );
 };
 
+// Export wrapped with CookiesProvider
 export default () => (
   <CookiesProvider>
     <App />

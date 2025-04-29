@@ -1,32 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { useCookies } from "react-cookie";
-import Notification from "../utils/Notification";
+import { useSelector } from "react-redux"; // Use Redux to get authentication state
+import toast from 'react-hot-toast'; // Import toast from react-hot-toast
 
 const PrivateRoute = ({ children }) => {
-  const [cookies] = useCookies(["token"]);
-  const [showNotification, setShowNotification] = useState(false);
-  const [redirect, setRedirect] = useState(false);
+  const { isLoggedIn } = useSelector(state => state.auth); // Get auth state from Redux
 
   useEffect(() => {
-    if (!cookies.token) {
-      setShowNotification(true);
-      setTimeout(() => setRedirect(true), 2000); // delay redirect
+    if (!isLoggedIn) {
+      toast.error("You must log in first!"); // Show error toast if not logged in
     }
-  }, [cookies.token]);
+  }, [isLoggedIn]);
 
-  if (cookies.token) return children;
+  if (isLoggedIn) {
+    return children; // Render children if logged in
+  }
 
   return (
-    <>
-      {showNotification && (
-        <Notification
-          message="You must log in first!"
-          onClose={() => setShowNotification(false)}
-        />
-      )}
-      {redirect && <Navigate to="/login" />}
-    </>
+    <Navigate to="/login" replace /> // Redirect to login page if not logged in
   );
 };
 

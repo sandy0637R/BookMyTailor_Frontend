@@ -1,73 +1,63 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import Notification from "../utils/Notification";
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginRequest } from '../redux/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast'; // ✅ Toast import
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [notification, setNotification] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const { isLoggedIn, error } = useSelector((state) => state.auth);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/users/login",
-        formData,
-        { withCredentials: true }
-      );
-      localStorage.setItem("token", res.data.token); // ✅ store token
-      window.dispatchEvent(new Event("storage")); // ✅ trigger update
-      setNotification("Login successful!");
-      setTimeout(() => navigate("/"), 1500);
-    } catch (error) {
-      setNotification(error.response?.data || "Something went wrong");
+  useEffect(() => {
+    if (isLoggedIn) {
+      toast.success('Login successful'); // ✅ Success toast
+      navigate('/');
     }
+  }, [isLoggedIn, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error); // ✅ Error toast from backend
+    }
+  }, [error]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(loginRequest({ email, password }));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-80">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-          />
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition duration-300"
-          >
-            Login
-          </button>
-        </form>
-      </div>
 
-      {notification && (
-        <Notification
-          message={notification}
-          onClose={() => setNotification("")}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full p-2 mb-4 border rounded"
         />
-      )}
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full p-2 mb-6 border rounded"
+        />
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+        >
+          Login
+        </button>
+      </form>
     </div>
   );
 };

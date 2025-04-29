@@ -25,3 +25,15 @@
 .nav-btn {
   @apply ml-2 mr-2  p-1 pr-3 pl-3 hover:text-[var(--highlight-color)]  hover:bg-[var(--secondary)] hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_var(--highlight-color)];
 }
+
+@keyframes scrub {
+  0% {
+    transform: scaleX(0); /* Start with no progress */
+    transform-origin: right; /* Start from the right side */
+  }
+  100% {
+    transform: scaleX(1); /* Fill the progress bar */
+    transform-origin: left; /* End on the left side */
+  }
+}
+

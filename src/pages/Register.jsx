@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Notification from "../utils/Notification"; // import your notification
+import { toast } from 'react-hot-toast'; // Import toast from react-hot-toast
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,8 +14,6 @@ const Register = () => {
     orders: [],
   });
 
-  const [message, setMessage] = useState("");
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -25,7 +23,7 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password.length < 6) {
-      setMessage("Password must be at least 6 characters long");
+      toast.error("Password must be at least 6 characters long"); // Use toast.error for error message
       return;
     }
 
@@ -35,10 +33,10 @@ const Register = () => {
         formData,
         { withCredentials: true }
       );
-      setMessage("Registered successfully!");
+      toast.success("Registered successfully!"); // Use toast.success for success message
       setTimeout(() => navigate("/login"), 2000); // redirect to login after 2s
     } catch (error) {
-      setMessage(error.response?.data || "Something went wrong");
+      toast.error(error.response?.data || "Something went wrong"); // Use toast.error for error message
     }
   };
 
@@ -74,16 +72,6 @@ const Register = () => {
             className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
             required
           />
-          <select
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="customer">Customer</option>
-            <option value="tailor">Tailor</option>
-            <option value="admin">Admin</option>
-          </select>
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded-xl hover:bg-blue-600 transition duration-300"
@@ -92,10 +80,6 @@ const Register = () => {
           </button>
         </form>
       </div>
-
-      {message && (
-        <Notification message={message} onClose={() => setMessage("")} />
-      )}
     </div>
   );
 };
