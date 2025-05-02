@@ -13,7 +13,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    loginRequest: (state, action) => {
+    loginRequest: (state) => {
       state.loading = true;
       state.error = null;
     },
@@ -38,8 +38,12 @@ const authSlice = createSlice({
       state.error = null;
     },
     setProfile: (state, action) => {
-      state.profile = action.payload;
+      state.profile = action.payload; // Ensure the full profile is updated
       state.loading = false;
+    },
+    updateProfileRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
@@ -60,6 +64,7 @@ export const {
   logout,
   fetchProfileRequest,
   setProfile,
+  updateProfileRequest,
   setError,
   setLoading,
   clearError

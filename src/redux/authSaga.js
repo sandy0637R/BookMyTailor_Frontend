@@ -1,18 +1,21 @@
 import { takeLatest, call, put } from "redux-saga/effects";
 import axios from "axios";
-import { login, setProfile, setError, setLoading } from "./authSlice";
+import {
+  login,
+  setProfile,
+  setError,
+  setLoading,
+} from "./authSlice";
 
-// API call to handle login
+// LOGIN API
 const loginApi = (loginInfo) => {
   return axios.post("http://localhost:5000/users/login", loginInfo);
 };
 
-// API call to fetch user profile
+// FETCH PROFILE API
 const fetchProfileApi = () => {
   const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("No token found. Please login first.");
-  }
+  if (!token) throw new Error("No token found. Please login first.");
   return axios.get("http://localhost:5000/users/profile", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -21,7 +24,19 @@ const fetchProfileApi = () => {
   });
 };
 
-// Saga to watch login action
+// UPDATE PROFILE API
+const updateProfileApi = (profileData) => {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No token found. Please login first.");
+  return axios.put("http://localhost:5000/users/profile", profileData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    withCredentials: true,
+  });
+};
+
+// LOGIN SAGA
 function* loginSaga(action) {
   try {
     const response = yield call(loginApi, action.payload);
@@ -36,39 +51,45 @@ function* loginSaga(action) {
       yield put(setError(message || "Login failed. Please try again."));
     }
   } catch (err) {
-    if (err.response && err.response.data && err.response.data.message) {
-      // Server responded with a custom error message (like "Email not found")
-      yield put(setError(err.response.data.message));
-    } else {
-      // Other errors (network error, etc.)
-      yield put(setError(err.message || "Something went wrong. Try again."));
-    }
+    yield put(setError(err.response?.data?.message || err.message || "Login failed"));
   }
 }
 
-
-// Saga to fetch user profile
+// FETCH PROFILE SAGA
 function* fetchUserProfile() {
   try {
-    yield put(setLoading(true)); // Show loading spinner or indication
+    yield put(setLoading(true));
     const response = yield call(fetchProfileApi);
-    console.log('Profile response:', response.data); // Check the structure of the response
-    yield put(setProfile(response.data)); // Set the profile in the state
-    yield put(setLoading(false)); // Hide loading spinner
+    yield put(setProfile(response.data)); // Full profile returned
+    yield put(setLoading(false));
   } catch (err) {
-    console.log("Fetch Profile Error:", err);
-    // Provide feedback to the user in case of error
-    yield put(setError(err.message || "An error occurred while fetching the profile."));
-    yield put(setLoading(false)); // Hide loading spinner
+    yield put(setError(err.message || "Error fetching profile."));
+    yield put(setLoading(false));
   }
 }
 
-// Watch for login action
+// UPDATE PROFILE SAGA
+function* updateProfileSaga(action) {
+  try {
+    yield put(setLoading(true));
+    const response = yield call(updateProfileApi, action.payload);
+    yield put(setProfile(response.data.user)); // Ensure full updated profile is set
+    yield put(setLoading(false));
+  } catch (err) {
+    yield put(setError(err.message || "Error updating profile."));
+    yield put(setLoading(false));
+  }
+}
+
+// WATCHERS
 export function* watchLogin() {
   yield takeLatest("auth/loginRequest", loginSaga);
 }
 
-// Watch for profile fetch action
 export function* watchFetchProfile() {
   yield takeLatest("auth/fetchProfileRequest", fetchUserProfile);
+}
+
+export function* watchUpdateProfile() {
+  yield takeLatest("auth/updateProfileRequest", updateProfileSaga);
 }
