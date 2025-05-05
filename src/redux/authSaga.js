@@ -5,83 +5,94 @@ import {
   setProfile,
   setError,
   setLoading,
+  fetchProfileRequest,
 } from "./authSlice";
 
-// LOGIN API
-const loginApi = (loginInfo) => {
-  return axios.post("http://localhost:5000/users/login", loginInfo);
-};
+// Utility to get token from localStorage
+const token = () => localStorage.getItem("token");
+const authHeader = () => ({ Authorization: `Bearer ${token()}` });
 
-// FETCH PROFILE API
-const fetchProfileApi = () => {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No token found. Please login first.");
-  return axios.get("http://localhost:5000/users/profile", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    withCredentials: true,
+// API calls
+const loginApi = (loginInfo) =>
+  axios.post("http://localhost:5000/users/login", loginInfo);
+
+const fetchProfileApi = () =>
+  axios.get("http://localhost:5000/users/profile", {
+    headers: authHeader(),
   });
-};
 
-// UPDATE PROFILE API
-const updateProfileApi = (profileData) => {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No token found. Please login first.");
-  return axios.put("http://localhost:5000/users/profile", profileData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    withCredentials: true,
+const updateProfileApi = (profileData) =>
+  axios.put("http://localhost:5000/users/profile", profileData, {
+    headers: authHeader(),
   });
-};
 
-// LOGIN SAGA
+// Login Saga
 function* loginSaga(action) {
   try {
     const response = yield call(loginApi, action.payload);
-    const { success, message, token, name, email } = response.data;
+    const { success, token, name, email, roles, tailorDetails, message } = response.data;
 
     if (success) {
-      yield put(login({ token, name, email }));
-      localStorage.setItem("token", token);
-      localStorage.setItem("loggedInUser", name);
-      localStorage.setItem("email", email);
+      // Save to Redux
+      yield put(login({ token, name, email, roles, tailorDetails }));
+
+      // Save to localStorage separately
+      localStorage.setItem("token", token || "");
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("user", name || "");
+      localStorage.setItem("email", email || "");
+      localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));
+      localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
     } else {
-      yield put(setError(message || "Login failed. Please try again."));
+      yield put(setError(message));
     }
   } catch (err) {
-    yield put(setError(err.response?.data?.message || err.message || "Login failed"));
+    yield put(setError(err.response?.data?.message || err.message));
   }
 }
 
-// FETCH PROFILE SAGA
+// Fetch Profile Saga
 function* fetchUserProfile() {
   try {
     yield put(setLoading(true));
     const response = yield call(fetchProfileApi);
-    yield put(setProfile(response.data)); // Full profile returned
-    yield put(setLoading(false));
+    const { name, email, roles, tailorDetails } = response.data;
+
+    yield put(setProfile({ name, email, roles, tailorDetails }));
+
+    // Save profile and other data to localStorage
+    localStorage.setItem("user", name || "");
+    localStorage.setItem("email", email || "");
+    localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));
+    localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
+    localStorage.setItem("profile", JSON.stringify(response.data));
   } catch (err) {
-    yield put(setError(err.message || "Error fetching profile."));
+    yield put(setError(err.response?.data?.message || err.message));
+  } finally {
     yield put(setLoading(false));
   }
 }
 
-// UPDATE PROFILE SAGA
+// Update Profile Saga
 function* updateProfileSaga(action) {
   try {
     yield put(setLoading(true));
     const response = yield call(updateProfileApi, action.payload);
-    yield put(setProfile(response.data.user)); // Ensure full updated profile is set
-    yield put(setLoading(false));
+    const { success, message } = response.data;
+
+    if (success) {
+      yield put(fetchProfileRequest());
+    } else {
+      yield put(setError(message));
+    }
   } catch (err) {
-    yield put(setError(err.message || "Error updating profile."));
+    yield put(setError(err.response?.data?.message || err.message));
+  } finally {
     yield put(setLoading(false));
   }
 }
 
-// WATCHERS
+// Watchers
 export function* watchLogin() {
   yield takeLatest("auth/loginRequest", loginSaga);
 }

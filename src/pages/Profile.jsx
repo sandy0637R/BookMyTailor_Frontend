@@ -7,66 +7,190 @@ import toast from 'react-hot-toast';
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoggedIn, profile, loading, error } = useSelector((state) => state.auth);
+  const { profile, loading } = useSelector((state) => state.auth);
 
-  const [selectedRole, setSelectedRole] = useState("Customer");
+  const [currentRole, setCurrentRole] = useState(localStorage.getItem('role') || 'customer');
+  const [showTailorConfirm, setShowTailorConfirm] = useState(false);
+  const [showTailorForm, setShowTailorForm] = useState(false);
+  const [tailorForm, setTailorForm] = useState({
+    experience: '',
+    specialization: '',
+    fees: ''
+  });
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-    } else if (profile === null) {
-      dispatch(fetchProfileRequest());
-    } else if (profile.role) {
-      setSelectedRole(profile.role);
+    dispatch(fetchProfileRequest());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (profile) {
+      const roles = profile.roles || [];
+      const hasTailor = roles.includes('tailor');
+      setCurrentRole(localStorage.getItem('role') || (hasTailor ? 'tailor' : 'customer'));
+
+      if (hasTailor && profile.tailorDetails) {
+        setTailorForm({
+          experience: profile.tailorDetails.experience || '',
+          specialization: profile.tailorDetails.specialization?.join(', ') || '',
+          fees: profile.tailorDetails.fees || ''
+        });
+      } else {
+        setTailorForm({ experience: '', specialization: '', fees: '' });
+      }
+
+      localStorage.setItem("user", profile.name || '');
+      localStorage.setItem("email", profile.email || '');
+      localStorage.setItem("roles", JSON.stringify(profile.roles || ['customer']));
+      localStorage.setItem("tailorDetails", JSON.stringify(profile.tailorDetails || null));
+      localStorage.setItem("profile", JSON.stringify(profile));
     }
-  }, [dispatch, profile, isLoggedIn, navigate]);
+  }, [profile]);
 
   const handleLogout = () => {
     dispatch(logout());
-    toast.success("Logged out successfully!");
-    setTimeout(() => {
-      navigate("/login");
-    }, 3000);
+    toast.success('Logged out successfully!');
+    localStorage.clear();
+    navigate("/login");
   };
 
   const handleRoleChange = (e) => {
-    const newRole = e.target.value;
-    setSelectedRole(newRole);
-    dispatch(updateProfileRequest({ role: newRole }));
-    toast.success(`Role updated to ${newRole}`);
+    const selected = e.target.value;
+    if (selected === currentRole) return;
+
+    if (selected === "tailor") {
+      if (profile?.roles?.includes("tailor") && profile.tailorDetails) {
+        setCurrentRole("tailor");
+        localStorage.setItem("role", "tailor");
+        toast.success("Switched to Tailor mode");
+      } else {
+        setShowTailorConfirm(true);
+      }
+    } else {
+      dispatch(updateProfileRequest({ roles: ["customer"] }));
+      setCurrentRole("customer");
+      localStorage.setItem("role", "customer");
+      toast.success("Switched to Customer mode");
+    }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+  const handleTailorConfirm = (confirm) => {
+    setShowTailorConfirm(false);
+    if (confirm) setShowTailorForm(true);
+  };
+
+  const handleTailorFormSubmit = (e) => {
+    e.preventDefault();
+
+    const tailorDetails = {
+      experience: Number(tailorForm.experience),
+      specialization: tailorForm.specialization.split(',').map(s => s.trim()),
+      fees: Number(tailorForm.fees),
+    };
+
+    const roles = profile?.roles?.includes("customer")
+      ? ["customer", "tailor"]
+      : ["tailor"];
+
+    dispatch(updateProfileRequest({ roles, tailorDetails }));
+
+    setTimeout(() => {
+      dispatch(fetchProfileRequest());
+    }, 500);
+
+    toast.success("Tailor profile submitted!");
+    setShowTailorForm(false);
+    setCurrentRole("tailor");
+    localStorage.setItem("role", "tailor");
+  };
+
+  if (loading) return <div className="text-center">Loading...</div>;
 
   return (
-    <div className="profile-container p-6 bg-gray-100 rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">User Profile</h2>
-      {profile ? (
-        <div className="profile-info space-y-4">
-          <p><strong>Name:</strong> {profile.name || 'N/A'}</p>
-          <p><strong>Email:</strong> {profile.email || 'N/A'}</p>
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h1 className="text-2xl font-semibold mb-4">Profile</h1>
+      <p className="text-lg mb-2">Name: {profile?.name}</p>
+      <p className="text-lg mb-4">Email: {profile?.email}</p>
 
-          <div>
-            <label className="font-semibold mr-2">Role:</label>
-            <select
-              value={selectedRole}
-              onChange={handleRoleChange}
-              className="border p-2 rounded"
+      <div className="mb-4">
+        <label htmlFor="role" className="block text-sm font-medium text-gray-700">Switch Role</label>
+        <select 
+          id="role" 
+          value={currentRole} 
+          onChange={handleRoleChange} 
+          className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="customer">Customer</option>
+          <option value="tailor">Tailor</option>
+        </select>
+      </div>
+
+      {showTailorConfirm && (
+        <div className="bg-yellow-100 p-4 mb-4 rounded-md">
+          <p className="text-gray-700">Do you want to become a tailor? Please provide your details.</p>
+          <div className="flex mt-2">
+            <button 
+              onClick={() => handleTailorConfirm(true)} 
+              className="bg-blue-500 text-white py-2 px-4 rounded-md mr-2"
             >
-              <option value="Customer">Customer</option>
-              <option value="Tailor">Tailor</option>
-              <option value="Admin">Admin</option>
-            </select>
+              Yes
+            </button>
+            <button 
+              onClick={() => handleTailorConfirm(false)} 
+              className="bg-red-500 text-white py-2 px-4 rounded-md"
+            >
+              No
+            </button>
           </div>
         </div>
-      ) : (
-        <p>No profile data available</p>
       )}
 
-      <button
-        onClick={handleLogout}
-        className="mt-6 w-full py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+      {showTailorForm && (
+        <form onSubmit={handleTailorFormSubmit} className="space-y-4">
+          <input
+            type="number"
+            value={tailorForm.experience}
+            onChange={e => setTailorForm({ ...tailorForm, experience: e.target.value })}
+            placeholder="Experience"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <input
+            type="text"
+            value={tailorForm.specialization}
+            onChange={e => setTailorForm({ ...tailorForm, specialization: e.target.value })}
+            placeholder="Specialization (comma-separated)"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <input
+            type="number"
+            value={tailorForm.fees}
+            onChange={e => setTailorForm({ ...tailorForm, fees: e.target.value })}
+            placeholder="Fees"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button 
+            type="submit" 
+            className="w-full bg-indigo-500 text-white py-2 px-4 rounded-md"
+          >
+            Submit
+          </button>
+        </form>
+      )}
+
+      {currentRole === "tailor" && profile?.roles?.includes("tailor") && profile.tailorDetails && (
+        <div className="mt-6 p-4 bg-gray-100 rounded-md">
+          <h3 className="text-lg font-semibold">Your Tailor Details</h3>
+          <p className="mt-2">Experience: {profile.tailorDetails.experience}</p>
+          <p className="mt-2">Specialization: {profile.tailorDetails.specialization?.join(', ')}</p>
+          <p className="mt-2">Fees: {profile.tailorDetails.fees}</p>
+        </div>
+      )}
+
+      <button 
+        onClick={handleLogout} 
+        className="mt-6 w-full bg-red-500 text-white py-2 px-4 rounded-md"
       >
         Logout
       </button>
