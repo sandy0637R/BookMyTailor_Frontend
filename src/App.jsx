@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Tailors from "./pages/Tailors";
 import Profile from "./pages/Profile";
+import PalletePage from "./pages/PalletePage";
 import Navbar from "./components/Navbar";
 import PrivateRoute from "./utils/PrivateRoute";
 import ToastContainer from "./containers/ToastContainer";
@@ -39,6 +40,14 @@ const App = () => {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/pallete"
+            element={
+              <PrivateRoute>
+                <PalletePage />
               </PrivateRoute>
             }
           />

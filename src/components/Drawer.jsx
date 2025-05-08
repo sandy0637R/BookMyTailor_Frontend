@@ -85,6 +85,9 @@ export default function Drawer() {
               <Link to="/profile">
                 <li className={getLinkClass("/profile")}>Profile</li>
               </Link>
+              <Link to="/pallete">
+                <li className={getLinkClass("/pallete")}>Color Tone</li>
+              </Link>
             </>
           )}
 
