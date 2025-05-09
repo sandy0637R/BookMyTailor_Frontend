@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProfileRequest, logout, updateProfileRequest } from '../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-
+import axios from 'axios';
 const Profile = () => {
+  const [file,setFile]=useState();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile, loading } = useSelector((state) => state.auth);
@@ -18,6 +19,29 @@ const Profile = () => {
     fees: ''
   });
 
+  const handleUpload = async () => {
+    if (!file) return toast.error("Please select a file");
+  
+    const formData = new FormData();
+    formData.append("profileImage", file);
+  
+    try {
+      const res = await axios.put("http://localhost:5000/users/profile", formData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`  // Add the token from localStorage
+        },
+      });
+  
+      toast.success("Image uploaded successfully!");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Upload failed!");
+    }
+  };
+  
+  
   useEffect(() => {
     dispatch(fetchProfileRequest());
   }, [dispatch]);
@@ -108,6 +132,8 @@ const Profile = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-semibold mb-4">Profile</h1>
+      <input type="file" onChange={e=>setFile(e.target.files[0])}/>
+      <button onClick={handleUpload}>Submit</button>
       <p className="text-lg mb-2">Name: {profile?.name}</p>
       <p className="text-lg mb-4">Email: {profile?.email}</p>
 
