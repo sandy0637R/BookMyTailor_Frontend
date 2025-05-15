@@ -2,33 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginRequest } from '../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast'; // ✅ Toast import
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { isLoggedIn, error } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      toast.success('Login successful'); // ✅ Success toast
-      navigate('/');
-    }
-  }, [isLoggedIn, navigate]);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error); // ✅ Error toast from backend
-    }
-  }, [error]);
+  const { isLoggedIn, error, roleError } = useSelector((state) => state.auth);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(loginRequest({ email, password }));
+
+    const loginData = {
+      email,
+      password,
+      ...(isAdminLogin && { role: 'admin' })
+    };
+
+    dispatch(loginRequest(loginData));
   };
+
+  // Handle notifications in useEffect
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+    if (roleError) {
+      toast.error(roleError);
+    }
+  }, [error, roleError]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/');
+    }
+  }, [isLoggedIn, navigate]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -49,8 +60,21 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-2 mb-6 border rounded"
+          className="w-full p-2 mb-4 border rounded"
         />
+
+        <div className="mb-4">
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={isAdminLogin}
+              onChange={(e) => setIsAdminLogin(e.target.checked)}
+              className="accent-blue-500"
+            />
+            <span>Login as Admin</span>
+          </label>
+        </div>
+
         <button
           type="submit"
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"

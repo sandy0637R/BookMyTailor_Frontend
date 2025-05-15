@@ -35,6 +35,7 @@ const authSlice = createSlice({
     loginRequest: (state) => {
       state.loading = true;
       state.error = null;
+      state.roleError = null;
     },
     login: (state, action) => {
       const { name, email, roles = ["customer"], tailorDetails = null, token } = action.payload;
@@ -45,6 +46,7 @@ const authSlice = createSlice({
       state.tailorDetails = tailorDetails;
       state.token = token;
       state.loading = false;
+      state.roleError = null; // Reset role error
       state.error = null;
       saveToLocalStorage(state);
     },
@@ -93,6 +95,9 @@ const authSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+    setRoleError: (state, action) => {
+      state.roleError = action.payload; // Set the role-specific error
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -108,6 +113,7 @@ export const {
   updateProfileRequest,
   updateRole,
   setError,
+  setRoleError,
   setLoading,
   clearError,
 } = authSlice.actions;
