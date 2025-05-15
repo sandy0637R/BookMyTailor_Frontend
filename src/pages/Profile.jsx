@@ -18,13 +18,14 @@ const Profile = () => {
   const [showTailorForm, setShowTailorForm] = useState(false);
   const [tailorForm, setTailorForm] = useState({ experience: '', specialization: '', fees: '' });
 
+  const isAdmin = profile?.roles?.includes('admin');
+
   useEffect(() => {
     const savedImageUrl = localStorage.getItem('profileImageUrl');
     if (savedImageUrl) {
       setImageUrl(savedImageUrl);
     } else if (profile?.profileImage) {
       const url = `http://localhost:5000/${profile.profileImage.replace(/\\/g, '/')}`;
-      console.log("Image from profile:", profile.profileImage);
       setImageUrl(url);
     }
   }, [profile]);
@@ -37,7 +38,8 @@ const Profile = () => {
     if (profile) {
       const roles = profile.roles || [];
       const hasTailor = roles.includes('tailor');
-      setCurrentRole(localStorage.getItem('role') || (hasTailor ? 'tailor' : 'customer'));
+      const savedRole = localStorage.getItem('role');
+      setCurrentRole(savedRole || (hasTailor ? 'tailor' : 'customer'));
 
       if (hasTailor && profile.tailorDetails) {
         setTailorForm({
@@ -49,7 +51,7 @@ const Profile = () => {
 
       localStorage.setItem("user", profile.name || '');
       localStorage.setItem("email", profile.email || '');
-      localStorage.setItem("roles", JSON.stringify(profile.roles || ['customer']));
+      localStorage.setItem("roles", JSON.stringify(roles));
       localStorage.setItem("tailorDetails", JSON.stringify(profile.tailorDetails || null));
       localStorage.setItem("profile", JSON.stringify(profile));
     }
@@ -122,20 +124,24 @@ const Profile = () => {
       <ImageUpload imageUrl={imageUrl} setImageUrl={setImageUrl} />
 
       <p className="text-lg mb-2">Name: {profile?.name}</p>
-      <p className="text-lg mb-4">Email: {profile?.email}</p>
+      <p className="text-lg mb-2">Email: {profile?.email}</p>
 
-      <div className="mb-4">
-        <label htmlFor="role" className="block text-sm font-medium text-gray-700">Switch Role</label>
-        <select 
-          id="role" 
-          value={currentRole} 
-          onChange={handleRoleChange} 
-          className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
-        >
-          <option value="customer">Customer</option>
-          <option value="tailor">Tailor</option>
-        </select>
-      </div>
+      {isAdmin ? (
+        <p className="text-lg mb-4">Role: Admin</p>
+      ) : (
+        <div className="mb-4">
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700">Switch Role</label>
+          <select
+            id="role"
+            value={currentRole}
+            onChange={handleRoleChange}
+            className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="customer">Customer</option>
+            <option value="tailor">Tailor</option>
+          </select>
+        </div>
+      )}
 
       {showTailorConfirm && (
         <div className="bg-yellow-100 p-4 mb-4 rounded-md">

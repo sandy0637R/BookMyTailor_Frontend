@@ -34,24 +34,27 @@ function* loginSaga(action) {
     const { success, token, name, email, roles, tailorDetails, message } = response.data;
 
     if (success) {
-      // Admin role checks
-      // 1. Trying to log in as admin but not really an admin
-if (action.payload.role === "admin" && (!roles.includes("admin") || roles.length > 1)) {
-  yield put(setRoleError("You are not a valid admin."));
-  return;
-}
+      // Safe role checks
+      if (
+        action.payload.role === "admin" &&
+        (!Array.isArray(roles) || !roles.includes("admin") || roles.length > 1)
+      ) {
+        yield put(setRoleError("You are not a valid admin."));
+        return;
+      }
 
-// 2. Trying to log in as non-admin but is an admin
-if (action.payload.role !== "admin" && roles.length === 1 && roles.includes("admin")) {
-  yield put(setRoleError("Admin must login with 'Login as Admin' selected."));
-  return;
-}
+      if (
+        action.payload.role !== "admin" &&
+        Array.isArray(roles) &&
+        roles.length === 1 &&
+        roles.includes("admin")
+      ) {
+        yield put(setRoleError("Admin must login with 'Login as Admin' selected."));
+        return;
+      }
 
-
-      // Save to Redux
       yield put(login({ token, name, email, roles, tailorDetails }));
 
-      // Save to localStorage separately
       localStorage.setItem("token", token || "");
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("user", name || "");
