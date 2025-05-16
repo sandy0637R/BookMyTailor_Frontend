@@ -3,12 +3,11 @@ import { createSlice } from "@reduxjs/toolkit";
 // Load each key individually
 const savedAuth = {
   isLoggedIn: JSON.parse(localStorage.getItem("isLoggedIn")) || false,
-  user: localStorage.getItem("user") || null,
-  email: localStorage.getItem("email") || null,
   roles: JSON.parse(localStorage.getItem("roles")) || ["customer"],
   tailorDetails: JSON.parse(localStorage.getItem("tailorDetails")) || null,
   profile: JSON.parse(localStorage.getItem("profile")) || null,
   token: localStorage.getItem("token") || null,
+  role: localStorage.getItem("role") || "customer", // ✅ added
 };
 
 const initialState = {
@@ -17,7 +16,6 @@ const initialState = {
   error: null,
 };
 
-// Save each item individually
 const saveToLocalStorage = (state) => {
   localStorage.setItem("isLoggedIn", JSON.stringify(state.isLoggedIn));
   localStorage.setItem("user", state.user || "");
@@ -26,6 +24,7 @@ const saveToLocalStorage = (state) => {
   localStorage.setItem("tailorDetails", JSON.stringify(state.tailorDetails));
   localStorage.setItem("profile", JSON.stringify(state.profile));
   localStorage.setItem("token", state.token || "");
+  localStorage.setItem("role", state.role || "customer"); // ✅ added
 };
 
 const authSlice = createSlice({
@@ -46,7 +45,7 @@ const authSlice = createSlice({
       state.tailorDetails = tailorDetails;
       state.token = token;
       state.loading = false;
-      state.roleError = null; // Reset role error
+      state.roleError = null;
       state.error = null;
       saveToLocalStorage(state);
     },
@@ -59,6 +58,7 @@ const authSlice = createSlice({
         tailorDetails: null,
         token: null,
         profile: null,
+        role: "customer", // ✅ added
       });
       localStorage.clear();
     },
@@ -96,10 +96,14 @@ const authSlice = createSlice({
       state.loading = false;
     },
     setRoleError: (state, action) => {
-      state.roleError = action.payload; // Set the role-specific error
+      state.roleError = action.payload;
     },
     clearError: (state) => {
       state.error = null;
+    },
+    setRole: (state, action) => { // ✅ added
+      state.role = action.payload;
+      localStorage.setItem("role", action.payload);
     },
   },
 });
@@ -116,6 +120,7 @@ export const {
   setRoleError,
   setLoading,
   clearError,
+  setRole, // ✅ added
 } = authSlice.actions;
 
 export default authSlice.reducer;

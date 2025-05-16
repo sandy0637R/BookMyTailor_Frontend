@@ -11,6 +11,7 @@ import PalletePage from "./pages/PalletePage";
 import Navbar from "./components/Navbar";
 import PrivateRoute from "./utils/PrivateRoute";
 import ToastContainer from "./containers/ToastContainer";
+import AddPost from "./pages/AddPost";
 
 const App = () => {
   return (
@@ -48,6 +49,14 @@ const App = () => {
             element={
               <PrivateRoute>
                 <PalletePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/addpost"
+            element={
+              <PrivateRoute>
+                <AddPost />
               </PrivateRoute>
             }
           />

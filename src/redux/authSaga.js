@@ -7,6 +7,7 @@ import {
   setRoleError,
   setLoading,
   fetchProfileRequest,
+  setRole, // ✅ added
 } from "./authSlice";
 
 // Utility to get token from localStorage
@@ -34,7 +35,6 @@ function* loginSaga(action) {
     const { success, token, name, email, roles, tailorDetails, message } = response.data;
 
     if (success) {
-      // Safe role checks
       if (
         action.payload.role === "admin" &&
         (!Array.isArray(roles) || !roles.includes("admin") || roles.length > 1)
@@ -53,12 +53,11 @@ function* loginSaga(action) {
         return;
       }
 
+      yield put(setRole(action.payload.role)); // ✅ set selected role globally
       yield put(login({ token, name, email, roles, tailorDetails }));
 
       localStorage.setItem("token", token || "");
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("user", name || "");
-      localStorage.setItem("email", email || "");
       localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));
       localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
     } else {
@@ -78,7 +77,6 @@ function* fetchUserProfile() {
 
     yield put(setProfile({ name, email, roles, tailorDetails }));
 
-    // Save profile and other data to localStorage
     localStorage.setItem("user", name || "");
     localStorage.setItem("email", email || "");
     localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));

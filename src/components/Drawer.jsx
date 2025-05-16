@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
 import { IoMdArrowDropright } from "react-icons/io";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 export default function Drawer() {
   const [open, setOpen] = useState(false);
-  const [notification, setNotification] = useState(""); // State for notification message
   const drawerRef = useRef();
   const location = useLocation();
-  
 
-  // Getting the auth state from Redux
+  // Get isLoggedIn from Redux
   const { isLoggedIn } = useSelector((state) => state.auth);
+
+  // Get current role from localStorage or default to "customer"
+  const currentRole = localStorage.getItem("role") || "customer";
 
   // Handle outside click to close drawer
   useEffect(() => {
@@ -31,14 +32,11 @@ export default function Drawer() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  // Get active link styling
   const getLinkClass = (path) => {
     return location.pathname === path
       ? "drawer-btn bg-[var(--secondary)] text-[var(--highlight-color)] rounded-sm"
       : "drawer-btn";
   };
-
-  // Handle Logout
 
   return (
     <div className="relative" ref={drawerRef}>
@@ -88,6 +86,11 @@ export default function Drawer() {
               <Link to="/pallete">
                 <li className={getLinkClass("/pallete")}>Color Tone</li>
               </Link>
+              {currentRole === "tailor" && (
+                <Link to="/addpost">
+                  <li className={getLinkClass("/addpost")}>Posts</li>
+                </Link>
+              )}
             </>
           )}
 
@@ -96,13 +99,6 @@ export default function Drawer() {
           </Link>
         </ul>
       </div>
-
-      {notification && (
-        <Notification
-          message={notification}
-          onClose={() => setNotification("")}
-        />
-      )}
     </div>
   );
 }
