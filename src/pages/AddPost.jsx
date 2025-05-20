@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const ManagePosts = () => {
+const AddPost = () => {
   const [posts, setPosts] = useState([]);
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState("");
@@ -14,7 +14,6 @@ const ManagePosts = () => {
     fetchPosts();
   }, []);
 
-  // Fetch all posts
   const fetchPosts = async () => {
     try {
       const res = await axios.get("http://localhost:5000/users/posts", {
@@ -26,12 +25,10 @@ const ManagePosts = () => {
     }
   };
 
-  // Handle image input change
   const handleImageChange = (e) => {
     setImages(Array.from(e.target.files));
   };
 
-  // Add new post
   const handleAddPost = async (e) => {
     e.preventDefault();
     try {
@@ -57,14 +54,12 @@ const ManagePosts = () => {
     }
   };
 
-  // Start editing post
   const startEdit = (post) => {
     setEditingPostId(post._id);
     setCaption(post.caption);
     setHashtags(post.hashtags.join(", "));
   };
 
-  // Cancel editing
   const cancelEdit = () => {
     setEditingPostId(null);
     setCaption("");
@@ -72,7 +67,6 @@ const ManagePosts = () => {
     setImages([]);
   };
 
-  // Save edited post
   const saveEdit = async () => {
     try {
       await axios.put(
@@ -91,7 +85,6 @@ const ManagePosts = () => {
     }
   };
 
-  // Delete post
   const deletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
     try {
@@ -134,7 +127,11 @@ const ManagePosts = () => {
           />
         )}
         <button type="submit">{editingPostId ? "Save Edit" : "Add Post"}</button>
-        {editingPostId && <button onClick={cancelEdit} style={{ marginLeft: 10 }}>Cancel</button>}
+        {editingPostId && (
+          <button onClick={cancelEdit} style={{ marginLeft: 10 }}>
+            Cancel
+          </button>
+        )}
       </form>
 
       <h2 style={{ marginTop: 40 }}>All Posts</h2>
@@ -145,7 +142,12 @@ const ManagePosts = () => {
           <p><b>Hashtags:</b> {post.hashtags.join(", ")}</p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {post.images.map((imgUrl, idx) => (
-              <img key={idx} src={imgUrl} alt="post-img" style={{ height: 80, objectFit: "cover" }} />
+              <img
+                key={idx}
+                src={imgUrl}
+                alt="post-img"
+                style={{ height: 80, objectFit: "cover" }}
+              />
             ))}
           </div>
           <button onClick={() => startEdit(post)}>Edit</button>
@@ -158,4 +160,4 @@ const ManagePosts = () => {
   );
 };
 
-export default ManagePosts;
+export default AddPost;
