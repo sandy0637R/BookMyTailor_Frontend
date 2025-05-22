@@ -112,7 +112,7 @@ const Profile = () => {
   if (loading) return <div className="text-center">Loading...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-15">
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-15 ">
       <h1 className="text-2xl font-semibold mb-4">Profile</h1>
 
       {imageUrl ? (

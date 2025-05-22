@@ -99,23 +99,26 @@ const AddPost = () => {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "auto" }}>
-      <h2>{editingPostId ? "Edit Post" : "Add Post"}</h2>
-      <form onSubmit={editingPostId ? (e) => { e.preventDefault(); saveEdit(); } : handleAddPost}>
+    <div className="max-w-4xl mx-auto px-4 py-8 mt-15">
+      <h2 className="text-3xl font-bold text-center mb-6">{editingPostId ? "Edit Post" : "Add Post"}</h2>
+      <form
+        onSubmit={editingPostId ? (e) => { e.preventDefault(); saveEdit(); } : handleAddPost}
+        className="mb-10"
+      >
         <input
           type="text"
           placeholder="Caption"
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
           required
-          style={{ width: "100%", marginBottom: 10 }}
+          className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <input
           type="text"
           placeholder="Hashtags (comma separated)"
           value={hashtags}
           onChange={(e) => setHashtags(e.target.value)}
-          style={{ width: "100%", marginBottom: 10 }}
+          className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         {!editingPostId && (
           <input
@@ -123,35 +126,58 @@ const AddPost = () => {
             multiple
             accept="image/*"
             onChange={handleImageChange}
-            style={{ marginBottom: 10 }}
+            className="mb-4"
           />
         )}
-        <button type="submit">{editingPostId ? "Save Edit" : "Add Post"}</button>
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+        >
+          {editingPostId ? "Save Edit" : "Add Post"}
+        </button>
         {editingPostId && (
-          <button onClick={cancelEdit} style={{ marginLeft: 10 }}>
+          <button
+            onClick={cancelEdit}
+            className="ml-4 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors"
+          >
             Cancel
           </button>
         )}
       </form>
 
-      <h2 style={{ marginTop: 40 }}>All Posts</h2>
-      {posts.length === 0 && <p>No posts yet.</p>}
+      <h2 className="text-3xl font-bold mb-6">All Posts</h2>
+      {posts.length === 0 && <p className="text-center text-gray-500">No posts yet.</p>}
       {posts.map((post) => (
-        <div key={post._id} style={{ border: "1px solid #ccc", padding: 10, marginBottom: 10 }}>
-          <p><b>Caption:</b> {post.caption}</p>
-          <p><b>Hashtags:</b> {post.hashtags.join(", ")}</p>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div
+          key={post._id}
+          className="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200"
+        >
+          <p className="text-lg font-semibold mb-2">
+            <span className="text-gray-600">Caption:</span> {post.caption}
+          </p>
+          <p className="text-sm text-gray-600 mb-4">
+            <span className="font-medium">Hashtags:</span> {post.hashtags.join(", ")}
+          </p>
+          <div className="flex flex-wrap gap-4 mb-4">
             {post.images.map((imgUrl, idx) => (
               <img
                 key={idx}
                 src={imgUrl}
                 alt="post-img"
-                style={{ height: 80, objectFit: "cover" }}
+                className="h-20 rounded-md object-cover"
               />
             ))}
           </div>
-          <button onClick={() => startEdit(post)}>Edit</button>
-          <button onClick={() => deletePost(post._id)} style={{ marginLeft: 10, color: "red" }}>
+          <button
+            onClick={() => startEdit(post)}
+            className="bg-blue-100 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => deletePost(post._id)}
+            className="ml-4 px-4 py-2 rounded-md text-red-600 border border-red-600 hover:bg-red-100 transition-colors"
+          >
             Delete
           </button>
         </div>
