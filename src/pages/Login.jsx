@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginRequest } from '../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -74,7 +75,9 @@ const Login = () => {
             <span>Login as Admin</span>
           </label>
         </div>
-
+       <Link to="/register">
+                   <li className="text-red-600">Register</li>
+                 </Link>
         <button
           type="submit"
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"

@@ -4,6 +4,7 @@ const TailorDetails = ({ details }) => (
     <p className="mt-2">Experience: {details.experience}</p>
     <p className="mt-2">Specialization: {details.specialization?.join(', ')}</p>
     <p className="mt-2">Fees: {details.fees}</p>
+    <p className="mt-2">Description: {details?.description || "N/A"}</p>
   </div>
 );
 

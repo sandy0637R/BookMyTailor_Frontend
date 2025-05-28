@@ -73,14 +73,15 @@ function* fetchUserProfile() {
   try {
     yield put(setLoading(true));
     const response = yield call(fetchProfileApi);
-    const { name, email, roles, tailorDetails } = response.data;
+    const { name, email, roles, tailorDetails, address } = response.data;
 
-    yield put(setProfile({ name, email, roles, tailorDetails }));
+    yield put(setProfile({ name, email, roles, tailorDetails, address }));
 
     localStorage.setItem("user", name || "");
     localStorage.setItem("email", email || "");
     localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));
     localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
+    localStorage.setItem("address", JSON.stringify(address || {}));
     localStorage.setItem("profile", JSON.stringify(response.data));
   } catch (err) {
     yield put(setError(err.response?.data?.message || err.message));
