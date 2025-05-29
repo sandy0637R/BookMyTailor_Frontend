@@ -76,6 +76,7 @@ function* fetchUserProfile() {
     const { name, email, roles, tailorDetails, address } = response.data;
 
     yield put(setProfile({ name, email, roles, tailorDetails, address }));
+    yield put(setRole(localStorage.getItem("role") || "customer"));
 
     localStorage.setItem("user", name || "");
     localStorage.setItem("email", email || "");

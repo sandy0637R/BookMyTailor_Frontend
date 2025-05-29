@@ -62,8 +62,7 @@ const Profile = () => {
     if (profile) {
       const roles = profile.roles || [];
       const hasTailor = roles.includes("tailor");
-      const savedRole = localStorage.getItem("role");
-      setCurrentRole(savedRole || (hasTailor ? "tailor" : "customer"));
+      
 
       setEditForm({
         name: profile?.name || "",

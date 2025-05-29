@@ -74,6 +74,9 @@ const authSlice = createSlice({
       state.roles = roles.map((role) => role.toLowerCase());
       state.tailorDetails = tailorDetails;
       state.loading = false;
+       const currentRole = localStorage.getItem("role") || "customer";
+  state.role = currentRole;
+
       saveToLocalStorage(state);
     },
     updateProfileRequest: (state) => {
