@@ -8,6 +8,7 @@ const savedAuth = {
   profile: JSON.parse(localStorage.getItem("profile")) || null,
   token: localStorage.getItem("token") || null,
   role: localStorage.getItem("role") || "customer", // ✅ added
+  profileImage: localStorage.getItem("profileImage") || null, // ✅ added
 };
 
 const initialState = {
@@ -24,7 +25,8 @@ const saveToLocalStorage = (state) => {
   localStorage.setItem("tailorDetails", JSON.stringify(state.tailorDetails));
   localStorage.setItem("profile", JSON.stringify(state.profile));
   localStorage.setItem("token", state.token || "");
-  localStorage.setItem("role", state.role || "customer"); // ✅ added
+  localStorage.setItem("role", state.role || "customer");
+  localStorage.setItem("profileImage", state.profileImage || ""); // ✅ added
 };
 
 const authSlice = createSlice({
@@ -37,16 +39,25 @@ const authSlice = createSlice({
       state.roleError = null;
     },
     login: (state, action) => {
-      const { name, email, roles = ["customer"], tailorDetails = null, token } = action.payload;
+      const {
+        name,
+        email,
+        roles = ["customer"],
+        tailorDetails = null,
+        token,
+        profileImage = null,  // ✅ added destructuring
+      } = action.payload;
       state.isLoggedIn = true;
       state.user = name;
       state.email = email;
       state.roles = roles.map((role) => role.toLowerCase());
       state.tailorDetails = tailorDetails;
       state.token = token;
+      state.profileImage = profileImage; // ✅ fixed assignment
       state.loading = false;
       state.roleError = null;
       state.error = null;
+
       saveToLocalStorage(state);
     },
     logout: (state) => {
@@ -59,6 +70,7 @@ const authSlice = createSlice({
         token: null,
         profile: null,
         role: "customer", // ✅ added
+        profileImage: null, // ✅ added to reset on logout
       });
       localStorage.clear();
     },
@@ -67,15 +79,22 @@ const authSlice = createSlice({
       state.error = null;
     },
     setProfile: (state, action) => {
-      const { name, email, roles = ["customer"], tailorDetails = null } = action.payload;
+      const {
+        name,
+        email,
+        roles = ["customer"],
+        tailorDetails = null,
+        profileImage = null, // ✅ added destructuring
+      } = action.payload;
       state.profile = action.payload;
       state.user = name;
       state.email = email;
       state.roles = roles.map((role) => role.toLowerCase());
       state.tailorDetails = tailorDetails;
+      state.profileImage = profileImage; // ✅ set profileImage here
       state.loading = false;
-       const currentRole = localStorage.getItem("role") || "customer";
-  state.role = currentRole;
+      const currentRole = localStorage.getItem("role") || "customer";
+      state.role = currentRole;
 
       saveToLocalStorage(state);
     },
@@ -104,7 +123,7 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    setRole: (state, action) => { // ✅ added
+    setRole: (state, action) => {
       state.role = action.payload;
       localStorage.setItem("role", action.payload);
     },
@@ -123,7 +142,7 @@ export const {
   setRoleError,
   setLoading,
   clearError,
-  setRole, // ✅ added
+  setRole,
 } = authSlice.actions;
 
 export default authSlice.reducer;

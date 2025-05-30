@@ -16,7 +16,8 @@ const Profile = () => {
   const navigate = useNavigate();
   const { profile, loading } = useSelector((state) => state.auth);
 
-  const [imageUrl, setImageUrl] = useState("");
+ const [profileImage, setProfileImage] = useState(() => localStorage.getItem("profileImage") || "");
+
   const [currentRole, setCurrentRole] = useState(
     localStorage.getItem("role") || "customer"
   );
@@ -41,25 +42,24 @@ const Profile = () => {
 
   const isAdmin = profile?.roles?.includes("admin");
 
-  useEffect(() => {
-    const savedImageUrl = localStorage.getItem("profileImageUrl");
-    if (savedImageUrl) {
-      setImageUrl(savedImageUrl);
-    } else if (profile?.profileImage) {
-      const url = `http://localhost:5000/${profile.profileImage.replace(
-        /\\/g,
-        "/"
-      )}`;
-      setImageUrl(url);
-    }
-  }, [profile]);
-
+ 
   useEffect(() => {
     dispatch(fetchProfileRequest());
   }, [dispatch]);
+  
+ useEffect(() => {
+  if (profileImage) {
+    localStorage.setItem("profileImage", profileImage);
+  }
+}, [profileImage]);
+
 
   useEffect(() => {
     if (profile) {
+       if (!profileImage) {
+      setImageUrl(profile.profileImage || "");
+    }
+
       const roles = profile.roles || [];
       const hasTailor = roles.includes("tailor");
       
@@ -156,6 +156,7 @@ const Profile = () => {
       name: editForm.name,
       email: editForm.email,
       address: editForm.address,
+      profileImage: profileImage,
       tailorDetails: {
         experience: Number(editForm.experience),
         specialization: editForm.specialization.split(",").map((s) => s.trim()),
@@ -168,7 +169,7 @@ const Profile = () => {
     dispatch(fetchProfileRequest());
     toast.success("Profile updated!");
     setIsEditing(false);
-    dispatch(updateProfileRequest(payload));
+   
   };
 
   if (loading) return <div className="text-center">Loading...</div>;
@@ -177,21 +178,8 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-15">
       <h1 className="text-2xl font-semibold mb-4">Profile</h1>
 
-      {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt="Profile"
-          className="w-32 h-32 object-cover rounded-full mb-4"
-        />
-      ) : (
-        <img
-          src="/path/to/fallback-image.jpg"
-          alt="Profile"
-          className="w-32 h-32 object-cover rounded-full mb-4"
-        />
-      )}
+     <ImageUpload profileImage={profileImage} setProfileImage={setProfileImage} />
 
-      <ImageUpload imageUrl={imageUrl} setImageUrl={setImageUrl} />
 
       {isEditing ? (
         <>

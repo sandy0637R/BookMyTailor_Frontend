@@ -11,6 +11,10 @@ import {
 } from "./authSlice";
 
 // Utility to get token from localStorage
+const BASE_URL = "http://localhost:5000/";
+const resolveImagePath = (path) =>
+  path?.startsWith("http") ? path : BASE_URL + path;
+
 const token = () => localStorage.getItem("token");
 const authHeader = () => ({ Authorization: `Bearer ${token()}` });
 
@@ -32,7 +36,7 @@ const updateProfileApi = (profileData) =>
 function* loginSaga(action) {
   try {
     const response = yield call(loginApi, action.payload);
-    const { success, token, name, email, roles, tailorDetails, message } = response.data;
+    const { success, token, name, email, roles, tailorDetails,profileImage, message ,} = response.data;
 
     if (success) {
       if (
@@ -54,12 +58,17 @@ function* loginSaga(action) {
       }
 
       yield put(setRole(action.payload.role)); // ✅ set selected role globally
-      yield put(login({ token, name, email, roles, tailorDetails }));
+      const fixedLoginImage = resolveImagePath(profileImage);
+     yield put(login({ token, name, email, roles, tailorDetails ,profileImage: fixedLoginImage }));
+
 
       localStorage.setItem("token", token || "");
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));
       localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
+localStorage.setItem("profileImage", fixedLoginImage);
+
+
     } else {
       yield put(setError(message));
     }
@@ -73,9 +82,11 @@ function* fetchUserProfile() {
   try {
     yield put(setLoading(true));
     const response = yield call(fetchProfileApi);
-    const { name, email, roles, tailorDetails, address } = response.data;
+    const { name, email, roles, tailorDetails, address, profileImage } = response.data;  // Add profileImage here
 
-    yield put(setProfile({ name, email, roles, tailorDetails, address }));
+    const fixedFetchedImage = resolveImagePath(profileImage);
+    yield put(setProfile({ name, email, roles, tailorDetails, address, profileImage: fixedFetchedImage }));
+  // Include profileImage in state
     yield put(setRole(localStorage.getItem("role") || "customer"));
 
     localStorage.setItem("user", name || "");
@@ -84,12 +95,15 @@ function* fetchUserProfile() {
     localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
     localStorage.setItem("address", JSON.stringify(address || {}));
     localStorage.setItem("profile", JSON.stringify(response.data));
+localStorage.setItem("profileImage", fixedFetchedImage);
+  // Save profileImage locally too
   } catch (err) {
     yield put(setError(err.response?.data?.message || err.message));
   } finally {
     yield put(setLoading(false));
   }
 }
+
 
 // Update Profile Saga
 function* updateProfileSaga(action) {

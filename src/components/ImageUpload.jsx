@@ -1,13 +1,16 @@
-import axios from 'axios';
-import { useState} from "react";
-import toast from 'react-hot-toast';
+import axios from "axios";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { setProfile } from "../redux/authSlice";
 
-const ImageUpload = ({ imageUrl, setImageUrl }) => {
-  const [file, setFile] = useState();
+const ImageUpload = ({ profileImage, setProfileImage }) => {
+  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleUpload = async () => {
-    if (!file) return toast.error("Please select a file");
+    if (!file) return toast.error("Please select an image file");
     if (!file.type.startsWith("image/")) return toast.error("Only image files allowed");
 
     const formData = new FormData();
@@ -19,15 +22,23 @@ const ImageUpload = ({ imageUrl, setImageUrl }) => {
         withCredentials: true,
         headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      const uploadedImageUrl = `http://localhost:5000/${res.data.user.profileImage.replace(/\\/g, '/')}`;
-      setImageUrl(uploadedImageUrl);
-      localStorage.setItem('profileImageUrl', uploadedImageUrl);
+
+      const newImagePath = res.data.user.profileImage.replace(/\\/g, "/");
+      const fullUrl = `http://localhost:5000/${newImagePath}`;
+
+      // Update profile image via prop setter
+      setProfileImage(fullUrl);
+
+      // Update Redux store
+      dispatch(setProfile({ ...res.data.user, profileImage: newImagePath }));
+
+      setFile(null);
       toast.success("Image uploaded successfully!");
-    } catch (error) {
-      toast.error("Upload failed!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Upload failed!");
     } finally {
       setUploading(false);
     }
@@ -38,30 +49,42 @@ const ImageUpload = ({ imageUrl, setImageUrl }) => {
       const res = await axios.delete("http://localhost:5000/users/profile/image", {
         withCredentials: true,
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
       if (res.status === 200) {
-        setImageUrl('');
-        localStorage.removeItem('profileImageUrl');
+        setProfileImage("");
+        dispatch(setProfile({ ...res.data.user, profileImage: "" }));
         toast.success("Image deleted successfully!");
       }
-    } catch (error) {
-      toast.error("Image deletion failed!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Image deletion failed!");
     }
   };
 
   return (
     <div className="mb-4">
-      <input type="file" onChange={e => setFile(e.target.files[0])} />
-      <button onClick={handleUpload} disabled={uploading} className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setFile(e.target.files[0])}
+      />
+      <button
+        onClick={handleUpload}
+        disabled={uploading}
+        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+      >
         {uploading ? "Uploading..." : "Submit"}
       </button>
 
-      {/* Show delete only if image exists */}
-      {imageUrl && (
-        <div>
+      {profileImage && (
+        <div className="mt-4">
+          <img
+            src={profileImage}
+            alt="Profile"
+            className="w-32 h-32 object-cover rounded-full border"
+          />
           <button
             onClick={handleDeleteImage}
             className="mt-2 ml-2 bg-red-500 text-white px-4 py-2 rounded-md"
@@ -74,4 +97,4 @@ const ImageUpload = ({ imageUrl, setImageUrl }) => {
   );
 };
 
-export default ImageUpload
+export default ImageUpload;
