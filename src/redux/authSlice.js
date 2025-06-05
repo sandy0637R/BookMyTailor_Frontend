@@ -54,6 +54,10 @@ const authSlice = createSlice({
       state.tailorDetails = tailorDetails;
       state.token = token;
       state.profileImage = profileImage; // ✅ fixed assignment
+      
+      // ✅ I changed this: set profile object on login for localStorage consistency
+      state.profile = { name, email, roles, tailorDetails, profileImage };
+
       state.loading = false;
       state.roleError = null;
       state.error = null;

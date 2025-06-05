@@ -57,7 +57,7 @@ const Profile = () => {
   useEffect(() => {
     if (profile) {
        if (!profileImage) {
-      setImageUrl(profile.profileImage || "");
+      setProfileImage(profile.profileImage || "");
     }
 
       const roles = profile.roles || [];
