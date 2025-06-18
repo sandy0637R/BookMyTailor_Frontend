@@ -8,6 +8,9 @@ import {
   setLoading,
   fetchProfileRequest,
   setRole, // ✅ added
+    setCloths,             // ✅ added
+  setClothsError 
+  
 } from "./authSlice";
 
 // Utility to get token from localStorage
@@ -31,6 +34,21 @@ const updateProfileApi = (profileData) =>
   axios.put("http://localhost:5000/users/profile", profileData, {
     headers: authHeader(),
   });
+  const getClothsApi = () =>
+  axios.get("http://localhost:5000/cloths/allcloths"); // ✅ added
+
+// ✅ Cloths Saga
+function* getClothsSaga() {
+  try {
+    const response = yield call(getClothsApi);
+    const cloths = response.data;
+
+    yield put(setCloths(cloths)); // ✅ save cloths to state
+  } catch (error) {
+    yield put(setClothsError(error.message)); // ✅ handle error
+  }
+}
+
 
 // Login Saga
 function* loginSaga(action) {
@@ -135,4 +153,8 @@ export function* watchFetchProfile() {
 
 export function* watchUpdateProfile() {
   yield takeLatest("auth/updateProfileRequest", updateProfileSaga);
+}
+
+export function* watchGetCloths() {
+  yield takeLatest("auth/getClothsRequest", getClothsSaga); // ✅ added
 }

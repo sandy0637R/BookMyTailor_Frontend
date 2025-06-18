@@ -12,6 +12,8 @@ import Navbar from "./components/Navbar";
 import PrivateRoute from "./utils/PrivateRoute";
 import ToastContainer from "./containers/ToastContainer";
 import AddPost from "./pages/AddPost";
+import Wishlist from "./pages/Wishlist";
+import Cart from "./pages/Cart";
 
 const App = () => {
   return (
@@ -41,6 +43,22 @@ const App = () => {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <PrivateRoute>
+                <Cart />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <PrivateRoute>
+                <Wishlist />
               </PrivateRoute>
             }
           />

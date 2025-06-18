@@ -15,6 +15,9 @@ const initialState = {
   ...savedAuth,
   loading: false,
   error: null,
+  cloths: [], // ✅ added
+  wishlist: [], // ✅ added
+  cart: [],
 };
 
 const saveToLocalStorage = (state) => {
@@ -45,7 +48,7 @@ const authSlice = createSlice({
         roles = ["customer"],
         tailorDetails = null,
         token,
-        profileImage = null,  // ✅ added destructuring
+        profileImage = null, // ✅ added destructuring
       } = action.payload;
       state.isLoggedIn = true;
       state.user = name;
@@ -54,7 +57,7 @@ const authSlice = createSlice({
       state.tailorDetails = tailorDetails;
       state.token = token;
       state.profileImage = profileImage; // ✅ fixed assignment
-      
+
       // ✅ I changed this: set profile object on login for localStorage consistency
       state.profile = { name, email, roles, tailorDetails, profileImage };
 
@@ -64,6 +67,41 @@ const authSlice = createSlice({
 
       saveToLocalStorage(state);
     },
+    getClothsRequest: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    setCloths: (state, action) => {
+      state.cloths = action.payload;
+      state.loading = false;
+    },
+    setClothsError: (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
+
+    // ✅ Wishlist
+    addToWishlist: (state, action) => {
+      const item = action.payload;
+      const exists = state.wishlist.find((i) => i._id === item._id);
+      if (!exists) state.wishlist.push(item);
+    },
+    removeFromWishlist: (state, action) => {
+      state.wishlist = state.wishlist.filter(
+        (item) => item._id !== action.payload
+      );
+    },
+
+    // ✅ Cart
+    addToCart: (state, action) => {
+      const item = action.payload;
+      const exists = state.cart.find((i) => i._id === item._id);
+      if (!exists) state.cart.push(item);
+    },
+    removeFromCart: (state, action) => {
+      state.cart = state.cart.filter((item) => item._id !== action.payload);
+    },
+
     logout: (state) => {
       Object.assign(state, initialState, {
         isLoggedIn: false,
@@ -147,6 +185,13 @@ export const {
   setLoading,
   clearError,
   setRole,
+  getClothsRequest,
+  setCloths,
+  setClothsError,
+  addToWishlist,
+  removeFromWishlist,
+  addToCart,
+  removeFromCart,
 } = authSlice.actions;
 
 export default authSlice.reducer;
