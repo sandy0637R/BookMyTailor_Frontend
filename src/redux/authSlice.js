@@ -7,17 +7,17 @@ const savedAuth = {
   tailorDetails: JSON.parse(localStorage.getItem("tailorDetails")) || null,
   profile: JSON.parse(localStorage.getItem("profile")) || null,
   token: localStorage.getItem("token") || null,
-  role: localStorage.getItem("role") || "customer", // ✅ added
-  profileImage: localStorage.getItem("profileImage") || null, // ✅ added
+  role: localStorage.getItem("role") || "customer",
+  profileImage: localStorage.getItem("profileImage") || null,
+  wishlist: JSON.parse(localStorage.getItem("wishlist")) || [],
+  cart: JSON.parse(localStorage.getItem("cart")) || [],
 };
 
 const initialState = {
   ...savedAuth,
   loading: false,
   error: null,
-  cloths: [], // ✅ added
-  wishlist: [], // ✅ added
-  cart: [],
+  cloths: [],
 };
 
 const saveToLocalStorage = (state) => {
@@ -29,7 +29,9 @@ const saveToLocalStorage = (state) => {
   localStorage.setItem("profile", JSON.stringify(state.profile));
   localStorage.setItem("token", state.token || "");
   localStorage.setItem("role", state.role || "customer");
-  localStorage.setItem("profileImage", state.profileImage || ""); // ✅ added
+  localStorage.setItem("profileImage", state.profileImage || "");
+  localStorage.setItem("wishlist", JSON.stringify(state.wishlist || [])); // ✅ added
+  localStorage.setItem("cart", JSON.stringify(state.cart || [])); 
 };
 
 const authSlice = createSlice({
@@ -48,60 +50,27 @@ const authSlice = createSlice({
         roles = ["customer"],
         tailorDetails = null,
         token,
-        profileImage = null, // ✅ added destructuring
+        profileImage = null,
+        wishlist = [],
+        cart = [],
       } = action.payload;
+
       state.isLoggedIn = true;
       state.user = name;
       state.email = email;
       state.roles = roles.map((role) => role.toLowerCase());
       state.tailorDetails = tailorDetails;
       state.token = token;
-      state.profileImage = profileImage; // ✅ fixed assignment
-
-      // ✅ I changed this: set profile object on login for localStorage consistency
+      state.profileImage = profileImage;
+      state.wishlist = wishlist;
+      state.cart = cart;
       state.profile = { name, email, roles, tailorDetails, profileImage };
-
       state.loading = false;
       state.roleError = null;
       state.error = null;
 
       saveToLocalStorage(state);
     },
-    getClothsRequest: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    setCloths: (state, action) => {
-      state.cloths = action.payload;
-      state.loading = false;
-    },
-    setClothsError: (state, action) => {
-      state.error = action.payload;
-      state.loading = false;
-    },
-
-    // ✅ Wishlist
-    addToWishlist: (state, action) => {
-      const item = action.payload;
-      const exists = state.wishlist.find((i) => i._id === item._id);
-      if (!exists) state.wishlist.push(item);
-    },
-    removeFromWishlist: (state, action) => {
-      state.wishlist = state.wishlist.filter(
-        (item) => item._id !== action.payload
-      );
-    },
-
-    // ✅ Cart
-    addToCart: (state, action) => {
-      const item = action.payload;
-      const exists = state.cart.find((i) => i._id === item._id);
-      if (!exists) state.cart.push(item);
-    },
-    removeFromCart: (state, action) => {
-      state.cart = state.cart.filter((item) => item._id !== action.payload);
-    },
-
     logout: (state) => {
       Object.assign(state, initialState, {
         isLoggedIn: false,
@@ -111,8 +80,8 @@ const authSlice = createSlice({
         tailorDetails: null,
         token: null,
         profile: null,
-        role: "customer", // ✅ added
-        profileImage: null, // ✅ added to reset on logout
+        role: "customer",
+        profileImage: null,
       });
       localStorage.clear();
     },
@@ -126,17 +95,21 @@ const authSlice = createSlice({
         email,
         roles = ["customer"],
         tailorDetails = null,
-        profileImage = null, // ✅ added destructuring
+        profileImage = null,
+        wishlist = [],
+        cart = [],
       } = action.payload;
+
       state.profile = action.payload;
       state.user = name;
       state.email = email;
       state.roles = roles.map((role) => role.toLowerCase());
       state.tailorDetails = tailorDetails;
-      state.profileImage = profileImage; // ✅ set profileImage here
+      state.profileImage = profileImage;
+      state.wishlist = wishlist;
+      state.cart = cart;
       state.loading = false;
-      const currentRole = localStorage.getItem("role") || "customer";
-      state.role = currentRole;
+      state.role = localStorage.getItem("role") || "customer";
 
       saveToLocalStorage(state);
     },
@@ -151,6 +124,18 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = null;
       saveToLocalStorage(state);
+    },
+    getClothsRequest: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    setCloths: (state, action) => {
+      state.cloths = action.payload;
+      state.loading = false;
+    },
+    setClothsError: (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
@@ -169,6 +154,12 @@ const authSlice = createSlice({
       state.role = action.payload;
       localStorage.setItem("role", action.payload);
     },
+
+    // ✅ NEW: Wishlist + Cart trigger actions
+    addToWishlist: (state, action) => {},
+    removeFromWishlist: (state, action) => {},
+    addToCart: (state, action) => {},
+    removeFromCart: (state, action) => {},
   },
 });
 

@@ -37,6 +37,21 @@ const updateProfileApi = (profileData) =>
   const getClothsApi = () =>
   axios.get("http://localhost:5000/cloths/allcloths"); // ✅ added
 
+ // Wishlist and Cart API with corrected structure
+const addToWishlistApi = (itemId) =>
+  axios.post("http://localhost:5000/users/wishlist", { itemId }, { headers: authHeader() });
+
+const removeFromWishlistApi = (itemId) =>
+  axios.delete(`http://localhost:5000/users/wishlist/${itemId}`, { headers: authHeader() });
+
+const addToCartApi = (itemId) =>
+  axios.post("http://localhost:5000/users/cart", { itemId }, { headers: authHeader() });
+
+const removeFromCartApi = (itemId) =>
+  axios.delete(`http://localhost:5000/users/cart/${itemId}`, { headers: authHeader() });
+
+
+
 // ✅ Cloths Saga
 function* getClothsSaga() {
   try {
@@ -46,6 +61,44 @@ function* getClothsSaga() {
     yield put(setCloths(cloths)); // ✅ save cloths to state
   } catch (error) {
     yield put(setClothsError(error.message)); // ✅ handle error
+  }
+}
+
+function* addToWishlistSaga(action) {
+  try {
+    yield call(addToWishlistApi, action.payload);
+    yield put(fetchProfileRequest());
+  } catch (err) {
+    yield put(setError(err.message));
+  }
+}
+
+function* removeFromWishlistSaga(action) {
+  try {
+    yield call(removeFromWishlistApi, action.payload);
+    yield put(fetchProfileRequest());
+  } catch (err) {
+    yield put(setError(err.message));
+  }
+}
+
+function* addToCartSaga(action) {
+  try {
+    yield call(addToCartApi, action.payload);              // ✅ Add to cart
+    yield call(removeFromWishlistApi, action.payload);     // ✅ Remove from wishlist
+    yield put(fetchProfileRequest());                      // ✅ Sync profile
+  } catch (err) {
+    yield put(setError(err.message));
+  }
+}
+
+
+function* removeFromCartSaga(action) {
+  try {
+    yield call(removeFromCartApi, action.payload);
+    yield put(fetchProfileRequest());
+  } catch (err) {
+    yield put(setError(err.message));
   }
 }
 
@@ -100,10 +153,10 @@ function* fetchUserProfile() {
   try {
     yield put(setLoading(true));
     const response = yield call(fetchProfileApi);
-    const { name, email, roles, tailorDetails, address, profileImage } = response.data;  // Add profileImage here
+    const { name, email, roles, tailorDetails, address, profileImage,wishlist, cart } = response.data;  // Add profileImage here
 
     const fixedFetchedImage = resolveImagePath(profileImage);
-    yield put(setProfile({ name, email, roles, tailorDetails, address, profileImage: fixedFetchedImage }));
+    yield put(setProfile({ name, email, roles, tailorDetails, address, profileImage: fixedFetchedImage , wishlist, cart }));
   // Include profileImage in state
     yield put(setRole(localStorage.getItem("role") || "customer"));
 
@@ -114,6 +167,9 @@ function* fetchUserProfile() {
     localStorage.setItem("address", JSON.stringify(address || {}));
     localStorage.setItem("profile", JSON.stringify(response.data));
 localStorage.setItem("profileImage", fixedFetchedImage);
+localStorage.setItem("wishlist", JSON.stringify(wishlist || []));
+localStorage.setItem("cart", JSON.stringify(cart || []));
+
   // Save profileImage locally too
   } catch (err) {
     yield put(setError(err.response?.data?.message || err.message));
@@ -157,4 +213,20 @@ export function* watchUpdateProfile() {
 
 export function* watchGetCloths() {
   yield takeLatest("auth/getClothsRequest", getClothsSaga); // ✅ added
+}
+
+export function* watchAddToWishlist() {
+  yield takeLatest("auth/addToWishlist", addToWishlistSaga);
+}
+
+export function* watchRemoveFromWishlist() {
+  yield takeLatest("auth/removeFromWishlist", removeFromWishlistSaga);
+}
+
+export function* watchAddToCart() {
+  yield takeLatest("auth/addToCart", addToCartSaga);
+}
+
+export function* watchRemoveFromCart() {
+  yield takeLatest("auth/removeFromCart", removeFromCartSaga);
 }

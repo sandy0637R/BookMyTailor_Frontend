@@ -4,6 +4,10 @@ import {
   watchFetchProfile,
   watchUpdateProfile,
   watchGetCloths,
+  watchAddToWishlist,
+  watchRemoveFromWishlist,
+  watchAddToCart,
+  watchRemoveFromCart,
 } from './authSaga';
 
 export default function* rootSaga() {
@@ -12,5 +16,9 @@ export default function* rootSaga() {
     watchFetchProfile(),
     watchUpdateProfile(), // Added watcher for profile update
     watchGetCloths(),
+     watchAddToWishlist(),
+    watchRemoveFromWishlist(),
+    watchAddToCart(),
+    watchRemoveFromCart(),
   ]);
 }
