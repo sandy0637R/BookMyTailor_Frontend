@@ -14,7 +14,8 @@ import ToastContainer from "./containers/ToastContainer";
 import AddPost from "./pages/AddPost";
 import Wishlist from "./pages/Wishlist";
 import Cart from "./pages/Cart";
-
+import Customize from "./pages/Customize";
+import CustomOrder from "./pages/CustomOrder";
 const App = () => {
   return (
     <div className="relative min-h-screen">
@@ -75,6 +76,22 @@ const App = () => {
             element={
               <PrivateRoute>
                 <AddPost />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/custom"
+            element={
+              <PrivateRoute>
+                <Customize />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/tailorcustom"
+            element={
+              <PrivateRoute>
+                <CustomOrder />
               </PrivateRoute>
             }
           />

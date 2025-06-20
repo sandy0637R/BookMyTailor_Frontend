@@ -91,6 +91,17 @@ export default function Drawer() {
                   <li className={getLinkClass("/addpost")}>Posts</li>
                 </Link>
               )}
+              {currentRole === "tailor" && (
+  <Link to="/tailorcustom">
+    <li className={getLinkClass("/tailorcustom")}>Customer Requests</li>
+  </Link>
+)}
+{currentRole === "customer" && (
+  <Link to="/custom">
+    <li className={getLinkClass("/custom")}>Customize</li>
+  </Link>
+)}
+
             </>
           )}
 

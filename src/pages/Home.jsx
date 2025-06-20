@@ -6,8 +6,7 @@ import Customize from './Customize'
 const Home = () => {
   return (
     <div>
-      <CustomOrder/>
-      <Customize/>
+      <Cloths/>
     </div>
   )
 }
