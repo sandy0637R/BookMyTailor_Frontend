@@ -41,6 +41,7 @@ const ClothDetails = ({
         <div className="w-1/2 p-6 flex flex-col justify-between">
           <div>
             <h2 className="text-2xl font-bold mb-2">{cloth.name}</h2>
+             <p className="text-gray-600 mb-1"><strong>Description:</strong> {cloth.description}</p>
             <p className="text-gray-600 mb-1"><strong>Type:</strong> {cloth.type}</p>
             <p className="text-gray-600 mb-1"><strong>Brand:</strong> {cloth.manufacturer}</p>
             <p className="text-gray-600 mb-1"><strong>Sizes:</strong> {cloth.size.join(", ")}</p>

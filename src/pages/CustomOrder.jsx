@@ -6,7 +6,6 @@ import { toast } from "react-hot-toast";
 const CustomOrder = () => {
   const token = useSelector((state) => state.auth.token);
   const roles = useSelector((state) => state.auth.roles);
-  const profile = useSelector((state) => state.auth.profile);
 
   const [uploadedRequests, setUploadedRequests] = useState([]);
   const [acceptedRequests, setAcceptedRequests] = useState([]);
@@ -70,6 +69,21 @@ const CustomOrder = () => {
     }
   };
 
+  const handleDeleteDelivered = async (requestId, customerId) => {
+    try {
+      await axios.delete(
+        `http://localhost:5000/custom/request/${customerId}/${requestId}/tailor-delete`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Delivered request removed");
+      fetchAcceptedRequests();
+    } catch {
+      toast.error("Failed to remove delivered request");
+    }
+  };
+
   const statusOptions = ["Accepted", "Ready", "Out for Delivery", "Delivered"];
 
   if (!roles?.includes("tailor")) {
@@ -80,9 +94,13 @@ const CustomOrder = () => {
     );
   }
 
-  const renderRequestCard = (req, showAccept, showUpdate) => (
-    <div key={req._id} className="border p-4 mb-4 rounded shadow">
-      <p><b>Requested by:</b> {req.customer?.name}</p>
+ const renderRequestCard = (req, showAccept, showUpdate) => {
+  const requestId = req.requestId?.$oid || req._id;
+  const customerId = req.customerId?.$oid || req.customer?.userId;
+
+  return (
+    <div key={requestId} className="border p-4 mb-4 rounded shadow">
+      <p><b>Requested by:</b> {req.customer?.name || req.customerName}</p>
       <p><b>Status:</b> {req.status}</p>
       <p><b>Budget:</b> ₹{req.budget}</p>
       <p><b>Duration:</b> {req.duration}</p>
@@ -99,7 +117,7 @@ const CustomOrder = () => {
 
       {showAccept && (
         <button
-          onClick={() => handleAccept(req._id, req.customer?.userId)}
+          onClick={() => handleAccept(requestId, customerId)}
           className="bg-green-600 text-white px-3 py-1 rounded"
         >
           Accept
@@ -109,9 +127,9 @@ const CustomOrder = () => {
       {showUpdate && (
         <div className="mt-2">
           <select
-            value={statusMap[req._id] || ""}
+            value={statusMap[requestId] || ""}
             onChange={(e) =>
-              setStatusMap((prev) => ({ ...prev, [req._id]: e.target.value }))
+              setStatusMap((prev) => ({ ...prev, [requestId]: e.target.value }))
             }
             className="border rounded px-2 py-1"
           >
@@ -126,7 +144,7 @@ const CustomOrder = () => {
           </select>
           <button
             onClick={() =>
-              handleStatusUpdate(req._id, req.customer?.userId, statusMap[req._id])
+              handleStatusUpdate(requestId, customerId, statusMap[requestId])
             }
             className="ml-2 bg-blue-500 text-white px-3 py-1 rounded"
           >
@@ -134,8 +152,19 @@ const CustomOrder = () => {
           </button>
         </div>
       )}
+
+      {req.status === "Delivered" && requestId && customerId && (
+        <button
+          onClick={() => handleDeleteDelivered(requestId, customerId)}
+          className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
+        >
+          Remove Delivered Request
+        </button>
+      )}
     </div>
   );
+};
+
 
   return (
     <div className="p-4">

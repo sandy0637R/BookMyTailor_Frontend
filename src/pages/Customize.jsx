@@ -14,6 +14,7 @@ const Customize = () => {
     budget: "",
     duration: "",
     description: "",
+    quantity: "",
     image: null,
   });
   const [preview, setPreview] = useState(null);
@@ -60,6 +61,7 @@ const Customize = () => {
       fd.append("budget", form.budget);
       fd.append("duration", form.duration);
       fd.append("description", form.description);
+      fd.append("quantity", form.quantity);
       fd.append("image", form.image);
       fd.append("measurements", JSON.stringify(form.measurements));
 
@@ -76,6 +78,7 @@ const Customize = () => {
         budget: "",
         duration: "",
         description: "",
+        quantity: "",
         image: null,
       });
       setPreview(null);
@@ -156,6 +159,7 @@ const Customize = () => {
       fd.append("budget", req.budget);
       fd.append("duration", req.duration);
       fd.append("description", req.description);
+      fd.append("quantity", req.quantity);
       fd.append("measurements", JSON.stringify(req.measurements));
       if (req.image instanceof File) fd.append("image", req.image);
 
@@ -178,7 +182,7 @@ const Customize = () => {
       "Uploaded",
       "Accepted",
       "Ready",
-      "Shipped",
+      "Out for Delivery",
       "Delivered",
       "Confirmed",
     ];
@@ -209,6 +213,7 @@ const Customize = () => {
       </div>
     );
   }
+
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Upload Custom Request</h2>
@@ -233,6 +238,14 @@ const Customize = () => {
           placeholder="Description"
           onChange={handleInput}
           value={form.description}
+        />
+        <input
+          name="quantity"
+          type="number"
+          min="1"
+          placeholder="Quantity"
+          onChange={handleInput}
+          value={form.quantity}
         />
         <input
           name="measurements.chest"
@@ -290,6 +303,13 @@ const Customize = () => {
               <textarea
                 value={req.description}
                 onChange={(e) => handleEditChange(e, req._id, "description")}
+              />
+              <input
+                type="number"
+                min="1"
+                value={req.quantity || ""}
+                onChange={(e) => handleEditChange(e, req._id, "quantity")}
+                placeholder="Quantity"
               />
               <input
                 value={req.measurements?.chest || ""}
@@ -354,16 +374,18 @@ const Customize = () => {
                   <b>Courier:</b> {req.courier || "N/A"}
                 </div>
               )}
-              {req.status === "Uploaded" && (
-                <>
-                  <button onClick={() => handleDelete(req._id)} className="text-red-600">
-                    Delete
-                  </button>
-                  <button onClick={() => setEditingId(req._id)} className="text-blue-600 ml-4">
-                    Edit
-                  </button>
-                </>
-              )}
+              {["Uploaded", "Confirmed"].includes(req.status) && (
+  <>
+    <button onClick={() => handleDelete(req._id)} className="text-red-600">
+      Delete
+    </button>
+    {req.status === "Uploaded" && (
+      <button onClick={() => setEditingId(req._id)} className="text-blue-600 ml-4">
+        Edit
+      </button>
+    )}
+  </>
+)}
               {req.status === "Delivered" && (
                 <button onClick={() => handleConfirm(req._id)} className="text-green-600">
                   Confirm Delivery
