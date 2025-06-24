@@ -6,6 +6,7 @@ import {
   addToWishlist,
   fetchProfileRequest,
   getClothsRequest,
+  addToCart,
 } from "../redux/authSlice";
 import ClothDetails from "../components/ClothDetails";
 
@@ -26,13 +27,16 @@ const Cart = () => {
   const cartItems = useMemo(
     () =>
       cart
-        ?.map((id) => cloths.find((item) => item._id === id))
+        ?.map(({ item, quantity }) => {
+          const cloth = cloths.find((c) => c._id === item);
+          return cloth ? { ...cloth, quantity } : null;
+        })
         .filter(Boolean),
     [cart, cloths]
   );
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
-  const isInCart = (id) => cart.includes(id);
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const isInCart = (id) => cart.some((entry) => entry.item === id);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -56,12 +60,27 @@ const Cart = () => {
                 <div className="p-4 space-y-2">
                   <h3 className="text-xl font-semibold">{item.name}</h3>
                   <p className="text-gray-600">
-                    Brand:{" "}
-                    <span className="text-black">{item.manufacturer}</span>
+                    Brand: <span className="text-black">{item.manufacturer}</span>
                   </p>
                   <p className="text-lg font-bold text-green-600">
                     ₹{item.price}
                   </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => dispatch(removeFromCart(item._id))}
+                      className="px-2 py-1 text-lg font-bold border rounded hover:bg-red-100"
+                    >
+                      -
+                    </button>
+                    <span className="text-lg">{item.quantity}</span>
+                    <button
+                      onClick={() => dispatch(addToCart(item._id))}
+                      className="px-2 py-1 text-lg font-bold border rounded hover:bg-green-100"
+                    >
+                      +
+                    </button>
+                  </div>
 
                   <div className="flex justify-between mt-4 flex-wrap gap-2">
                     <button

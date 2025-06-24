@@ -63,7 +63,11 @@ const authSlice = createSlice({
       state.token = token;
       state.profileImage = profileImage;
       state.wishlist = wishlist;
-      state.cart = cart;
+     state.cart = cart.map((entry) => ({
+  item: entry.item,
+  quantity: entry.quantity,
+}));
+
       state.profile = { name, email, roles, tailorDetails, profileImage };
       state.loading = false;
       state.roleError = null;
@@ -107,7 +111,11 @@ const authSlice = createSlice({
       state.tailorDetails = tailorDetails;
       state.profileImage = profileImage;
       state.wishlist = wishlist;
-      state.cart = cart;
+      state.cart = cart.map((entry) => ({
+  item: entry.item,
+  quantity: entry.quantity,
+}));
+
       state.loading = false;
       state.role = localStorage.getItem("role") || "customer";
 
