@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import RequestDisplayCard from "../components/RequestDisplayCard";
+import RequestEditForm from "../components/RequestEditForm";
+import RequestUploadForm from "../components/RequestUploadForm";
+
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
@@ -153,8 +157,7 @@ const Customize = () => {
     );
   };
 
-  const handleEditSubmit = async (req) => {
-    // ✅ Add validation before API call
+   const handleEditSubmit = async (req) => {
     const maleMeasurements = [
       "chest",
       "shoulderWidth",
@@ -198,13 +201,11 @@ const Customize = () => {
       return;
     }
 
-    // ✅ Continue with API call
     try {
       const fd = new FormData();
       fd.append("gender", req.gender);
       fd.append("budget", req.budget);
-      fd.append("duration", new Date(form.duration).toISOString());
-
+      fd.append("duration", new Date(req.duration).toISOString()); // Fixed this line
       fd.append("description", req.description);
       fd.append("quantity", req.quantity);
       fd.append("measurements", JSON.stringify(req.measurements));
@@ -217,11 +218,11 @@ const Customize = () => {
       toast.success("Request updated");
       setEditingId(null);
       fetchRequests();
-    } catch {
+    } catch (err) {
+      console.error("Update error:", err); // Add error logging
       toast.error("Update failed");
     }
   };
-
   const requiredFields = [
     form.gender,
     form.budget,
@@ -252,37 +253,6 @@ const Customize = () => {
 
   const isSubmitDisabled = requiredFields.includes("") || !isMeasurementFilled;
 
-  const renderTrackingStatus = (status) => {
-    const steps = [
-      "Uploaded",
-      "Accepted",
-      "Ready",
-      "Out for Delivery",
-      "Delivered",
-      "Confirmed",
-    ];
-    const currentIndex = steps.indexOf(status);
-    return (
-      <div className="flex flex-col text-sm text-gray-700 mt-2">
-        <b>Tracking:</b>
-        <ul className="pl-4 list-disc">
-          {steps.map((step, index) => (
-            <li
-              key={index}
-              className={
-                index <= currentIndex
-                  ? "text-green-600 font-semibold"
-                  : "text-gray-400"
-              }
-            >
-              {step}
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
-
   if (role !== "customer") {
     return (
       <div className="p-4 text-red-600">
@@ -294,440 +264,36 @@ const Customize = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Upload Custom Request</h2>
-
-      <div className="grid grid-cols-1 gap-2">
-        <input type="file" accept="image/*" onChange={handleFile} />
-        {preview && (
-          <img src={preview} alt="Preview" className="w-32 h-32 object-cover" />
-        )}
-        <select name="gender" onChange={handleInput} value={form.gender}>
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-        <input
-          name="budget"
-          placeholder="Budget"
-          onChange={handleInput}
-          value={form.budget}
-        />
-        <input
-          type="date"
-          name="duration"
-          onChange={handleInput}
-          value={form.duration}
-        />
-
-        <textarea
-          name="description"
-          placeholder="Description"
-          onChange={handleInput}
-          value={form.description}
-        />
-        <input
-          name="quantity"
-          type="number"
-          min="1"
-          placeholder="Quantity"
-          onChange={handleInput}
-          value={form.quantity}
-        />
-        {/* Dynamic Measurements */}
-        {form.gender === "Male" && (
-          <>
-            <input
-              name="measurements.chest"
-              placeholder="Chest"
-              onChange={handleInput}
-              value={form.measurements.chest || ""}
-            />
-            <input
-              name="measurements.shoulderWidth"
-              placeholder="Shoulder Width"
-              onChange={handleInput}
-              value={form.measurements.shoulderWidth || ""}
-            />
-            <input
-              name="measurements.sleeveLength"
-              placeholder="Sleeve Length"
-              onChange={handleInput}
-              value={form.measurements.sleeveLength || ""}
-            />
-            <input
-              name="measurements.shirtLength"
-              placeholder="Shirt Length"
-              onChange={handleInput}
-              value={form.measurements.shirtLength || ""}
-            />
-            <input
-              name="measurements.neck"
-              placeholder="Neck"
-              onChange={handleInput}
-              value={form.measurements.neck || ""}
-            />
-            <input
-              name="measurements.waist"
-              placeholder="Waist"
-              onChange={handleInput}
-              value={form.measurements.waist || ""}
-            />
-            <input
-              name="measurements.hip"
-              placeholder="Hip"
-              onChange={handleInput}
-              value={form.measurements.hip || ""}
-            />
-            <input
-              name="measurements.inseam"
-              placeholder="Inseam"
-              onChange={handleInput}
-              value={form.measurements.inseam || ""}
-            />
-            <input
-              name="measurements.rise"
-              placeholder="Rise"
-              onChange={handleInput}
-              value={form.measurements.rise || ""}
-            />
-            <input
-              name="measurements.thigh"
-              placeholder="Thigh"
-              onChange={handleInput}
-              value={form.measurements.thigh || ""}
-            />
-          </>
-        )}
-
-        {form.gender === "Female" && (
-          <>
-            <input
-              name="measurements.bust"
-              placeholder="Bust"
-              onChange={handleInput}
-              value={form.measurements.bust || ""}
-            />
-            <input
-              name="measurements.topLength"
-              placeholder="Top Length"
-              onChange={handleInput}
-              value={form.measurements.topLength || ""}
-            />
-            <input
-              name="measurements.waist"
-              placeholder="Waist"
-              onChange={handleInput}
-              value={form.measurements.waist || ""}
-            />
-            <input
-              name="measurements.hip"
-              placeholder="Hip"
-              onChange={handleInput}
-              value={form.measurements.hip || ""}
-            />
-            <input
-              name="measurements.inseam"
-              placeholder="Inseam"
-              onChange={handleInput}
-              value={form.measurements.inseam || ""}
-            />
-            <input
-              name="measurements.rise"
-              placeholder="Rise"
-              onChange={handleInput}
-              value={form.measurements.rise || ""}
-            />
-            <input
-              name="measurements.thigh"
-              placeholder="Thigh"
-              onChange={handleInput}
-              value={form.measurements.thigh || ""}
-            />
-          </>
-        )}
-
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitDisabled}
-          className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          Submit
-        </button>
-      </div>
+      
+      <RequestUploadForm
+        form={form}
+        handleInput={handleInput}
+        handleFile={handleFile}
+        preview={preview}
+        isSubmitDisabled={isSubmitDisabled}
+        handleSubmit={handleSubmit}
+      />
 
       <h2 className="text-xl font-bold mt-8 mb-2">My Requests</h2>
+      
       {requests.map((req) => (
         <div key={req._id} className="border p-3 my-2 rounded shadow">
           {editingId === req._id ? (
-            <>
-              <select
-                value={req.gender}
-                onChange={(e) => handleEditChange(e, req._id, "gender")}
-              >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-              <input
-                value={req.budget}
-                onChange={(e) => handleEditChange(e, req._id, "budget")}
-                placeholder="Budget"
-              />
-              <input
-                value={req.duration}
-                onChange={(e) => handleEditChange(e, req._id, "duration")}
-                placeholder="Duration"
-              />
-              <textarea
-                value={req.description}
-                onChange={(e) => handleEditChange(e, req._id, "description")}
-              />
-              <input
-                type="number"
-                min="1"
-                value={req.quantity || ""}
-                onChange={(e) => handleEditChange(e, req._id, "quantity")}
-                placeholder="Quantity"
-              />
-              {req.gender === "Male" && (
-                <>
-                  <input
-                    value={req.measurements?.chest || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "chest")
-                    }
-                    placeholder="Chest"
-                  />
-                  <input
-                    value={req.measurements?.shoulderWidth || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "shoulderWidth")
-                    }
-                    placeholder="Shoulder Width"
-                  />
-                  <input
-                    value={req.measurements?.sleeveLength || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "sleeveLength")
-                    }
-                    placeholder="Sleeve Length"
-                  />
-                  <input
-                    value={req.measurements?.shirtLength || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "shirtLength")
-                    }
-                    placeholder="Shirt Length"
-                  />
-                  <input
-                    value={req.measurements?.neck || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "neck")
-                    }
-                    placeholder="Neck"
-                  />
-                  <input
-                    value={req.measurements?.waist || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "waist")
-                    }
-                    placeholder="Waist"
-                  />
-                  <input
-                    value={req.measurements?.hip || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "hip")
-                    }
-                    placeholder="Hip"
-                  />
-                  <input
-                    value={req.measurements?.inseam || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "inseam")
-                    }
-                    placeholder="Inseam"
-                  />
-                  <input
-                    value={req.measurements?.rise || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "rise")
-                    }
-                    placeholder="Rise"
-                  />
-                  <input
-                    value={req.measurements?.thigh || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "thigh")
-                    }
-                    placeholder="Thigh"
-                  />
-                </>
-              )}
-
-              {req.gender === "Female" && (
-                <>
-                  <input
-                    value={req.measurements?.bust || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "bust")
-                    }
-                    placeholder="Bust"
-                  />
-                  <input
-                    value={req.measurements?.topLength || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "topLength")
-                    }
-                    placeholder="Top Length"
-                  />
-                  <input
-                    value={req.measurements?.waist || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "waist")
-                    }
-                    placeholder="Waist"
-                  />
-                  <input
-                    value={req.measurements?.hip || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "hip")
-                    }
-                    placeholder="Hip"
-                  />
-                  <input
-                    value={req.measurements?.inseam || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "inseam")
-                    }
-                    placeholder="Inseam"
-                  />
-                  <input
-                    value={req.measurements?.rise || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "rise")
-                    }
-                    placeholder="Rise"
-                  />
-                  <input
-                    value={req.measurements?.thigh || ""}
-                    onChange={(e) =>
-                      handleEditMeasurementsChange(e, req._id, "thigh")
-                    }
-                    placeholder="Thigh"
-                  />
-                </>
-              )}
-
-              <input type="file" onChange={(e) => handleEditFile(e, req._id)} />
-              {req.imagePreview && (
-                <img
-                  src={req.imagePreview}
-                  className="w-32 h-32 object-cover"
-                  alt="preview"
-                />
-              )}
-              <button
-                onClick={() => handleEditSubmit(req)}
-                className="text-green-600"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setEditingId(null)}
-                className="text-gray-600 ml-2"
-              >
-                Cancel
-              </button>
-            </>
+            <RequestEditForm
+              req={req}
+              handleEditChange={handleEditChange}
+              handleEditMeasurementsChange={handleEditMeasurementsChange}
+              handleEditFile={handleEditFile}
+              handleEditSubmit={handleEditSubmit}
+              setEditingId={setEditingId}
+            />
           ) : (
-            <>
-              <p>
-                <b>Status:</b> {req.status}
-              </p>
-              <p>
-                <b>Budget:</b> ₹{req.budget}
-              </p>
-              <p>
-                <b>Duration:</b> {req.duration}
-              </p>
-              <p>
-                <b>Gender:</b> {req.gender}
-              </p>
-              <div className="mt-2 text-sm text-gray-700">
-                <b>Measurements:</b>
-                <ul className="list-disc pl-5 mt-1">
-                  {req.gender === "Male" && (
-                    <>
-                      <li>Chest: {req.measurements?.chest}</li>
-                      <li>Shoulder Width: {req.measurements?.shoulderWidth}</li>
-                      <li>Sleeve Length: {req.measurements?.sleeveLength}</li>
-                      <li>Shirt Length: {req.measurements?.shirtLength}</li>
-                      <li>Neck: {req.measurements?.neck}</li>
-                      <li>Waist: {req.measurements?.waist}</li>
-                      <li>Hip: {req.measurements?.hip}</li>
-                      <li>Inseam: {req.measurements?.inseam}</li>
-                      <li>Rise: {req.measurements?.rise}</li>
-                      <li>Thigh: {req.measurements?.thigh}</li>
-                    </>
-                  )}
-                  {req.gender === "Female" && (
-                    <>
-                      <li>Bust: {req.measurements?.bust}</li>
-                      <li>Top Length: {req.measurements?.topLength}</li>
-                      <li>Waist: {req.measurements?.waist}</li>
-                      <li>Hip: {req.measurements?.hip}</li>
-                      <li>Inseam: {req.measurements?.inseam}</li>
-                      <li>Rise: {req.measurements?.rise}</li>
-                      <li>Thigh: {req.measurements?.thigh}</li>
-                    </>
-                  )}
-                </ul>
-              </div>
-
-              {req.image && (
-                <img
-                  src={
-                    typeof req.image === "string"
-                      ? `http://localhost:5000/uploads/customRequests/${req.image}`
-                      : URL.createObjectURL(req.image)
-                  }
-                  alt="Dress"
-                  className="w-32 h-32 object-cover"
-                />
-              )}
-              {renderTrackingStatus(req.status)}
-              {(req.status === "Shipped" || req.status === "Delivered") && (
-                <div className="text-sm mt-1">
-                  <b>Tracking ID:</b> {req.trackingId || "N/A"} <br />
-                  <b>Courier:</b> {req.courier || "N/A"}
-                </div>
-              )}
-              {["Uploaded", "Confirmed"].includes(req.status) && (
-                <>
-                  <button
-                    onClick={() => handleDelete(req._id)}
-                    className="text-red-600"
-                  >
-                    Delete
-                  </button>
-                  {req.status === "Uploaded" && (
-                    <button
-                      onClick={() => setEditingId(req._id)}
-                      className="text-blue-600 ml-4"
-                    >
-                      Edit
-                    </button>
-                  )}
-                </>
-              )}
-              {req.status === "Delivered" && (
-                <button
-                  onClick={() => handleConfirm(req._id)}
-                  className="text-green-600"
-                >
-                  Confirm Delivery
-                </button>
-              )}
-            </>
+            <RequestDisplayCard
+              req={req}
+              handleDelete={handleDelete}
+              setEditingId={setEditingId}
+              handleConfirm={handleConfirm}
+            />
           )}
         </div>
       ))}

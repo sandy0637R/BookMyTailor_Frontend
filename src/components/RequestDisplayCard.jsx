@@ -1,0 +1,133 @@
+import React from "react";
+
+
+
+const RequestDisplayCard = ({ 
+  req, 
+  handleDelete, 
+  setEditingId, 
+  handleConfirm 
+}) => {
+  // Tracking status renderer
+  const renderTrackingStatus = (status) => {
+    const steps = [
+      "Uploaded",
+      "Accepted",
+      "Ready",
+      "Out for Delivery",
+      "Delivered",
+      "Confirmed",
+    ];
+    const currentIndex = steps.indexOf(status);
+    return (
+      <div className="flex flex-col text-sm text-gray-700 mt-2">
+        <b>Tracking:</b>
+        <ul className="pl-4 list-disc">
+          {steps.map((step, index) => (
+            <li
+              key={index}
+              className={
+                index <= currentIndex
+                  ? "text-green-600 font-semibold"
+                  : "text-gray-400"
+              }
+            >
+              {step}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      <p><b>Status:</b> {req.status}</p>
+      <p><b>Budget:</b> ₹{req.budget}</p>
+      <p><b>Duration:</b> {req.duration}</p>
+      <p><b>Gender:</b> {req.gender}</p>
+      
+      <div className="mt-2 text-sm text-gray-700">
+        <b>Measurements:</b>
+        <ul className="list-disc pl-5 mt-1">
+          {req.gender === "Male" && (
+            <>
+              <li>Chest: {req.measurements?.chest}</li>
+              <li>Shoulder Width: {req.measurements?.shoulderWidth}</li>
+              <li>Sleeve Length: {req.measurements?.sleeveLength}</li>
+              <li>Shirt Length: {req.measurements?.shirtLength}</li>
+              <li>Neck: {req.measurements?.neck}</li>
+              <li>Waist: {req.measurements?.waist}</li>
+              <li>Hip: {req.measurements?.hip}</li>
+              <li>Inseam: {req.measurements?.inseam}</li>
+              <li>Rise: {req.measurements?.rise}</li>
+              <li>Thigh: {req.measurements?.thigh}</li>
+            </>
+          )}
+          {req.gender === "Female" && (
+            <>
+              <li>Bust: {req.measurements?.bust}</li>
+              <li>Top Length: {req.measurements?.topLength}</li>
+              <li>Waist: {req.measurements?.waist}</li>
+              <li>Hip: {req.measurements?.hip}</li>
+              <li>Inseam: {req.measurements?.inseam}</li>
+              <li>Rise: {req.measurements?.rise}</li>
+              <li>Thigh: {req.measurements?.thigh}</li>
+            </>
+          )}
+        </ul>
+      </div>
+
+      {req.image && (
+        <img
+          src={
+            typeof req.image === "string"
+              ? `http://localhost:5000/uploads/customRequests/${req.image}`
+              : URL.createObjectURL(req.image)
+          }
+          alt="Dress"
+          className="w-32 h-32 object-cover"
+        />
+      )}
+      
+      {renderTrackingStatus(req.status)}
+      
+      {(req.status === "Shipped" || req.status === "Delivered") && (
+        <div className="text-sm mt-1">
+          <b>Tracking ID:</b> {req.trackingId || "N/A"} <br />
+          <b>Courier:</b> {req.courier || "N/A"}
+        </div>
+      )}
+      
+      {["Uploaded", "Confirmed"].includes(req.status) && (
+        <>
+          <button
+            onClick={() => handleDelete(req._id)}
+            className="text-red-600"
+          >
+            Delete
+          </button>
+          {req.status === "Uploaded" && (
+            <button
+              onClick={() => setEditingId(req._id)}
+              className="text-blue-600 ml-4"
+            >
+              Edit
+            </button>
+          )}
+        </>
+      )}
+      
+      {req.status === "Delivered" && (
+        <button
+          onClick={() => handleConfirm(req._id)}
+          className="text-green-600"
+        >
+          Confirm Delivery
+        </button>
+      )}
+    </>
+  );
+};
+
+export default RequestDisplayCard;
