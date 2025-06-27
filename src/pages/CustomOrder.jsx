@@ -2,14 +2,17 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import ChatBox from "../components/ChatBox"; // Add ChatBox import
 
 const CustomOrder = () => {
   const token = useSelector((state) => state.auth.token);
   const roles = useSelector((state) => state.auth.roles);
+  const profile = useSelector((state) => state.auth.profile); // for currentUser
 
   const [uploadedRequests, setUploadedRequests] = useState([]);
   const [acceptedRequests, setAcceptedRequests] = useState([]);
   const [statusMap, setStatusMap] = useState({});
+  const [chatUser, setChatUser] = useState(null); // selectedUser for chat
 
   useEffect(() => {
     if (roles?.includes("tailor")) {
@@ -94,77 +97,88 @@ const CustomOrder = () => {
     );
   }
 
- const renderRequestCard = (req, showAccept, showUpdate) => {
-  const requestId = req.requestId?.$oid || req._id;
-  const customerId = req.customerId?.$oid || req.customer?.userId;
+  const renderRequestCard = (req, showAccept, showUpdate) => {
+    const requestId = req.requestId?.$oid || req._id;
+    const customerId = req.customerId?.$oid || req.customer?.userId;
 
-  return (
-    <div key={requestId} className="border p-4 mb-4 rounded shadow">
-      <p><b>Requested by:</b> {req.customer?.name || req.customerName}</p>
-      <p><b>Status:</b> {req.status}</p>
-      <p><b>Budget:</b> ₹{req.budget}</p>
-      <p><b>Duration:</b> {req.duration}</p>
-      <p><b>Gender:</b> {req.gender}</p>
-      <p><b>Description:</b> {req.description || "N/A"}</p>
-      <p><b>Measurements:</b> {JSON.stringify(req.measurements)}</p>
-      {req.image && (
-        <img
-          src={`http://localhost:5000/uploads/customRequests/${req.image}`}
-          alt="Dress"
-          className="w-32 h-32 object-cover my-2"
-        />
-      )}
+    return (
+      <div key={requestId} className="border p-4 mb-4 rounded shadow">
+        <p><b>Requested by:</b> {req.customer?.name || req.customerName}</p>
+        <p><b>Status:</b> {req.status}</p>
+        <p><b>Budget:</b> ₹{req.budget}</p>
+        <p><b>Duration:</b> {req.duration}</p>
+        <p><b>Gender:</b> {req.gender}</p>
+        <p><b>Description:</b> {req.description || "N/A"}</p>
+        <p><b>Measurements:</b> {JSON.stringify(req.measurements)}</p>
+        {req.image && (
+          <img
+            src={`http://localhost:5000/uploads/customRequests/${req.image}`}
+            alt="Dress"
+            className="w-32 h-32 object-cover my-2"
+          />
+        )}
 
-      {showAccept && (
-        <button
-          onClick={() => handleAccept(requestId, customerId)}
-          className="bg-green-600 text-white px-3 py-1 rounded"
-        >
-          Accept
-        </button>
-      )}
-
-      {showUpdate && (
-        <div className="mt-2">
-          <select
-            value={statusMap[requestId] || ""}
-            onChange={(e) =>
-              setStatusMap((prev) => ({ ...prev, [requestId]: e.target.value }))
-            }
-            className="border rounded px-2 py-1"
-          >
-            <option value="">Update Status</option>
-            {statusOptions
-              .filter((s) => statusOptions.indexOf(s) > statusOptions.indexOf(req.status))
-              .map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-          </select>
+        {showAccept && (
           <button
-            onClick={() =>
-              handleStatusUpdate(requestId, customerId, statusMap[requestId])
-            }
-            className="ml-2 bg-blue-500 text-white px-3 py-1 rounded"
+            onClick={() => handleAccept(requestId, customerId)}
+            className="bg-green-600 text-white px-3 py-1 rounded"
           >
-            Update
+            Accept
           </button>
-        </div>
-      )}
+        )}
 
-      {req.status === "Delivered" && requestId && customerId && (
-        <button
-          onClick={() => handleDeleteDelivered(requestId, customerId)}
-          className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
-        >
-          Remove Delivered Request
-        </button>
-      )}
-    </div>
-  );
-};
+        {showUpdate && (
+          <div className="mt-2">
+            <select
+              value={statusMap[requestId] || ""}
+              onChange={(e) =>
+                setStatusMap((prev) => ({ ...prev, [requestId]: e.target.value }))
+              }
+              className="border rounded px-2 py-1"
+            >
+              <option value="">Update Status</option>
+              {statusOptions
+                .filter((s) => statusOptions.indexOf(s) > statusOptions.indexOf(req.status))
+                .map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+            </select>
+            <button
+              onClick={() =>
+                handleStatusUpdate(requestId, customerId, statusMap[requestId])
+              }
+              className="ml-2 bg-blue-500 text-white px-3 py-1 rounded"
+            >
+              Update
+            </button>
+          </div>
+        )}
 
+        {req.status === "Delivered" && requestId && customerId && (
+          <button
+            onClick={() => handleDeleteDelivered(requestId, customerId)}
+            className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
+          >
+            Remove Delivered Request
+          </button>
+        )}
+
+        {showUpdate && (
+          <button
+            onClick={() => setChatUser({ 
+              _id: customerId, 
+              name: req.customer?.name || req.customerName 
+            })}
+            className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded"
+          >
+            Send Message
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="p-4">
@@ -180,6 +194,21 @@ const CustomOrder = () => {
         <p>No accepted requests.</p>
       ) : (
         acceptedRequests.map((req) => renderRequestCard(req, false, true))
+      )}
+
+      {chatUser && (
+        <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
+          <ChatBox 
+            currentUser={profile} 
+            selectedUser={chatUser} 
+          />
+          <button
+            onClick={() => setChatUser(null)}
+            className="mt-2 text-sm text-red-600 hover:underline"
+          >
+            Close Chat
+          </button>
+        </div>
       )}
     </div>
   );

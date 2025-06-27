@@ -1,14 +1,13 @@
 import React from "react";
 
-
-
 const RequestDisplayCard = ({ 
   req, 
   handleDelete, 
   setEditingId, 
-  handleConfirm 
+  handleConfirm,
+  setChatUser
 }) => {
-  // Tracking status renderer
+
   const renderTrackingStatus = (status) => {
     const steps = [
       "Uploaded",
@@ -89,16 +88,16 @@ const RequestDisplayCard = ({
           className="w-32 h-32 object-cover"
         />
       )}
-      
+
       {renderTrackingStatus(req.status)}
-      
+
       {(req.status === "Shipped" || req.status === "Delivered") && (
         <div className="text-sm mt-1">
           <b>Tracking ID:</b> {req.trackingId || "N/A"} <br />
           <b>Courier:</b> {req.courier || "N/A"}
         </div>
       )}
-      
+
       {["Uploaded", "Confirmed"].includes(req.status) && (
         <>
           <button
@@ -117,13 +116,27 @@ const RequestDisplayCard = ({
           )}
         </>
       )}
-      
+
       {req.status === "Delivered" && (
         <button
           onClick={() => handleConfirm(req._id)}
           className="text-green-600"
         >
           Confirm Delivery
+        </button>
+      )}
+
+      {req.tailorId && req.status !== "Uploaded" && (
+        <button
+          onClick={() =>
+            setChatUser({
+              _id: req.tailorId._id || req.tailorId,
+              name: req.tailorId.name || "Tailor",
+            })
+          }
+          className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded"
+        >
+          Send Message
         </button>
       )}
     </>

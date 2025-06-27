@@ -153,10 +153,10 @@ function* fetchUserProfile() {
   try {
     yield put(setLoading(true));
     const response = yield call(fetchProfileApi);
-    const { name, email, roles, tailorDetails, address, profileImage,wishlist, cart } = response.data;  // Add profileImage here
+    const { _id,name, email, roles, tailorDetails, address, profileImage,wishlist, cart } = response.data;  // Add profileImage here
 
     const fixedFetchedImage = resolveImagePath(profileImage);
-    yield put(setProfile({ name, email, roles, tailorDetails, address, profileImage: fixedFetchedImage , wishlist, cart }));
+    yield put(setProfile({_id, name, email, roles, tailorDetails, address, profileImage: fixedFetchedImage , wishlist, cart }));
   // Include profileImage in state
     yield put(setRole(localStorage.getItem("role") || "customer"));
 

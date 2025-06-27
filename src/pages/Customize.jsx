@@ -5,11 +5,12 @@ import { toast } from "react-hot-toast";
 import RequestDisplayCard from "../components/RequestDisplayCard";
 import RequestEditForm from "../components/RequestEditForm";
 import RequestUploadForm from "../components/RequestUploadForm";
-
+import ChatBox from "../components/ChatBox"; // ✅ Import ChatBox
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
   const role = useSelector((state) => state.auth.role);
+  const profile = useSelector((state) => state.auth.profile); // ✅ Current user
 
   const [requests, setRequests] = useState([]);
   const [form, setForm] = useState({
@@ -24,6 +25,7 @@ const Customize = () => {
 
   const [preview, setPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [chatUser, setChatUser] = useState(null); // ✅ For Chat
 
   const fetchRequests = async () => {
     try {
@@ -157,7 +159,7 @@ const Customize = () => {
     );
   };
 
-   const handleEditSubmit = async (req) => {
+  const handleEditSubmit = async (req) => {
     const maleMeasurements = [
       "chest",
       "shoulderWidth",
@@ -205,7 +207,7 @@ const Customize = () => {
       const fd = new FormData();
       fd.append("gender", req.gender);
       fd.append("budget", req.budget);
-      fd.append("duration", new Date(req.duration).toISOString()); // Fixed this line
+      fd.append("duration", new Date(req.duration).toISOString());
       fd.append("description", req.description);
       fd.append("quantity", req.quantity);
       fd.append("measurements", JSON.stringify(req.measurements));
@@ -219,10 +221,11 @@ const Customize = () => {
       setEditingId(null);
       fetchRequests();
     } catch (err) {
-      console.error("Update error:", err); // Add error logging
+      console.error("Update error:", err);
       toast.error("Update failed");
     }
   };
+
   const requiredFields = [
     form.gender,
     form.budget,
@@ -264,7 +267,7 @@ const Customize = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Upload Custom Request</h2>
-      
+
       <RequestUploadForm
         form={form}
         handleInput={handleInput}
@@ -275,7 +278,7 @@ const Customize = () => {
       />
 
       <h2 className="text-xl font-bold mt-8 mb-2">My Requests</h2>
-      
+
       {requests.map((req) => (
         <div key={req._id} className="border p-3 my-2 rounded shadow">
           {editingId === req._id ? (
@@ -293,10 +296,23 @@ const Customize = () => {
               handleDelete={handleDelete}
               setEditingId={setEditingId}
               handleConfirm={handleConfirm}
+              setChatUser={setChatUser} // ✅ Pass chat handler
             />
           )}
         </div>
       ))}
+
+      {chatUser && (
+        <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
+          <ChatBox currentUser={profile} selectedUser={chatUser} />
+          <button
+            onClick={() => setChatUser(null)}
+            className="mt-2 text-sm text-red-600 hover:underline"
+          >
+            Close Chat
+          </button>
+        </div>
+      )}
     </div>
   );
 };

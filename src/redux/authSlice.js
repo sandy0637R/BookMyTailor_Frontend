@@ -45,6 +45,7 @@ const authSlice = createSlice({
     },
     login: (state, action) => {
       const {
+        _id,
         name,
         email,
         roles = ["customer"],
@@ -68,7 +69,7 @@ const authSlice = createSlice({
   quantity: entry.quantity,
 }));
 
-      state.profile = { name, email, roles, tailorDetails, profileImage };
+      state.profile = { _id,name, email, roles, tailorDetails, profileImage };
       state.loading = false;
       state.roleError = null;
       state.error = null;
