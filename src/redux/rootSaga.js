@@ -11,6 +11,7 @@ import {
 } from './authSaga';
 
 import { watchSocial } from './socialSaga';
+import { watchPost } from './postSaga';
 
 export default function* rootSaga() {
   yield all([
@@ -23,5 +24,6 @@ export default function* rootSaga() {
     watchAddToCart(),
     watchRemoveFromCart(),
     watchSocial(),
+    watchPost(),
   ]);
 }

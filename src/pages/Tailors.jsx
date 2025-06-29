@@ -1,151 +1,44 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import { useDispatch, useSelector } from "react-redux";
 
 const Tailors = () => {
-  const [posts, setPosts] = useState([]);
+  const dispatch = useDispatch();
+  const posts = useSelector((state) => state.post.posts);
+  const userId = useSelector((state) => state.post.userId); // from postSlice
+  const token = useSelector((state) => state.auth.token);
+
   const [commentTexts, setCommentTexts] = useState({});
   const [selectedCommentId, setSelectedCommentId] = useState(null);
-  const [userId, setUserId] = useState(null);
-
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (token) {
-      const decodedToken = jwtDecode(token);
-      setUserId(decodedToken?._id || null);
+      dispatch({ type: "FETCH_POSTS" });
+      dispatch({ type: "SET_USER_FROM_TOKEN" });
     }
-  }, [token]);
-
-  useEffect(() => {
-    const fetchPostsAndComments = async () => {
-      try {
-        const postsRes = await axios.get("http://localhost:5000/tailors/posts", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const postsData = postsRes.data;
-
-        const postsWithComments = await Promise.all(
-          postsData.map(async (post) => {
-            try {
-              const commentsRes = await axios.get(
-                `http://localhost:5000/tailors/posts/${post._id}/comments`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-
-              const mappedComments = commentsRes.data.map((cmt) => ({
-                _id: cmt._id,
-                text: cmt.commentText,
-                userId: cmt.userId,
-                commentedBy: { name: cmt.userName },
-                createdAt: cmt.createdAt,
-              }));
-
-              return { ...post, comments: mappedComments };
-            } catch {
-              return { ...post, comments: [] };
-            }
-          })
-        );
-
-        setPosts(postsWithComments);
-      } catch {}
-    };
-
-    fetchPostsAndComments();
-  }, [token]);
+  }, [token, dispatch]);
 
   const hasUserLiked = (post) => {
     return post.likes?.some((likeId) => likeId === userId);
   };
 
-  const handleLike = async (postId) => {
-    try {
-      const res = await axios.put(
-        `http://localhost:5000/tailors/posts/${postId}/like`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const updatedPostFromBackend = res.data.post;
-      const oldPost = posts.find((p) => p._id === postId);
-
-      const updatedPost = {
-        ...updatedPostFromBackend,
-        postedBy: oldPost.postedBy,
-        comments: oldPost.comments,
-      };
-
-      setPosts((prev) =>
-        prev.map((post) => (post._id === postId ? updatedPost : post))
-      );
-    } catch {}
+  const handleLike = (postId) => {
+    dispatch({ type: "LIKE_POST", payload: { postId } });
   };
 
   const handleCommentChange = (postId, text) => {
     setCommentTexts((prev) => ({ ...prev, [postId]: text }));
   };
 
-  const handleCommentSubmit = async (postId) => {
+  const handleCommentSubmit = (postId) => {
     const text = commentTexts[postId];
     if (!text) return;
-
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/tailors/posts/${postId}/comment`,
-        { text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const newCommentFromBackend = res.data.comment;
-
-      const newComment = newCommentFromBackend
-        ? {
-            _id: newCommentFromBackend._id,
-            text: newCommentFromBackend.commentText,
-            userId: newCommentFromBackend.userId,
-            commentedBy: { name: newCommentFromBackend.userName },
-            createdAt: newCommentFromBackend.createdAt,
-          }
-        : {
-            _id: Date.now().toString(),
-            text,
-            userId,
-            commentedBy: { name: "You" },
-            createdAt: new Date().toISOString(),
-          };
-
-      setPosts((prev) =>
-        prev.map((post) =>
-          post._id === postId
-            ? { ...post, comments: [...post.comments, newComment] }
-            : post
-        )
-      );
-
-      setCommentTexts((prev) => ({ ...prev, [postId]: "" }));
-    } catch {}
+    dispatch({ type: "COMMENT_POST", payload: { postId, text } });
+    setCommentTexts((prev) => ({ ...prev, [postId]: "" }));
   };
 
-  const handleDeleteComment = async (postId, commentId) => {
-    try {
-      await axios.delete(
-        `http://localhost:5000/tailors/posts/${postId}/comments/${commentId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setPosts((prev) =>
-        prev.map((post) => {
-          if (post._id === postId) {
-            return {
-              ...post,
-              comments: post.comments.filter((c) => c._id !== commentId),
-            };
-          }
-          return post;
-        })
-      );
-    } catch {}
+  const handleDeleteComment = (postId, commentId) => {
+    dispatch({ type: "DELETE_COMMENT", payload: { postId, commentId } });
+    setSelectedCommentId(null);
   };
 
   const handleCommentClick = (commentId, userIdOfComment) => {
@@ -182,11 +75,11 @@ const Tailors = () => {
           <p className="text-sm text-gray-600 mb-4"><span className="font-medium">Posted by:</span> {post.postedBy?.name || "Unknown"}</p>
 
           <button
-  onClick={() => handleLike(post._id)}
-  className="px-4 py-2 rounded-md font-medium bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
->
-  Like {post.likes?.length || 0}
-</button>
+            onClick={() => handleLike(post._id)}
+            className="px-4 py-2 rounded-md font-medium bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+          >
+            Like {post.likes?.length || 0}
+          </button>
 
           <div className="mt-4">
             <h4 className="text-md font-bold mb-2">Comments</h4>
@@ -207,7 +100,6 @@ const Tailors = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteComment(post._id, cmt._id);
-                        setSelectedCommentId(null);
                       }}
                       className="ml-4 text-sm text-red-600 hover:underline"
                     >
