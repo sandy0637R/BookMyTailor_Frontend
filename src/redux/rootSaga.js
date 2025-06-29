@@ -10,6 +10,8 @@ import {
   watchRemoveFromCart,
 } from './authSaga';
 
+import { watchSocial } from './socialSaga';
+
 export default function* rootSaga() {
   yield all([
     watchLogin(),
@@ -20,5 +22,6 @@ export default function* rootSaga() {
     watchRemoveFromWishlist(),
     watchAddToCart(),
     watchRemoveFromCart(),
+    watchSocial(),
   ]);
 }
