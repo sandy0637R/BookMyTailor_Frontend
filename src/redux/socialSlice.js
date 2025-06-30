@@ -6,6 +6,8 @@ const initialState = {
   ratings: {},
   userRating: {},
   followerList: {},
+  followingList: {},      // ✅ added
+  ratedUsersList: {},
   loadingFollowId: null,
   submittingRatingId: null,
 };
@@ -27,6 +29,16 @@ const socialSlice = createSlice({
   const { tailorId, followers } = action.payload;
   state.followerList[tailorId] = followers;
 },
+setFollowingList: (state, action) => {
+  const { userId, following } = action.payload;
+  state.followingList[userId] = following;
+},
+
+setRatedUsers: (state, action) => {
+  const { tailorId, ratedUsers } = action.payload;
+  state.ratedUsersList[tailorId] = ratedUsers;
+},
+
 
     updateFollowers: (state, action) => {
       const { tailorId, followers } = action.payload;
@@ -59,6 +71,8 @@ export const {
   updateFollowers,
   setLoadingFollowId,
   setSubmittingRatingId,
+   setFollowingList,      // ✅
+  setRatedUsers,
 } = socialSlice.actions;
 
 export default socialSlice.reducer;

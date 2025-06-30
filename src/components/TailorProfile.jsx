@@ -4,6 +4,8 @@ import AllTailors from "./AllTailors";
 import FollowerButton from "./FollowerButton";
 import FollowersList from "./FollowersList";
 import Rating from "./Rating";
+import FollowingList from "./FollowingList";
+import RatingList from "./RatingList";
 
 const TailorProfile = () => {
   const token = useSelector((state) => state.auth.token);
@@ -15,10 +17,11 @@ const TailorProfile = () => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [followerName, setFollowerName] = useState("");
   const [showFollowersId, setShowFollowersId] = useState(null);
+  const [showFollowingId, setShowFollowingId] = useState(null);
+  const [showRatingId, setShowRatingId] = useState(null);
 
   return (
     <div className="p-6 space-y-6">
-      {/* Handles token parsing, userId, name, and dispatching FETCH_TAILORS */}
       <AllTailors
         token={token}
         setCurrentUserId={setCurrentUserId}
@@ -37,11 +40,25 @@ const TailorProfile = () => {
           >
             {/* Followers count and list */}
             <FollowersList
-  tailorId={tailor._id}
-  showFollowersId={showFollowersId}
-  setShowFollowersId={setShowFollowersId}
-  defaultFollowers={tailor.tailorDetails?.followers || []}
-/>
+              tailorId={tailor._id}
+              showFollowersId={showFollowersId}
+              setShowFollowersId={setShowFollowersId}
+              defaultFollowers={tailor.tailorDetails?.followers || []}
+            />
+
+            {/* Following count and list */}
+            <FollowingList
+              userId={tailor._id}
+              showFollowingId={showFollowingId}
+              setShowFollowingId={setShowFollowingId}
+            />
+
+            {/* Rating list */}
+            <RatingList
+              tailorId={tailor._id}
+              showRatingId={showRatingId}
+              setShowRatingId={setShowRatingId}
+            />
 
             {/* Profile Image */}
             <img

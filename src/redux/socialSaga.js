@@ -1,4 +1,3 @@
-// socialSaga.js
 import { takeLatest, call, put, all } from "redux-saga/effects";
 import axios from "axios";
 import {
@@ -9,6 +8,8 @@ import {
   updateFollowers,
   setLoadingFollowId,
   setSubmittingRatingId,
+  setFollowingList,     // ✅ added
+  setRatedUsers,        // ✅ added
 } from "./socialSlice";
 
 const BASE_URL = "http://localhost:5000";
@@ -48,8 +49,13 @@ function* submitRatingSaga(action) {
     const { data } = yield call(axios.post, `${BASE_URL}/tailors/rate`, { tailorId, rating }, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
     yield put(setRatings({ [tailorId]: data.averageRating }));
     yield put(setUserRating({ [tailorId]: rating }));
+
+    // ✅ Refetch rated users immediately to update UI
+    yield put({ type: "FETCH_RATED_USERS", payload: tailorId });
+
   } catch (err) {
     console.error("Rating Failed:", err);
   } finally {
@@ -57,35 +63,55 @@ function* submitRatingSaga(action) {
   }
 }
 
+
 function* toggleFollowSaga(action) {
-  const { tailorId } = action.payload;
+  const { tailorId, isFollowing, currentUserId } = action.payload;
+
   try {
     const token = localStorage.getItem("token");
     yield put(setLoadingFollowId(tailorId));
 
-    const url = action.payload.isFollowing
+    const url = isFollowing
       ? `${BASE_URL}/tailors/unfollow/${tailorId}`
       : `${BASE_URL}/tailors/follow/${tailorId}`;
 
-    // ✅ Send request to follow/unfollow
     yield call(axios.post, url, {}, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // ✅ Fetch updated followers from backend
-    const { data } = yield call(axios.get, `${BASE_URL}/tailors/followers/${tailorId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const { data: followerData } = yield call(
+      axios.get,
+      `${BASE_URL}/tailors/followers/${tailorId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    yield put(updateFollowers({ tailorId, followers: followerData.followers }));
+    yield put(setFollowerList({ tailorId, followers: followerData.followers }));
 
-    // ✅ Update both UI sources
-    yield put(updateFollowers({ tailorId, followers: data.followers }));
-    yield put(setFollowerList({ tailorId, followers: data.followers }));
+    const { data: followingData } = yield call(
+      axios.get,
+      `${BASE_URL}/users/${currentUserId}/following`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const uniqueFollowing = [];
+    const seen = new Set();
+    for (const user of followingData.following) {
+      const idStr = user._id.toString();
+      if (!seen.has(idStr)) {
+        seen.add(idStr);
+        uniqueFollowing.push(user);
+      }
+    }
+
+    yield put(setFollowingList({ userId: currentUserId, following: uniqueFollowing }));
   } catch (err) {
-    console.error("Follow/Unfollow Failed:", err);
+    console.error("❌ Follow/Unfollow Failed:", err);
   } finally {
     yield put(setLoadingFollowId(null));
   }
 }
+
+
 
 
 function* fetchFollowersSaga(action) {
@@ -95,12 +121,63 @@ function* fetchFollowersSaga(action) {
     const { data } = yield call(axios.get, `${BASE_URL}/tailors/followers/${tailorId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    yield put(setFollowerList({ tailorId, followers: data.followers })); // ✅ send tailorId with followers
+    yield put(setFollowerList({ tailorId, followers: data.followers }));
   } catch (err) {
     console.error("Fetch Followers Failed:", err);
   }
 }
 
+function* fetchFollowingListSaga(action) {
+  
+  const userId = action.payload;
+
+  try {
+    const token = localStorage.getItem("token");
+    const { data } = yield call(
+      axios.get,
+      `${BASE_URL}/users/${userId}/following`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const uniqueFollowing = [];
+    const seen = new Set();
+    for (const user of data.following) {
+      const idStr = user._id.toString();
+      if (!seen.has(idStr)) {
+        seen.add(idStr);
+        uniqueFollowing.push(user);
+      }
+    }
+
+   
+
+    yield put(setFollowingList({ userId, following: uniqueFollowing }));
+  } catch (err) {
+    console.error("❌ Fetch Following List Failed:", err);
+  }
+}
+
+
+
+function* fetchRatedUsersSaga(action) {
+  console.log("📥 FETCH_RATED_USERS Triggered with:", action.payload);
+  const tailorId = action.payload;
+  console.log("📥 FETCH_RATED_USERS Triggered with:", tailorId); // ✅ ADD THIS
+
+  try {
+    const token = localStorage.getItem("token");
+    const { data } = yield call(
+      axios.get,
+      `${BASE_URL}/users/tailors/${tailorId}/rated-users`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("✅ Rated Users API response:", data); // ✅ ADD THIS
+
+    yield put(setRatedUsers({ tailorId, ratedUsers: data.ratedUsers }));
+  } catch (err) {
+    console.error("❌ Fetch Rated Users Failed:", err);
+  }
+}
 
 export function* watchSocial() {
   yield all([
@@ -108,5 +185,7 @@ export function* watchSocial() {
     takeLatest("SUBMIT_RATING", submitRatingSaga),
     takeLatest("TOGGLE_FOLLOW", toggleFollowSaga),
     takeLatest("FETCH_FOLLOWERS", fetchFollowersSaga),
+    takeLatest("FETCH_FOLLOWING_LIST", fetchFollowingListSaga),
+    takeLatest("FETCH_RATED_USERS", fetchRatedUsersSaga),
   ]);
 }
