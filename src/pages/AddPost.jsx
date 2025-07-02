@@ -158,6 +158,11 @@ const AddPost = () => {
           <p className="text-sm text-gray-600 mb-4">
             <span className="font-medium">Hashtags:</span> {post.hashtags.join(", ")}
           </p>
+          <p className="text-sm text-gray-500 mb-4">
+  <span className="font-medium">Posted on:</span>{" "}
+  {new Date(post.createdAt).toLocaleDateString()}{" "}
+  {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+</p>
           <div className="flex flex-wrap gap-4 mb-4">
             {post.images.map((imgUrl, idx) => (
               <img

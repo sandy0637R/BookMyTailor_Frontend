@@ -5,7 +5,7 @@ import { CookiesProvider } from "react-cookie";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Tailors from "./pages/Tailors";
+import TailorPost from "./pages/TailorPost";
 import Profile from "./pages/Profile";
 import PalletePage from "./pages/PalletePage";
 import Navbar from "./components/Navbar";
@@ -16,6 +16,7 @@ import Wishlist from "./pages/Wishlist";
 import Cart from "./pages/Cart";
 import Customize from "./pages/Customize";
 import CustomOrder from "./pages/CustomOrder";
+import TailorProfile from "./components/TailorProfile";
 const App = () => {
   return (
     <div className="relative min-h-screen">
@@ -36,7 +37,9 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/tailors" element={<Tailors />} />
+          <Route path="/tailors" element={<TailorPost />} />
+          <Route path="/tailorprofile/:id" element={<TailorProfile />} />
+
 
           {/* Private Route */}
           <Route

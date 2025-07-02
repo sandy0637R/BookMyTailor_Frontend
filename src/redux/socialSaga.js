@@ -160,9 +160,9 @@ function* fetchFollowingListSaga(action) {
 
 
 function* fetchRatedUsersSaga(action) {
-  console.log("📥 FETCH_RATED_USERS Triggered with:", action.payload);
+  
   const tailorId = action.payload;
-  console.log("📥 FETCH_RATED_USERS Triggered with:", tailorId); // ✅ ADD THIS
+  
 
   try {
     const token = localStorage.getItem("token");
@@ -171,7 +171,7 @@ function* fetchRatedUsersSaga(action) {
       `${BASE_URL}/users/tailors/${tailorId}/rated-users`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log("✅ Rated Users API response:", data); // ✅ ADD THIS
+   
 
     yield put(setRatedUsers({ tailorId, ratedUsers: data.ratedUsers }));
   } catch (err) {
