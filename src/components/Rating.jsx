@@ -11,7 +11,8 @@ const Rating = ({
   const submittingRatingId = useSelector((state) => state.social.submittingRatingId);
   const [ratingModeId, setRatingModeId] = useState(null);
   const [selectedRating, setSelectedRating] = useState(0);
-  const alreadyRated = userRateValue !== undefined && userRateValue > 0;
+  
+  const alreadyRated = userRateValue && userRateValue > 0;
   const inRatingMode = ratingModeId === tailorId;
   const submitting = submittingRatingId === tailorId;
 
@@ -61,6 +62,8 @@ const Rating = ({
         <>
           {renderStars(Math.round(avgRating))}
           <span className="ml-2 text-lg">{avgRating.toFixed(1)}</span>
+          
+          {/* ✅ Only show if user has NOT rated and it's not their own profile */}
           {!alreadyRated && tailorId !== currentUserId && (
             <button
               className="ml-3 bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"

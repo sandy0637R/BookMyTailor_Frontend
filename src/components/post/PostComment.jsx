@@ -44,27 +44,32 @@ const PostComment = ({
       <h4 className="text-md font-bold mb-2">Comments</h4>
       <div className="space-y-2">
         {(post.comments || []).map((cmt) => (
-          <div
-            key={cmt._id}
-            onClick={() => handleCommentClick(cmt._id, cmt.userId)}
-            className={`p-2 rounded-md transition-all ${
-              cmt.userId === userId ? "hover:bg-gray-100 cursor-pointer" : ""
-            }`}
-          >
-            <span className="font-medium">{cmt.commentedBy?.name || "User"}:</span> {cmt.text}
-            {selectedCommentId === cmt._id && cmt.userId === userId && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteComment(post._id, cmt._id);
-                }}
-                className="ml-4 text-sm text-red-600 hover:underline"
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        ))}
+  <div
+    key={cmt._id}
+    onClick={() => handleCommentClick(cmt._id, cmt.userId)}
+    className={`p-2 rounded-md transition-all ${
+      cmt.userId === userId ? "hover:bg-gray-100 cursor-pointer" : ""
+    }`}
+  >
+    <span className="font-medium">
+      {cmt.userName || cmt.commentedBy?.name || "User"}:
+    </span>{" "}
+    {cmt.text || cmt.commentText || "No content"}
+
+    {selectedCommentId === cmt._id && cmt.userId === userId && (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDeleteComment(post._id, cmt._id);
+        }}
+        className="ml-4 text-sm text-red-600 hover:underline"
+      >
+        Delete
+      </button>
+    )}
+  </div>
+))}
+
       </div>
 
       <div className="flex items-center mt-4 space-x-2">

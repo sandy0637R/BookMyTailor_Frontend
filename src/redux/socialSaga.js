@@ -8,8 +8,9 @@ import {
   updateFollowers,
   setLoadingFollowId,
   setSubmittingRatingId,
-  setFollowingList,     // ✅ added
-  setRatedUsers,        // ✅ added
+  setFollowingList,
+  setRatedUsers,
+  updateTailor, // ✅ correct name
 } from "./socialSlice";
 
 const BASE_URL = "http://localhost:5000";
@@ -20,20 +21,30 @@ function* fetchTailorsSaga() {
     const { data } = yield call(axios.get, `${BASE_URL}/tailors/alltailors`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    yield put(setTailors(data.tailors));
+
+    const tailors = data.tailors || data;
+    yield put(setTailors(tailors));
+
     const ratings = {};
     const userRatings = {};
-    for (const tailor of data.tailors) {
-      const ratingResponse = yield call(axios.get, `${BASE_URL}/tailors/ratings/${tailor._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (ratingResponse.data.averageRating !== undefined) {
-        ratings[tailor._id] = ratingResponse.data.averageRating;
-      }
-      if (ratingResponse.data.userRating !== undefined) {
-        userRatings[tailor._id] = ratingResponse.data.userRating;
+    for (const tailor of tailors) {
+      try {
+        const ratingResponse = yield call(
+          axios.get,
+          `${BASE_URL}/tailors/ratings/${tailor._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (ratingResponse.data.averageRating !== undefined) {
+          ratings[tailor._id] = ratingResponse.data.averageRating;
+        }
+        if (ratingResponse.data.userRating !== undefined) {
+          userRatings[tailor._id] = ratingResponse.data.userRating;
+        }
+      } catch (err) {
+        console.error(`Failed to fetch ratings for tailor ${tailor._id}:`, err);
       }
     }
+
     yield put(setRatings(ratings));
     yield put(setUserRating(userRatings));
   } catch (err) {
@@ -41,28 +52,65 @@ function* fetchTailorsSaga() {
   }
 }
 
+function* fetchTailorSaga(action) {
+  const { tailorId } = action.payload;
+
+  try {
+    const token = localStorage.getItem("token");
+
+    // ✅ Fetch tailor details
+    const { data } = yield call(
+      axios.get,
+      `${BASE_URL}/tailors/${tailorId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const tailor = data.tailor || data;
+    yield put(updateTailor(tailor));
+
+    // ✅ Fetch fresh averageRating and userRating from backend
+    const ratingResponse = yield call(
+      axios.get,
+      `${BASE_URL}/tailors/ratings/${tailorId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (ratingResponse.data?.averageRating !== undefined) {
+      yield put(setRatings({ [tailorId]: ratingResponse.data.averageRating }));
+    }
+
+    if (ratingResponse.data?.userRating !== undefined) {
+      yield put(setUserRating({ [tailorId]: ratingResponse.data.userRating }));
+    }
+
+  } catch (err) {
+    console.error("Fetch Tailor Failed:", err);
+  }
+}
+
+
+
 function* submitRatingSaga(action) {
   const { tailorId, rating } = action.payload;
   try {
     const token = localStorage.getItem("token");
     yield put(setSubmittingRatingId(tailorId));
-    const { data } = yield call(axios.post, `${BASE_URL}/tailors/rate`, { tailorId, rating }, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const { data } = yield call(
+      axios.post,
+      `${BASE_URL}/tailors/rate`,
+      { tailorId, rating },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
     yield put(setRatings({ [tailorId]: data.averageRating }));
     yield put(setUserRating({ [tailorId]: rating }));
-
-    // ✅ Refetch rated users immediately to update UI
     yield put({ type: "FETCH_RATED_USERS", payload: tailorId });
-
   } catch (err) {
     console.error("Rating Failed:", err);
   } finally {
     yield put(setSubmittingRatingId(null));
   }
 }
-
 
 function* toggleFollowSaga(action) {
   const { tailorId, isFollowing, currentUserId } = action.payload;
@@ -111,16 +159,15 @@ function* toggleFollowSaga(action) {
   }
 }
 
-
-
-
 function* fetchFollowersSaga(action) {
   const tailorId = action.payload;
   try {
     const token = localStorage.getItem("token");
-    const { data } = yield call(axios.get, `${BASE_URL}/tailors/followers/${tailorId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const { data } = yield call(
+      axios.get,
+      `${BASE_URL}/tailors/followers/${tailorId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     yield put(setFollowerList({ tailorId, followers: data.followers }));
   } catch (err) {
     console.error("Fetch Followers Failed:", err);
@@ -128,7 +175,6 @@ function* fetchFollowersSaga(action) {
 }
 
 function* fetchFollowingListSaga(action) {
-  
   const userId = action.payload;
 
   try {
@@ -149,20 +195,14 @@ function* fetchFollowingListSaga(action) {
       }
     }
 
-   
-
     yield put(setFollowingList({ userId, following: uniqueFollowing }));
   } catch (err) {
     console.error("❌ Fetch Following List Failed:", err);
   }
 }
 
-
-
 function* fetchRatedUsersSaga(action) {
-  
   const tailorId = action.payload;
-  
 
   try {
     const token = localStorage.getItem("token");
@@ -171,7 +211,6 @@ function* fetchRatedUsersSaga(action) {
       `${BASE_URL}/users/tailors/${tailorId}/rated-users`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-   
 
     yield put(setRatedUsers({ tailorId, ratedUsers: data.ratedUsers }));
   } catch (err) {
@@ -182,6 +221,7 @@ function* fetchRatedUsersSaga(action) {
 export function* watchSocial() {
   yield all([
     takeLatest("FETCH_TAILORS", fetchTailorsSaga),
+    takeLatest("FETCH_TAILOR", fetchTailorSaga),
     takeLatest("SUBMIT_RATING", submitRatingSaga),
     takeLatest("TOGGLE_FOLLOW", toggleFollowSaga),
     takeLatest("FETCH_FOLLOWERS", fetchFollowersSaga),

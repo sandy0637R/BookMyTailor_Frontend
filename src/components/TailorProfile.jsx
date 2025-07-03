@@ -1,83 +1,134 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import PostCard from "./post/PostCard";
+import { useParams, useNavigate } from "react-router-dom";
+import AllPost from "./post/AllPost";
+import FollowerButton from "./FollowerButton";
+import Rating from "./Rating";
 import FollowersList from "./FollowersList";
 import FollowingList from "./FollowingList";
 import RatingList from "./RatingList";
 
 const TailorProfile = () => {
+  const { id: tailorId } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const profile = useSelector((state) => state.auth.profile);
-  const posts = useSelector((state) => state.post.posts);
-  const userId = useSelector((state) => state.post.userId);
-  const ratings = useSelector((state) => state.social.ratings);
-  const userRating = useSelector((state) => state.social.userRating);
-  const followerList = useSelector((state) => state.social.followerList);
-  const followingList = useSelector((state) => state.social.followingList);
 
   useEffect(() => {
-    dispatch({ type: "FETCH_POSTS" });
     dispatch({ type: "SET_USER_FROM_TOKEN" });
-    if (profile?._id) {
-      dispatch({ type: "FETCH_FOLLOWERS", payload: profile._id });
-      dispatch({ type: "FETCH_RATED_USERS", payload: profile._id });
-      dispatch({ type: "FETCH_FOLLOWING_LIST", payload: profile._id });
+  }, [dispatch]);
+
+  const posts = useSelector((state) => state.post.posts);
+  useEffect(() => {
+    if (tailorId) {
+      dispatch({ type: "FETCH_TAILOR", payload: { tailorId } });
     }
-  }, [dispatch, profile?._id]);
+  }, [tailorId, dispatch,posts]);
 
-  if (!profile) return <p className="text-center py-10">Loading profile...</p>;
+  
 
-  const userRate = userRating[profile._id] || "Not rated";
-  const avgRate = ratings[profile._id]?.toFixed(1) || "No rating";
-  const followers = followerList[profile._id] || [];
-  const following = followingList[profile._id] || [];
+  const currentUserId = useSelector((state) => state.auth.profile?._id);
+  const followerName = useSelector((state) => state.auth.profile?.name);
+  const allTailors = useSelector((state) => state.social.tailors);
+  const tailor = allTailors.find((t) => String(t._id) === String(tailorId));
+  const avgRating = useSelector((state) => state.social.ratings[tailorId] || 0);
 
-  const userPosts = posts.filter(
-    (p) => p.postedBy?._id === profile._id
-  );
+  // ✅ Fixed: removed fallback `|| 0` here
+  const userRateValue = useSelector((state) => {
+  const userId = state.auth.profile?._id;
+  const ratingMap = state.social.userRating;
+  return ratingMap && tailorId in ratingMap ? ratingMap[tailorId] : undefined;
+});
+
+
+  const [showFollowersId, setShowFollowersId] = useState(null);
+  const [showFollowingId, setShowFollowingId] = useState(null);
+  const [showRatingId, setShowRatingId] = useState(null);
+
+  const handleRefresh = () => {
+    dispatch({ type: "FETCH_TAILOR", payload: { tailorId } });
+     dispatch({ type: "FETCH_TAILORS" });
+  };
+
+  if (!tailor) {
+    return <div className="text-center py-10 text-lg text-gray-600">Loading tailor profile...</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 space-y-10">
-      {/* 1. Profile Info */}
-      <div className="text-center space-y-2">
-        <img
-          src={profile.profileImage}
-          alt="Profile"
-          className="w-28 h-28 rounded-full mx-auto border"
-        />
-        <h2 className="text-2xl font-bold">{profile.name}</h2>
-        <p className="text-gray-600">{profile.email}</p>
-        <p className="text-sm text-gray-500">Role: {profile.roles.join(", ")}</p>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <button onClick={() => navigate(-1)} className="mb-6 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+        ← Back to Tailors
+      </button>
 
-      {/* 2. Followers & Following */}
-      <div className="flex flex-col md:flex-row justify-around items-start gap-6">
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg mb-2">Followers ({followers.length})</h3>
-          <FollowersList tailorId={profile._id} />
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="md:flex p-6">
+          <div className="md:w-1/4 flex flex-col items-center">
+            <img
+              src={tailor.profileImage ? `http://localhost:5000/${tailor.profileImage}` : "/default-profile.png"}
+              alt={tailor.name}
+              className="w-48 h-48 rounded-full object-cover border-4 border-white shadow-lg"
+            />
+            <div className="mt-4 space-y-4">
+              <FollowerButton
+                tailorId={tailor._id}
+                followers={tailor.tailorDetails?.followers || []}
+                currentUserId={currentUserId}
+                followerName={followerName}
+              />
+              <Rating
+                tailorId={tailor._id}
+                currentUserId={currentUserId}
+                avgRating={avgRating}
+                userRateValue={userRateValue}
+              />
+            </div>
+          </div>
+
+          <div className="md:w-3/4 md:pl-8 mt-6 md:mt-0">
+            <h1 className="text-3xl font-bold text-gray-800">{tailor.name}</h1>
+            <p className="text-gray-600 mt-2">{tailor.email}</p>
+
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><h3 className="font-semibold">Experience</h3><p>{tailor.tailorDetails?.experience || 0} years</p></div>
+              <div><h3 className="font-semibold">Specialization</h3><p>{tailor.tailorDetails?.specialization?.join(", ") || "Not specified"}</p></div>
+              <div><h3 className="font-semibold">Service Fees</h3><p>₹{tailor.tailorDetails?.fees || "Not specified"}</p></div>
+              <div><h3 className="font-semibold">Address</h3><p>{tailor.address || "Not specified"}</p></div>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="font-semibold">About</h3>
+              <p className="text-gray-700 mt-2">{tailor.tailorDetails?.description || "No description provided."}</p>
+            </div>
+
+            <div className="mt-6 flex space-x-6">
+              <FollowersList
+                tailorId={tailor._id}
+                showFollowersId={showFollowersId}
+                setShowFollowersId={setShowFollowersId}
+                defaultFollowers={tailor.tailorDetails?.followers || []}
+              />
+              <FollowingList
+                userId={tailor._id}
+                showFollowingId={showFollowingId}
+                setShowFollowingId={setShowFollowingId}
+                defaultFollowing={tailor.tailorDetails?.following || []}
+              />
+              <RatingList
+                tailorId={tailor._id}
+                showRatingId={showRatingId}
+                setShowRatingId={setShowRatingId}
+              />
+            </div>
+          </div>
         </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg mb-2">Following ({following.length})</h3>
-          <FollowingList userId={profile._id} />
+
+        <div className="px-6 py-4 border-t border-gray-200">
+          <h2 className="text-xl font-bold mb-4">Posts</h2>
+          {tailor.tailorDetails?.posts?.length > 0 ? (
+            <AllPost posts={tailor.tailorDetails.posts} onRefresh={handleRefresh} />
+          ) : (
+            <p className="text-gray-500">No posts yet.</p>
+          )}
         </div>
-      </div>
-
-      {/* 3. Rating */}
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Rating</h3>
-        <p className="mb-1">Average Rating: ⭐ {avgRate}</p>
-        <p>Your Rating: {userRate === "Not rated" ? userRate : `⭐ ${userRate}`}</p>
-        <RatingList tailorId={profile._id} />
-      </div>
-
-      {/* 4. Posts */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Your Posts ({userPosts.length})</h3>
-        {userPosts.length > 0 ? (
-          userPosts.map((post) => <PostCard key={post._id} post={post} />)
-        ) : (
-          <p className="text-gray-500">No posts available.</p>
-        )}
       </div>
     </div>
   );

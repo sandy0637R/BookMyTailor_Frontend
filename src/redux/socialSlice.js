@@ -60,6 +60,18 @@ setRatedUsers: (state, action) => {
     setSubmittingRatingId: (state, action) => {
       state.submittingRatingId = action.payload;
     },
+
+    // In socialSlice.js, add this reducer:
+updateTailor: (state, action) => {
+  const updatedTailor = action.payload;
+  const existingIndex = state.tailors.findIndex(t => t._id === updatedTailor._id);
+  
+  if (existingIndex >= 0) {
+    state.tailors[existingIndex] = updatedTailor;
+  } else {
+    state.tailors.push(updatedTailor);
+  }
+},
   },
 });
 
@@ -73,6 +85,7 @@ export const {
   setSubmittingRatingId,
    setFollowingList,      // ✅
   setRatedUsers,
+  updateTailor,
 } = socialSlice.actions;
 
 export default socialSlice.reducer;
