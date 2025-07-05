@@ -6,10 +6,11 @@ const initialState = {
   ratings: {},
   userRating: {},
   followerList: {},
-  followingList: {},      // ✅ added
+  followingList: {},
   ratedUsersList: {},
   loadingFollowId: null,
   submittingRatingId: null,
+  selectedUser: null, // ✅ NEW
 };
 
 const socialSlice = createSlice({
@@ -25,21 +26,18 @@ const socialSlice = createSlice({
     setUserRating: (state, action) => {
       state.userRating = { ...state.userRating, ...action.payload };
     },
-   setFollowerList: (state, action) => {
-  const { tailorId, followers } = action.payload;
-  state.followerList[tailorId] = followers;
-},
-setFollowingList: (state, action) => {
-  const { userId, following } = action.payload;
-  state.followingList[userId] = following;
-},
-
-setRatedUsers: (state, action) => {
-  const { tailorId, ratedUsers } = action.payload;
-  state.ratedUsersList[tailorId] = ratedUsers;
-},
-
-
+    setFollowerList: (state, action) => {
+      const { tailorId, followers } = action.payload;
+      state.followerList[tailorId] = followers;
+    },
+    setFollowingList: (state, action) => {
+      const { userId, following } = action.payload;
+      state.followingList[userId] = following;
+    },
+    setRatedUsers: (state, action) => {
+      const { tailorId, ratedUsers } = action.payload;
+      state.ratedUsersList[tailorId] = ratedUsers;
+    },
     updateFollowers: (state, action) => {
       const { tailorId, followers } = action.payload;
       state.tailors = state.tailors.map((tailor) =>
@@ -60,18 +58,27 @@ setRatedUsers: (state, action) => {
     setSubmittingRatingId: (state, action) => {
       state.submittingRatingId = action.payload;
     },
+    updateTailor: (state, action) => {
+      const updatedTailor = action.payload;
+      const existingIndex = state.tailors.findIndex(
+        (t) => t._id === updatedTailor._id
+      );
+      if (existingIndex >= 0) {
+        state.tailors[existingIndex] = updatedTailor;
+      } else {
+        state.tailors.push(updatedTailor);
+      }
+    },
 
-    // In socialSlice.js, add this reducer:
-updateTailor: (state, action) => {
-  const updatedTailor = action.payload;
-  const existingIndex = state.tailors.findIndex(t => t._id === updatedTailor._id);
-  
-  if (existingIndex >= 0) {
-    state.tailors[existingIndex] = updatedTailor;
-  } else {
-    state.tailors.push(updatedTailor);
-  }
-},
+    // ✅ NEW reducer to store single user
+    setSelectedUser: (state, action) => {
+      state.selectedUser = action.payload;
+    },
+
+    // ✅ NEW reducer to clear selected user
+    clearSelectedUser: (state) => {
+      state.selectedUser = null;
+    },
   },
 });
 
@@ -83,9 +90,11 @@ export const {
   updateFollowers,
   setLoadingFollowId,
   setSubmittingRatingId,
-   setFollowingList,      // ✅
+  setFollowingList,
   setRatedUsers,
   updateTailor,
+  setSelectedUser,      // ✅ exported
+  clearSelectedUser,    // ✅ exported
 } = socialSlice.actions;
 
 export default socialSlice.reducer;

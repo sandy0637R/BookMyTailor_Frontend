@@ -1,22 +1,28 @@
 import React, { useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import ViewProfileButton from "./ViewProfileButton";
+import { setSelectedUser } from "../redux/socialSlice"; // ✅ import
 
 const RatingList = ({ tailorId, showRatingId, setShowRatingId, defaultRatings = [] }) => {
   const dispatch = useDispatch();
   const ratingList = useSelector((state) => state.social.ratedUsersList);
 
-  // ✅ Automatically fetch rated users on mount or refresh
+  // ✅ Fetch rated users if not already available
   useEffect(() => {
     if (!ratingList[tailorId]) {
       dispatch({ type: "FETCH_RATED_USERS", payload: tailorId });
     }
   }, [dispatch, ratingList, tailorId]);
 
-  // ✅ Memoized ratings list
   const ratings = useMemo(() => ratingList?.[tailorId] || defaultRatings, [ratingList, tailorId, defaultRatings]);
 
   const handleViewRatings = () => {
     setShowRatingId(tailorId);
+  };
+
+  const handleClose = () => {
+    setShowRatingId(null);
+    dispatch(setSelectedUser(null)); // ✅ clear stale user
   };
 
   return (
@@ -29,13 +35,16 @@ const RatingList = ({ tailorId, showRatingId, setShowRatingId, defaultRatings = 
         <div className="bg-yellow-50 p-3 mt-2 rounded">
           <h4 className="font-bold mb-2">Rated By Users:</h4>
           {ratings.map((user, i) => (
-            <p key={`${user._id}-${i}`}>
-              {user.name} - ⭐ {user.rating}
-            </p>
+            <div key={`${user._id}-${i}`} className="flex items-center justify-between mb-1">
+              <p>
+                {user.name} - ⭐ {user.rating}
+              </p>
+              <ViewProfileButton userId={user._id} />
+            </div>
           ))}
           <button
             className="mt-2 text-sm text-red-600"
-            onClick={() => setShowRatingId(null)}
+            onClick={handleClose}
           >
             Close
           </button>

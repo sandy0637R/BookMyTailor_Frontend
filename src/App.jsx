@@ -17,6 +17,7 @@ import Cart from "./pages/Cart";
 import Customize from "./pages/Customize";
 import CustomOrder from "./pages/CustomOrder";
 import TailorProfile from "./components/TailorProfile";
+import CustomerProfile from "./pages/CustomerProfile";
 const App = () => {
   return (
     <div className="relative min-h-screen">
@@ -39,6 +40,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/tailors" element={<TailorPost />} />
           <Route path="/tailorprofile/:id" element={<TailorProfile />} />
+          <Route path="/customerprofile/:id" element={<CustomerProfile />} />
 
 
           {/* Private Route */}

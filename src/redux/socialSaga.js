@@ -1,3 +1,4 @@
+// socialSaga.js
 import { takeLatest, call, put, all } from "redux-saga/effects";
 import axios from "axios";
 import {
@@ -10,7 +11,8 @@ import {
   setSubmittingRatingId,
   setFollowingList,
   setRatedUsers,
-  updateTailor, // ✅ correct name
+  updateTailor,
+  setSelectedUser, // ✅ NEW
 } from "./socialSlice";
 
 const BASE_URL = "http://localhost:5000";
@@ -57,8 +59,6 @@ function* fetchTailorSaga(action) {
 
   try {
     const token = localStorage.getItem("token");
-
-    // ✅ Fetch tailor details
     const { data } = yield call(
       axios.get,
       `${BASE_URL}/tailors/${tailorId}`,
@@ -68,7 +68,6 @@ function* fetchTailorSaga(action) {
     const tailor = data.tailor || data;
     yield put(updateTailor(tailor));
 
-    // ✅ Fetch fresh averageRating and userRating from backend
     const ratingResponse = yield call(
       axios.get,
       `${BASE_URL}/tailors/ratings/${tailorId}`,
@@ -88,7 +87,23 @@ function* fetchTailorSaga(action) {
   }
 }
 
+function* fetchUserByIdSaga(action) {
+  const { userId, callback } = action.payload;
+  try {
+    const token = localStorage.getItem("token");
+    const { data } = yield call(
+      axios.get,
+      `${BASE_URL}/users/${userId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
+    yield put({ type: "social/setSelectedUser", payload: data }); // ✅ Save to store
+
+    if (callback) callback(data);
+  } catch (err) {
+    console.error("Fetch user by ID failed:", err);
+  }
+}
 
 function* submitRatingSaga(action) {
   const { tailorId, rating } = action.payload;
@@ -227,5 +242,6 @@ export function* watchSocial() {
     takeLatest("FETCH_FOLLOWERS", fetchFollowersSaga),
     takeLatest("FETCH_FOLLOWING_LIST", fetchFollowingListSaga),
     takeLatest("FETCH_RATED_USERS", fetchRatedUsersSaga),
+    takeLatest("FETCH_USER_BY_ID", fetchUserByIdSaga),
   ]);
 }

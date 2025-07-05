@@ -7,6 +7,7 @@ import Rating from "./Rating";
 import FollowersList from "./FollowersList";
 import FollowingList from "./FollowingList";
 import RatingList from "./RatingList";
+import { setSelectedUser } from "../redux/socialSlice"; // ✅ import
 
 const TailorProfile = () => {
   const { id: tailorId } = useParams();
@@ -18,13 +19,13 @@ const TailorProfile = () => {
   }, [dispatch]);
 
   const posts = useSelector((state) => state.post.posts);
+
   useEffect(() => {
+    dispatch(setSelectedUser(null)); // ✅ clear selected user
     if (tailorId) {
       dispatch({ type: "FETCH_TAILOR", payload: { tailorId } });
     }
-  }, [tailorId, dispatch,posts]);
-
-  
+  }, [tailorId, dispatch, posts]);
 
   const currentUserId = useSelector((state) => state.auth.profile?._id);
   const followerName = useSelector((state) => state.auth.profile?.name);
@@ -32,13 +33,11 @@ const TailorProfile = () => {
   const tailor = allTailors.find((t) => String(t._id) === String(tailorId));
   const avgRating = useSelector((state) => state.social.ratings[tailorId] || 0);
 
-  // ✅ Fixed: removed fallback `|| 0` here
   const userRateValue = useSelector((state) => {
-  const userId = state.auth.profile?._id;
-  const ratingMap = state.social.userRating;
-  return ratingMap && tailorId in ratingMap ? ratingMap[tailorId] : undefined;
-});
-
+    const userId = state.auth.profile?._id;
+    const ratingMap = state.social.userRating;
+    return ratingMap && tailorId in ratingMap ? ratingMap[tailorId] : undefined;
+  });
 
   const [showFollowersId, setShowFollowersId] = useState(null);
   const [showFollowingId, setShowFollowingId] = useState(null);
@@ -46,7 +45,7 @@ const TailorProfile = () => {
 
   const handleRefresh = () => {
     dispatch({ type: "FETCH_TAILOR", payload: { tailorId } });
-     dispatch({ type: "FETCH_TAILORS" });
+    dispatch({ type: "FETCH_TAILORS" });
   };
 
   if (!tailor) {
