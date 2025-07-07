@@ -14,7 +14,7 @@ const Navbar = () => {
       : "nav-btn";
 
   return (
-    <div className="bg-[var(--primary)] h-13 fixed w-screen top-0 p-2 flex text-[var(--content-color)] justify-between items-center ">
+    <div className="bg-[var(--primary)] h-13 fixed w-screen top-0 p-2 flex text-[var(--content-color)] justify-between items-center z-30 ">
       <div className="ml-13 font-bold">
         <span className="text-[var(--highlight-color)]">Book</span>MyTailor
       </div>

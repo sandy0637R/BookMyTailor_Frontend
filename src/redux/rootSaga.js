@@ -8,6 +8,7 @@ import {
   watchRemoveFromWishlist,
   watchAddToCart,
   watchRemoveFromCart,
+  watchGetClothById,
 } from './authSaga';
 
 import { watchSocial } from './socialSaga';
@@ -25,5 +26,6 @@ export default function* rootSaga() {
     watchRemoveFromCart(),
     watchSocial(),
     watchPost(),
+    watchGetClothById(),
   ]);
 }

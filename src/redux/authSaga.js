@@ -7,10 +7,11 @@ import {
   setRoleError,
   setLoading,
   fetchProfileRequest,
-  setRole, // ✅ added
-    setCloths,             // ✅ added
-  setClothsError 
-  
+  setRole,
+  setCloths,
+  setClothsError,
+  setSingleCloth,        // ✅ added
+  setSingleClothError    // ✅ added
 } from "./authSlice";
 
 // Utility to get token from localStorage
@@ -34,10 +35,13 @@ const updateProfileApi = (profileData) =>
   axios.put("http://localhost:5000/users/profile", profileData, {
     headers: authHeader(),
   });
-  const getClothsApi = () =>
-  axios.get("http://localhost:5000/cloths/allcloths"); // ✅ added
 
- // Wishlist and Cart API with corrected structure
+const getClothsApi = () =>
+  axios.get("http://localhost:5000/cloths/allcloths");
+
+const getClothByIdApi = (id) =>                          // ✅ added
+  axios.get(`http://localhost:5000/cloths/${id}`);       // ✅ added
+
 const addToWishlistApi = (itemId) =>
   axios.post("http://localhost:5000/users/wishlist", { itemId }, { headers: authHeader() });
 
@@ -50,17 +54,24 @@ const addToCartApi = (itemId) =>
 const removeFromCartApi = (itemId) =>
   axios.delete(`http://localhost:5000/users/cart/${itemId}`, { headers: authHeader() });
 
-
-
 // ✅ Cloths Saga
 function* getClothsSaga() {
   try {
     const response = yield call(getClothsApi);
     const cloths = response.data;
-
-    yield put(setCloths(cloths)); // ✅ save cloths to state
+    yield put(setCloths(cloths));
   } catch (error) {
-    yield put(setClothsError(error.message)); // ✅ handle error
+    yield put(setClothsError(error.message));
+  }
+}
+
+// ✅ Get Cloth by ID Saga
+function* getClothByIdSaga(action) {
+  try {
+    const response = yield call(getClothByIdApi, action.payload);
+    yield put(setSingleCloth(response.data));
+  } catch (error) {
+    yield put(setSingleClothError(error.message));
   }
 }
 
@@ -84,14 +95,13 @@ function* removeFromWishlistSaga(action) {
 
 function* addToCartSaga(action) {
   try {
-    yield call(addToCartApi, action.payload);              // ✅ Add to cart
-    yield call(removeFromWishlistApi, action.payload);     // ✅ Remove from wishlist
-    yield put(fetchProfileRequest());                      // ✅ Sync profile
+    yield call(addToCartApi, action.payload);
+    yield call(removeFromWishlistApi, action.payload);
+    yield put(fetchProfileRequest());
   } catch (err) {
     yield put(setError(err.message));
   }
 }
-
 
 function* removeFromCartSaga(action) {
   try {
@@ -102,12 +112,11 @@ function* removeFromCartSaga(action) {
   }
 }
 
-
 // Login Saga
 function* loginSaga(action) {
   try {
     const response = yield call(loginApi, action.payload);
-    const { success, token, name, email, roles, tailorDetails,profileImage, message ,} = response.data;
+    const { success, token, name, email, roles, tailorDetails, profileImage, message } = response.data;
 
     if (success) {
       if (
@@ -128,18 +137,15 @@ function* loginSaga(action) {
         return;
       }
 
-      yield put(setRole(action.payload.role)); // ✅ set selected role globally
+      yield put(setRole(action.payload.role));
       const fixedLoginImage = resolveImagePath(profileImage);
-     yield put(login({ token, name, email, roles, tailorDetails ,profileImage: fixedLoginImage }));
-
+      yield put(login({ token, name, email, roles, tailorDetails, profileImage: fixedLoginImage }));
 
       localStorage.setItem("token", token || "");
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));
       localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
-localStorage.setItem("profileImage", fixedLoginImage);
-
-
+      localStorage.setItem("profileImage", fixedLoginImage);
     } else {
       yield put(setError(message));
     }
@@ -153,11 +159,13 @@ function* fetchUserProfile() {
   try {
     yield put(setLoading(true));
     const response = yield call(fetchProfileApi);
-    const { _id,name, email, roles, tailorDetails, address, profileImage,wishlist, cart } = response.data;  // Add profileImage here
+    const { _id, name, email, roles, tailorDetails, address, profileImage, wishlist, cart } = response.data;
 
     const fixedFetchedImage = resolveImagePath(profileImage);
-    yield put(setProfile({_id, name, email, roles, tailorDetails, address, profileImage: fixedFetchedImage , wishlist, cart }));
-  // Include profileImage in state
+    yield put(setProfile({
+      _id, name, email, roles, tailorDetails, address,
+      profileImage: fixedFetchedImage, wishlist, cart
+    }));
     yield put(setRole(localStorage.getItem("role") || "customer"));
 
     localStorage.setItem("user", name || "");
@@ -166,18 +174,15 @@ function* fetchUserProfile() {
     localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
     localStorage.setItem("address", JSON.stringify(address || {}));
     localStorage.setItem("profile", JSON.stringify(response.data));
-localStorage.setItem("profileImage", fixedFetchedImage);
-localStorage.setItem("wishlist", JSON.stringify(wishlist || []));
-localStorage.setItem("cart", JSON.stringify(cart || []));
-
-  // Save profileImage locally too
+    localStorage.setItem("profileImage", fixedFetchedImage);
+    localStorage.setItem("wishlist", JSON.stringify(wishlist || []));
+    localStorage.setItem("cart", JSON.stringify(cart || []));
   } catch (err) {
     yield put(setError(err.response?.data?.message || err.message));
   } finally {
     yield put(setLoading(false));
   }
 }
-
 
 // Update Profile Saga
 function* updateProfileSaga(action) {
@@ -212,7 +217,11 @@ export function* watchUpdateProfile() {
 }
 
 export function* watchGetCloths() {
-  yield takeLatest("auth/getClothsRequest", getClothsSaga); // ✅ added
+  yield takeLatest("auth/getClothsRequest", getClothsSaga);
+}
+
+export function* watchGetClothById() {
+  yield takeLatest("auth/getClothByIdRequest", getClothByIdSaga);  // ✅ added
 }
 
 export function* watchAddToWishlist() {

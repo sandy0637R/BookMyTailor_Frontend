@@ -10,67 +10,56 @@ import toast from "react-hot-toast";
 import ImageUpload from "../components/ImageUpload";
 import TailorForm from "../components/TailorForm";
 import TailorDetails from "../components/TailorDetails";
+import FollowersList from "../components/FollowersList";
+import FollowingList from "../components/FollowingList";
+import FollowerButton from "../components/FollowerButton";
+import RatingList from "../components/RatingList";
+import Rating from "../components/Rating";
+import AddPost from "./AddPost";
+import { setSelectedUser } from "../redux/socialSlice";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile, loading } = useSelector((state) => state.auth);
+  const posts = useSelector((state) => state.post.posts);
+  const avgRating = useSelector((state) => state.social.ratings[profile?._id] || 0);
+  const userRateValue = useSelector((state) => state.social.userRating[profile?._id]);
 
- const [profileImage, setProfileImage] = useState(() => localStorage.getItem("profileImage") || "");
-
-  const [currentRole, setCurrentRole] = useState(
-    localStorage.getItem("role") || "customer"
-  );
+  const [profileImage, setProfileImage] = useState(() => localStorage.getItem("profileImage") || "");
+  const [currentRole, setCurrentRole] = useState(localStorage.getItem("role") || "customer");
   const [showTailorConfirm, setShowTailorConfirm] = useState(false);
   const [showTailorForm, setShowTailorForm] = useState(false);
-  const [tailorForm, setTailorForm] = useState({
-    experience: "",
-    specialization: "",
-    fees: "",
-    description: "",
-  });
+  const [showFollowersId, setShowFollowersId] = useState(null);
+  const [showFollowingId, setShowFollowingId] = useState(null);
+  const [showRatingId, setShowRatingId] = useState(null);
+  const [tailorForm, setTailorForm] = useState({ experience: "", specialization: "", fees: "", description: "" });
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    email: "",
-    address: "",
-    experience: "",
-    specialization: "",
-    fees: "",
-    description: "",
-  });
+  const [editForm, setEditForm] = useState({ name: "", email: "", address: "", experience: "", specialization: "", fees: "", description: "" });
 
   const isAdmin = profile?.roles?.includes("admin");
 
- 
   useEffect(() => {
     dispatch(fetchProfileRequest());
   }, [dispatch]);
-  
- useEffect(() => {
-  if (profileImage) {
-    localStorage.setItem("profileImage", profileImage);
-  }
-}, [profileImage]);
-
 
   useEffect(() => {
-    if (profile) {
-       if (!profileImage) {
-      setProfileImage(profile.profileImage || "");
-    }
+    if (profileImage) localStorage.setItem("profileImage", profileImage);
+  }, [profileImage]);
 
+  useEffect(() => {
+    dispatch(setSelectedUser(null));
+    if (profile) {
+      if (!profileImage) setProfileImage(profile.profileImage || "");
       const roles = profile.roles || [];
       const hasTailor = roles.includes("tailor");
-      
 
       setEditForm({
         name: profile?.name || "",
         email: profile?.email || "",
         address: profile?.address || "",
         experience: profile?.tailorDetails?.experience || "",
-        specialization:
-          profile?.tailorDetails?.specialization?.join(", ") || "",
+        specialization: profile?.tailorDetails?.specialization?.join(", ") || "",
         fees: profile?.tailorDetails?.fees || "",
         description: profile?.tailorDetails?.description || "",
       });
@@ -78,8 +67,7 @@ const Profile = () => {
       if (hasTailor && profile.tailorDetails) {
         setTailorForm({
           experience: profile.tailorDetails.experience || "",
-          specialization:
-            profile.tailorDetails.specialization?.join(", ") || "",
+          specialization: profile.tailorDetails.specialization?.join(", ") || "",
           fees: profile.tailorDetails.fees || "",
           description: profile.tailorDetails.description || "",
         });
@@ -88,10 +76,7 @@ const Profile = () => {
       localStorage.setItem("user", profile.name || "");
       localStorage.setItem("email", profile.email || "");
       localStorage.setItem("roles", JSON.stringify(roles));
-      localStorage.setItem(
-        "tailorDetails",
-        JSON.stringify(profile.tailorDetails || null)
-      );
+      localStorage.setItem("tailorDetails", JSON.stringify(profile.tailorDetails || null));
       localStorage.setItem("profile", JSON.stringify(profile));
     }
   }, [profile]);
@@ -130,21 +115,15 @@ const Profile = () => {
 
   const handleTailorFormSubmit = (e) => {
     e.preventDefault();
-
     const tailorDetails = {
       experience: Number(tailorForm.experience),
       specialization: tailorForm.specialization.split(",").map((s) => s.trim()),
       fees: Number(tailorForm.fees),
       description: tailorForm.description,
     };
-
-    const roles = profile?.roles?.includes("customer")
-      ? ["customer", "tailor"]
-      : ["tailor"];
-
+    const roles = profile?.roles?.includes("customer") ? ["customer", "tailor"] : ["tailor"];
     dispatch(updateProfileRequest({ roles, tailorDetails }));
     dispatch(fetchProfileRequest());
-
     toast.success("Tailor profile submitted!");
     setShowTailorForm(false);
     setCurrentRole("tailor");
@@ -156,7 +135,7 @@ const Profile = () => {
       name: editForm.name,
       email: editForm.email,
       address: editForm.address,
-      profileImage: profileImage,
+      profileImage,
       tailorDetails: {
         experience: Number(editForm.experience),
         specialization: editForm.specialization.split(",").map((s) => s.trim()),
@@ -164,12 +143,10 @@ const Profile = () => {
         description: editForm.description,
       },
     };
-
     dispatch(updateProfileRequest(payload));
     dispatch(fetchProfileRequest());
     toast.success("Profile updated!");
     setIsEditing(false);
-   
   };
 
   if (loading) return <div className="text-center">Loading...</div>;
@@ -178,81 +155,25 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-15">
       <h1 className="text-2xl font-semibold mb-4">Profile</h1>
 
-     <ImageUpload profileImage={profileImage} setProfileImage={setProfileImage} />
-
+      <ImageUpload profileImage={profileImage} setProfileImage={setProfileImage} />
 
       {isEditing ? (
         <>
-          <input
-            className="mb-2 border px-2 py-1 w-full rounded"
-            value={editForm.name}
-            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-          />
-          <input
-            className="mb-2 border px-2 py-1 w-full rounded"
-            value={editForm.email}
-            onChange={(e) =>
-              setEditForm({ ...editForm, email: e.target.value })
-            }
-          />
-          <input
-            className="mb-4 border px-2 py-1 w-full rounded"
-            placeholder="Address"
-            value={editForm.address}
-            onChange={(e) =>
-              setEditForm({ ...editForm, address: e.target.value })
-            }
-          />
+          <input className="mb-2 border px-2 py-1 w-full rounded" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+          <input className="mb-2 border px-2 py-1 w-full rounded" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+          <input className="mb-4 border px-2 py-1 w-full rounded" placeholder="Address" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
           {currentRole === "tailor" && (
             <>
-              <input
-                className="mb-2 border px-2 py-1 w-full rounded"
-                placeholder="Experience"
-                value={editForm.experience}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, experience: e.target.value })
-                }
-              />
-              <input
-                className="mb-2 border px-2 py-1 w-full rounded"
-                placeholder="Specialization"
-                value={editForm.specialization}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, specialization: e.target.value })
-                }
-              />
-              <input
-                className="mb-2 border px-2 py-1 w-full rounded"
-                placeholder="Fees"
-                value={editForm.fees}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, fees: e.target.value })
-                }
-              />
-              <textarea
-                className="mb-4 border px-2 py-1 w-full rounded"
-                placeholder="Description"
-                value={editForm.description}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, description: e.target.value })
-                }
-              />
+              <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Experience" value={editForm.experience} onChange={(e) => setEditForm({ ...editForm, experience: e.target.value })} />
+              <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Specialization" value={editForm.specialization} onChange={(e) => setEditForm({ ...editForm, specialization: e.target.value })} />
+              <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Fees" value={editForm.fees} onChange={(e) => setEditForm({ ...editForm, fees: e.target.value })} />
+              <textarea className="mb-4 border px-2 py-1 w-full rounded" placeholder="Description" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
             </>
           )}
 
           <div className="flex gap-2 mb-4">
-            <button
-              onClick={handleEditSubmit}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="bg-gray-400 text-white px-4 py-2 rounded"
-            >
-              Cancel
-            </button>
+            <button onClick={handleEditSubmit} className="bg-green-500 text-white px-4 py-2 rounded">Save</button>
+            <button onClick={() => setIsEditing(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
           </div>
         </>
       ) : (
@@ -260,12 +181,7 @@ const Profile = () => {
           <p className="text-lg mb-2">Name: {profile?.name}</p>
           <p className="text-lg mb-2">Email: {profile?.email}</p>
           <p className="text-lg mb-4">Address: {profile?.address || "N/A"}</p>
-          <button
-            onClick={() => setIsEditing(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-          >
-            Edit Profile
-          </button>
+          <button onClick={() => setIsEditing(true)} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">Edit Profile</button>
         </>
       )}
 
@@ -273,18 +189,8 @@ const Profile = () => {
         <p className="text-lg mb-4">Role: Admin</p>
       ) : (
         <div className="mb-4">
-          <label
-            htmlFor="role"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Switch Role
-          </label>
-          <select
-            id="role"
-            value={currentRole}
-            onChange={handleRoleChange}
-            className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
-          >
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700">Switch Role</label>
+          <select id="role" value={currentRole} onChange={handleRoleChange} className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md">
             <option value="customer">Customer</option>
             <option value="tailor">Tailor</option>
           </select>
@@ -293,46 +199,34 @@ const Profile = () => {
 
       {showTailorConfirm && (
         <div className="bg-yellow-100 p-4 mb-4 rounded-md">
-          <p className="text-gray-700">
-            Do you want to become a tailor? Please provide your details.
-          </p>
+          <p className="text-gray-700">Do you want to become a tailor? Please provide your details.</p>
           <div className="flex mt-2">
-            <button
-              onClick={() => handleTailorConfirm(true)}
-              className="bg-blue-500 text-white py-2 px-4 rounded-md mr-2"
-            >
-              Yes
-            </button>
-            <button
-              onClick={() => handleTailorConfirm(false)}
-              className="bg-red-500 text-white py-2 px-4 rounded-md"
-            >
-              No
-            </button>
+            <button onClick={() => handleTailorConfirm(true)} className="bg-blue-500 text-white py-2 px-4 rounded-md mr-2">Yes</button>
+            <button onClick={() => handleTailorConfirm(false)} className="bg-red-500 text-white py-2 px-4 rounded-md">No</button>
           </div>
         </div>
       )}
 
       {showTailorForm && (
-        <TailorForm
-          tailorForm={tailorForm}
-          setTailorForm={setTailorForm}
-          onSubmit={handleTailorFormSubmit}
-        />
+        <TailorForm tailorForm={tailorForm} setTailorForm={setTailorForm} onSubmit={handleTailorFormSubmit} />
       )}
 
-      {currentRole === "tailor" &&
-        profile?.roles?.includes("tailor") &&
-        profile.tailorDetails && (
-          <TailorDetails details={profile.tailorDetails} />
-        )}
+      {currentRole === "customer" && (
+        <FollowingList userId={profile._id} showFollowingId={showFollowingId} setShowFollowingId={setShowFollowingId} defaultFollowing={profile.following || []} />
+      )}
 
-      <button
-        onClick={handleLogout}
-        className="mt-6 w-full bg-red-500 text-white py-2 px-4 rounded-md"
-      >
-        Logout
-      </button>
+      {currentRole === "tailor" && profile?.roles?.includes("tailor") && profile.tailorDetails && (
+        <>
+          <FollowerButton tailorId={profile._id} followers={profile.tailorDetails.followers || []} currentUserId={profile._id} followerName={profile.name} />
+          <FollowersList tailorId={profile._id} showFollowersId={showFollowersId} setShowFollowersId={setShowFollowersId} defaultFollowers={profile.tailorDetails.followers || []} />
+          <RatingList tailorId={profile._id} showRatingId={showRatingId} setShowRatingId={setShowRatingId} />
+          <Rating tailorId={profile._id} currentUserId={profile._id} avgRating={avgRating} userRateValue={userRateValue} />
+          <AddPost />
+          <TailorDetails details={profile.tailorDetails} />
+        </>
+      )}
+
+      <button onClick={handleLogout} className="mt-6 w-full bg-red-500 text-white py-2 px-4 rounded-md">Logout</button>
     </div>
   );
 };

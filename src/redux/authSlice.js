@@ -18,6 +18,7 @@ const initialState = {
   loading: false,
   error: null,
   cloths: [],
+  singleCloth: null, // ✅ added
 };
 
 const saveToLocalStorage = (state) => {
@@ -30,8 +31,8 @@ const saveToLocalStorage = (state) => {
   localStorage.setItem("token", state.token || "");
   localStorage.setItem("role", state.role || "customer");
   localStorage.setItem("profileImage", state.profileImage || "");
-  localStorage.setItem("wishlist", JSON.stringify(state.wishlist || [])); // ✅ added
-  localStorage.setItem("cart", JSON.stringify(state.cart || [])); 
+  localStorage.setItem("wishlist", JSON.stringify(state.wishlist || []));
+  localStorage.setItem("cart", JSON.stringify(state.cart || []));
 };
 
 const authSlice = createSlice({
@@ -64,12 +65,12 @@ const authSlice = createSlice({
       state.token = token;
       state.profileImage = profileImage;
       state.wishlist = wishlist;
-     state.cart = cart.map((entry) => ({
-  item: entry.item,
-  quantity: entry.quantity,
-}));
+      state.cart = cart.map((entry) => ({
+        item: entry.item,
+        quantity: entry.quantity,
+      }));
 
-      state.profile = { _id,name, email, roles, tailorDetails, profileImage };
+      state.profile = { _id, name, email, roles, tailorDetails, profileImage };
       state.loading = false;
       state.roleError = null;
       state.error = null;
@@ -113,9 +114,9 @@ const authSlice = createSlice({
       state.profileImage = profileImage;
       state.wishlist = wishlist;
       state.cart = cart.map((entry) => ({
-  item: entry.item,
-  quantity: entry.quantity,
-}));
+        item: entry.item,
+        quantity: entry.quantity,
+      }));
 
       state.loading = false;
       state.role = localStorage.getItem("role") || "customer";
@@ -146,6 +147,22 @@ const authSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
+
+    // ✅ Cloth by ID actions
+    getClothByIdRequest: (state) => {
+      state.loading = true;
+      state.error = null;
+      state.singleCloth = null;
+    },
+    setSingleCloth: (state, action) => {
+      state.singleCloth = action.payload;
+      state.loading = false;
+    },
+    setSingleClothError: (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+    },
+
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
@@ -164,7 +181,7 @@ const authSlice = createSlice({
       localStorage.setItem("role", action.payload);
     },
 
-    // ✅ NEW: Wishlist + Cart trigger actions
+    // ✅ Wishlist + Cart actions
     addToWishlist: (state, action) => {},
     removeFromWishlist: (state, action) => {},
     addToCart: (state, action) => {},
@@ -188,6 +205,9 @@ export const {
   getClothsRequest,
   setCloths,
   setClothsError,
+  getClothByIdRequest,   // ✅ added
+  setSingleCloth,        // ✅ added
+  setSingleClothError,   // ✅ added
   addToWishlist,
   removeFromWishlist,
   addToCart,
