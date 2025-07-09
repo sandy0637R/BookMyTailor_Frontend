@@ -87,7 +87,7 @@ const TailorProfile = () => {
             <p className="text-gray-600 mt-2">{tailor.email}</p>
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><h3 className="font-semibold">Experience</h3><p>{tailor.tailorDetails?.experience || 0} years</p></div>
+              <div><h3 className="font-semibold">Experience</h3><p>{tailor.tailorDetails?.experience || 0}</p></div>
               <div><h3 className="font-semibold">Specialization</h3><p>{tailor.tailorDetails?.specialization?.join(", ") || "Not specified"}</p></div>
               <div><h3 className="font-semibold">Service Fees</h3><p>₹{tailor.tailorDetails?.fees || "Not specified"}</p></div>
               <div><h3 className="font-semibold">Address</h3><p>{tailor.address || "Not specified"}</p></div>

@@ -114,21 +114,36 @@ const Profile = () => {
   };
 
   const handleTailorFormSubmit = (e) => {
-    e.preventDefault();
-    const tailorDetails = {
-      experience: Number(tailorForm.experience),
-      specialization: tailorForm.specialization.split(",").map((s) => s.trim()),
-      fees: Number(tailorForm.fees),
-      description: tailorForm.description,
-    };
-    const roles = profile?.roles?.includes("customer") ? ["customer", "tailor"] : ["tailor"];
-    dispatch(updateProfileRequest({ roles, tailorDetails }));
-    dispatch(fetchProfileRequest());
-    toast.success("Tailor profile submitted!");
-    setShowTailorForm(false);
-    setCurrentRole("tailor");
-    localStorage.setItem("role", "tailor");
+  e.preventDefault();
+  const { experience, specialization, fees, description } = tailorForm;
+
+  // ✅ Allow empty description, but validate others
+  if (
+    experience === "" ||
+    !specialization?.trim() ||
+    fees === ""
+  ) {
+    toast.error("Experience, Specialization and Fees are required");
+    return;
+  }
+
+  const tailorDetails = {
+    experience: Number(experience),
+    specialization: specialization.split(",").map((s) => s.trim()),
+    fees: Number(fees),
+    description: description?.trim() || "",
   };
+  const roles = profile?.roles?.includes("customer")
+    ? ["customer", "tailor"]
+    : ["tailor"];
+
+  dispatch(updateProfileRequest({ roles, tailorDetails }));
+  dispatch(fetchProfileRequest());
+  toast.success("Tailor profile submitted!");
+  setShowTailorForm(false);
+  setCurrentRole("tailor");
+  localStorage.setItem("role", "tailor");
+};
 
   const handleEditSubmit = () => {
     const payload = {
@@ -164,7 +179,7 @@ const Profile = () => {
           <input className="mb-4 border px-2 py-1 w-full rounded" placeholder="Address" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
           {currentRole === "tailor" && (
             <>
-              <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Experience" value={editForm.experience} onChange={(e) => setEditForm({ ...editForm, experience: e.target.value })} />
+              
               <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Specialization" value={editForm.specialization} onChange={(e) => setEditForm({ ...editForm, specialization: e.target.value })} />
               <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Fees" value={editForm.fees} onChange={(e) => setEditForm({ ...editForm, fees: e.target.value })} />
               <textarea className="mb-4 border px-2 py-1 w-full rounded" placeholder="Description" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
