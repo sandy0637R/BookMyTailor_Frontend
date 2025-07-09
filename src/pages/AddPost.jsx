@@ -6,7 +6,11 @@ const AddPost = () => {
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [images, setImages] = useState([]);
+
   const [editingPostId, setEditingPostId] = useState(null);
+  const [editCaption, setEditCaption] = useState("");
+  const [editHashtags, setEditHashtags] = useState("");
+  const [editImages, setEditImages] = useState([]);
 
   const token = localStorage.getItem("token");
 
@@ -56,33 +60,16 @@ const AddPost = () => {
 
   const startEdit = (post) => {
     setEditingPostId(post._id);
-    setCaption(post.caption);
-    setHashtags(post.hashtags.join(", "));
+    setEditCaption(post.caption);
+    setEditHashtags(post.hashtags.join(", "));
+    setEditImages([]);
   };
 
   const cancelEdit = () => {
     setEditingPostId(null);
-    setCaption("");
-    setHashtags("");
-    setImages([]);
-  };
-
-  const saveEdit = async () => {
-    try {
-      await axios.put(
-        `http://localhost:5000/users/post/${editingPostId}`,
-        {
-          caption,
-          hashtags: hashtags.split(",").map((tag) => tag.trim()),
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert("Post updated");
-      cancelEdit();
-      fetchPosts();
-    } catch {
-      alert("Update failed");
-    }
+    setEditCaption("");
+    setEditHashtags("");
+    setEditImages([]);
   };
 
   const deletePost = async (postId) => {
@@ -100,91 +87,158 @@ const AddPost = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 mt-15">
-      <h2 className="text-3xl font-bold text-center mb-6">{editingPostId ? "Edit Post" : "Add Post"}</h2>
-      <form
-        onSubmit={editingPostId ? (e) => { e.preventDefault(); saveEdit(); } : handleAddPost}
-        className="mb-10"
-      >
+      <h2 className="text-3xl font-bold text-center mb-6">Add Post</h2>
+      <form onSubmit={handleAddPost} className="mb-10">
         <input
           type="text"
           placeholder="Caption"
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
           required
-          className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md"
         />
         <input
           type="text"
           placeholder="Hashtags (comma separated)"
           value={hashtags}
           onChange={(e) => setHashtags(e.target.value)}
-          className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md"
         />
-        {!editingPostId && (
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleImageChange}
-            className="mb-4"
-          />
-        )}
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleImageChange}
+          className="mb-4"
+        />
         <button
           type="submit"
-          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
         >
-          {editingPostId ? "Save Edit" : "Add Post"}
+          Add Post
         </button>
-        {editingPostId && (
-          <button
-            onClick={cancelEdit}
-            className="ml-4 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors"
-          >
-            Cancel
-          </button>
-        )}
       </form>
 
       <h2 className="text-3xl font-bold mb-6">All Posts</h2>
-      {posts.length === 0 && <p className="text-center text-gray-500">No posts yet.</p>}
+      {posts.length === 0 && (
+        <p className="text-center text-gray-500">No posts yet.</p>
+      )}
       {posts.map((post) => (
         <div
           key={post._id}
           className="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200"
         >
-          <p className="text-lg font-semibold mb-2">
-            <span className="text-gray-600">Caption:</span> {post.caption}
-          </p>
-          <p className="text-sm text-gray-600 mb-4">
-            <span className="font-medium">Hashtags:</span> {post.hashtags.join(", ")}
-          </p>
-          <p className="text-sm text-gray-500 mb-4">
-  <span className="font-medium">Posted on:</span>{" "}
-  {new Date(post.createdAt).toLocaleDateString()}{" "}
-  {new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-</p>
-          <div className="flex flex-wrap gap-4 mb-4">
-            {post.images.map((imgUrl, idx) => (
-              <img
-                key={idx}
-                src={imgUrl}
-                alt="post-img"
-                className="h-20 rounded-md object-cover"
+          {editingPostId === post._id ? (
+            <>
+              <input
+                type="text"
+                value={editCaption}
+                onChange={(e) => setEditCaption(e.target.value)}
+                className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md"
               />
-            ))}
-          </div>
-          <button
-            onClick={() => startEdit(post)}
-            className="bg-blue-100 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => deletePost(post._id)}
-            className="ml-4 px-4 py-2 rounded-md text-red-600 border border-red-600 hover:bg-red-100 transition-colors"
-          >
-            Delete
-          </button>
+              <input
+                type="text"
+                value={editHashtags}
+                onChange={(e) => setEditHashtags(e.target.value)}
+                className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md"
+              />
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => setEditImages(Array.from(e.target.files))}
+                className="mb-4"
+              />
+              <div className="flex flex-wrap gap-4 mb-4">
+                {post.images.map((imgUrl, idx) => (
+                  <img
+                    key={idx}
+                    src={imgUrl}
+                    alt="post-img"
+                    className="h-20 rounded-md object-cover"
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    const formData = new FormData();
+                    formData.append("caption", editCaption);
+                    formData.append("hashtags", editHashtags);
+                    editImages.forEach((img) =>
+                      formData.append("images", img)
+                    );
+                    try {
+                      await axios.put(
+                        `http://localhost:5000/users/post/${editingPostId}`,
+                        formData,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "multipart/form-data",
+                          },
+                        }
+                      );
+                      alert("Post updated");
+                      cancelEdit();
+                      fetchPosts();
+                    } catch {
+                      alert("Update failed");
+                    }
+                  }}
+                  className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-lg font-semibold mb-2">
+                <span className="text-gray-600">Caption:</span> {post.caption}
+              </p>
+              <p className="text-sm text-gray-600 mb-2">
+                <span className="font-medium">Hashtags:</span>{" "}
+                {post.hashtags.join(", ")}
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                <span className="font-medium">Posted on:</span>{" "}
+                {new Date(post.createdAt).toLocaleDateString()}{" "}
+                {new Date(post.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              <div className="flex flex-wrap gap-4 mb-4">
+                {post.images.map((imgUrl, idx) => (
+                  <img
+                    key={idx}
+                    src={imgUrl}
+                    alt="post-img"
+                    className="h-20 rounded-md object-cover"
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => startEdit(post)}
+                className="bg-blue-100 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-200 transition-colors"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => deletePost(post._id)}
+                className="ml-4 px-4 py-2 rounded-md text-red-600 border border-red-600 hover:bg-red-100 transition-colors"
+              >
+                Delete
+              </button>
+            </>
+          )}
         </div>
       ))}
     </div>

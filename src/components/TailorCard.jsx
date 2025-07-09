@@ -63,7 +63,6 @@ const TailorCard = ({
         Name: <span className="font-normal">{tailor.name}</span>
       </p>
       <p>Email: {tailor.email}</p>
-      <p>Experience: {tailor.tailorDetails?.experience} years</p>
 
       <div className="mt-3 space-x-2">
         <FollowerButton
