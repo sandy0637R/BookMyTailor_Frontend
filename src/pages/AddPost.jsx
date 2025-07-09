@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 const AddPost = () => {
   const [posts, setPosts] = useState([]);
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [images, setImages] = useState([]);
+  const [productLink, setProductLink] = useState("");
+const navigate = useNavigate();
 
   const [editingPostId, setEditingPostId] = useState(null);
   const [editCaption, setEditCaption] = useState("");
   const [editHashtags, setEditHashtags] = useState("");
   const [editImages, setEditImages] = useState([]);
+  const [editProductLink, setEditProductLink] = useState("");
 
   const token = localStorage.getItem("token");
 
@@ -35,10 +40,17 @@ const AddPost = () => {
 
   const handleAddPost = async (e) => {
     e.preventDefault();
+
+    if (productLink && !productLink.startsWith("http://localhost:5173/cloths/")) {
+      alert("If entered, product link must be a valid Book My Tailor link.");
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("caption", caption);
       formData.append("hashtags", hashtags);
+      formData.append("productLink", productLink);
       images.forEach((img) => formData.append("images", img));
 
       await axios.post("http://localhost:5000/users/post", formData, {
@@ -52,6 +64,7 @@ const AddPost = () => {
       setCaption("");
       setHashtags("");
       setImages([]);
+      setProductLink("");
       fetchPosts();
     } catch {
       alert("Add post failed");
@@ -63,6 +76,7 @@ const AddPost = () => {
     setEditCaption(post.caption);
     setEditHashtags(post.hashtags.join(", "));
     setEditImages([]);
+    setEditProductLink(post.productLink || "");
   };
 
   const cancelEdit = () => {
@@ -70,6 +84,7 @@ const AddPost = () => {
     setEditCaption("");
     setEditHashtags("");
     setEditImages([]);
+    setEditProductLink("");
   };
 
   const deletePost = async (postId) => {
@@ -111,6 +126,13 @@ const AddPost = () => {
           onChange={handleImageChange}
           className="mb-4"
         />
+        <input
+          type="text"
+          placeholder="Product link (optional)"
+          value={productLink}
+          onChange={(e) => setProductLink(e.target.value)}
+          className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md"
+        />
         <button
           type="submit"
           className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
@@ -147,7 +169,14 @@ const AddPost = () => {
                 multiple
                 accept="image/*"
                 onChange={(e) => setEditImages(Array.from(e.target.files))}
-                className="mb-4"
+                className="mb-2"
+              />
+              <input
+                type="text"
+                value={editProductLink}
+                onChange={(e) => setEditProductLink(e.target.value)}
+                placeholder="Product link (optional)"
+                className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md"
               />
               <div className="flex flex-wrap gap-4 mb-4">
                 {post.images.map((imgUrl, idx) => (
@@ -162,12 +191,19 @@ const AddPost = () => {
               <div className="flex gap-2">
                 <button
                   onClick={async () => {
+                    if (
+                      editProductLink &&
+                      !editProductLink.startsWith("http://localhost:5173/cloths/")
+                    ) {
+                      alert("If entered, product link must be a valid Book My Tailor link.");
+                      return;
+                    }
                     const formData = new FormData();
                     formData.append("caption", editCaption);
                     formData.append("hashtags", editHashtags);
-                    editImages.forEach((img) =>
-                      formData.append("images", img)
-                    );
+                    formData.append("productLink", editProductLink);
+                    editImages.forEach((img) => formData.append("images", img));
+
                     try {
                       await axios.put(
                         `http://localhost:5000/users/post/${editingPostId}`,
@@ -207,6 +243,83 @@ const AddPost = () => {
                 <span className="font-medium">Hashtags:</span>{" "}
                 {post.hashtags.join(", ")}
               </p>
+{post.productLink ? (
+  <button
+  onClick={() => {
+    const url = post.productLink.replace("http://localhost:5173", "");
+    navigate(url);
+  }}
+  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 mb-2"
+>
+  View Product
+</button>
+
+) : editingPostId !== post._id ? (
+  <div className="mb-2">
+    {!post.showProductLinkInput ? (
+      <button
+        onClick={() =>
+          setPosts((prev) =>
+            prev.map((p) =>
+              p._id === post._id ? { ...p, showProductLinkInput: true } : p
+            )
+          )
+        }
+        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+      >
+        Enter Product Link
+      </button>
+    ) : (
+      <div className="flex gap-2 items-center mt-2">
+        <input
+          type="text"
+          placeholder="Enter product link"
+          value={editProductLink}
+          onChange={(e) => setEditProductLink(e.target.value)}
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+        />
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          onClick={async () => {
+            if (
+              editProductLink &&
+              !editProductLink.startsWith("http://localhost:5173/cloths/")
+            ) {
+              alert("If entered, product link must be a valid Book My Tailor link.");
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append("caption", post.caption);
+            formData.append("hashtags", post.hashtags.join(", "));
+            formData.append("productLink", editProductLink);
+
+            try {
+              await axios.put(
+                `http://localhost:5000/users/post/${post._id}`,
+                formData,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                  },
+                }
+              );
+              alert("Product link added");
+              fetchPosts();
+            } catch {
+              alert("Failed to add product link");
+            }
+          }}
+        >
+          Submit
+        </button>
+      </div>
+    )}
+  </div>
+) : null}
+
+
               <p className="text-sm text-gray-500 mb-4">
                 <span className="font-medium">Posted on:</span>{" "}
                 {new Date(post.createdAt).toLocaleDateString()}{" "}
