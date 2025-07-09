@@ -20,9 +20,12 @@ const ClothDetails = ({
   onCartToggle,
 }) => {
   const dispatch = useDispatch();
-  const { singleCloth, loading, error } = useSelector((state) => state.auth);
+  const { singleCloth, loading, error, cart } = useSelector(
+    (state) => state.auth
+  );
 
   const resolvedCloth = cloth || singleCloth;
+  const id = resolvedCloth && resolvedCloth._id ? resolvedCloth._id : clothId;
 
   useEffect(() => {
     if (!cloth && clothId) {
@@ -31,25 +34,36 @@ const ClothDetails = ({
   }, [clothId, cloth, dispatch]);
 
   const handleCopyLink = () => {
-    const link = `${window.location.origin}/cloths/${resolvedCloth._id}`;
+    const link = `${window.location.origin}/cloths/${id}`;
     navigator.clipboard.writeText(link);
     toast.success("Link copied to clipboard!");
   };
 
   const handleWishlistToggle = () => {
-    onWishlistToggle(resolvedCloth._id);
+    onWishlistToggle(id);
   };
 
-  const handleCartToggle = () => {
-    onCartToggle(resolvedCloth._id);
+  const handleAddToCart = () => {
+    onCartToggle(id, "add");
   };
+
+  const handleRemoveFromCart = () => {
+    onCartToggle(id, "remove");
+  };
+
+  const getCartQuantity = (id) =>
+    cart.find((entry) => entry.item === id)?.quantity || 0;
+
+  const quantity = getCartQuantity(id);
 
   if (!resolvedCloth || loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
-
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={onClose}
+    >
       <div
         className="w-[90%] md:w-[70%] h-[80%] bg-white rounded-2xl shadow-2xl flex overflow-hidden transition-all duration-300"
         onClick={(e) => e.stopPropagation()}
@@ -67,12 +81,24 @@ const ClothDetails = ({
         <div className="w-1/2 p-6 flex flex-col justify-between">
           <div>
             <h2 className="text-2xl font-bold mb-2">{resolvedCloth.name}</h2>
-            <p className="text-gray-600 mb-1"><strong>Description:</strong> {resolvedCloth.description}</p>
-            <p className="text-gray-600 mb-1"><strong>Type:</strong> {resolvedCloth.type}</p>
-            <p className="text-gray-600 mb-1"><strong>Brand:</strong> {resolvedCloth.manufacturer}</p>
-            <p className="text-gray-600 mb-1"><strong>Sizes:</strong> {resolvedCloth.size.join(", ")}</p>
-            <p className="text-gray-600 mb-1"><strong>Gender:</strong> {resolvedCloth.gender}</p>
-            <p className="text-xl font-bold text-green-600 mt-4">₹{resolvedCloth.price}</p>
+            <p className="text-gray-600 mb-1">
+              <strong>Description:</strong> {resolvedCloth.description}
+            </p>
+            <p className="text-gray-600 mb-1">
+              <strong>Type:</strong> {resolvedCloth.type}
+            </p>
+            <p className="text-gray-600 mb-1">
+              <strong>Brand:</strong> {resolvedCloth.manufacturer}
+            </p>
+            <p className="text-gray-600 mb-1">
+              <strong>Sizes:</strong> {resolvedCloth.size.join(", ")}
+            </p>
+            <p className="text-gray-600 mb-1">
+              <strong>Gender:</strong> {resolvedCloth.gender}
+            </p>
+            <p className="text-xl font-bold text-green-600 mt-4">
+              ₹{resolvedCloth.price}
+            </p>
           </div>
 
           <div className="flex justify-between items-center mt-6 flex-wrap gap-2">
@@ -108,15 +134,24 @@ const ClothDetails = ({
               ))}
 
             {isInCart ? (
-              <button
-                onClick={handleCartToggle}
-                className="flex items-center gap-2 text-sm px-3 py-1 border rounded-xl text-red-600 hover:bg-red-600 hover:text-white"
-              >
-                <FaTrashAlt /> Remove Cart
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRemoveFromCart}
+                  className="px-2 py-1 text-lg font-bold border rounded hover:bg-red-100"
+                >
+                  -
+                </button>
+                <span className="text-lg">{quantity}</span>
+                <button
+                  onClick={handleAddToCart}
+                  className="px-2 py-1 text-lg font-bold border rounded hover:bg-green-100"
+                >
+                  +
+                </button>
+              </div>
             ) : (
               <button
-                onClick={handleCartToggle}
+                onClick={handleAddToCart}
                 className="flex items-center gap-2 text-sm px-3 py-1 border rounded-xl text-green-600 hover:bg-green-600 hover:text-white"
               >
                 <FaCartPlus /> Add to Cart

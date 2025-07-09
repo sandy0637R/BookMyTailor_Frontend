@@ -8,59 +8,60 @@ import {
   addToWishlist,
   removeFromWishlist,
 } from "../redux/authSlice";
-import { toast } from "react-hot-toast"; // ✅ Add toast
+import { toast } from "react-hot-toast";
 
 const ClothPage = () => {
   const { clothId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { wishlist, cart, isLoggedIn } = useSelector((state) => state.auth); // ✅ Add isLoggedIn
+  const { wishlist, cart, isLoggedIn } = useSelector((state) => state.auth);
 
   const isInWishlist = wishlist?.some(
     (item) => item?._id === clothId || item === clothId
   );
 
   const isInCart = cart?.some(
-    (entry) => entry?.item?._id === clothId || entry === clothId
+    (entry) => entry?.item?._id === clothId || entry?.item === clothId
   );
 
   const handleWishlistToggle = (id) => {
     if (!isLoggedIn) {
-      toast.error("Please login first");        // ✅ Show toast
-      navigate("/login");                      // ✅ Redirect to login
+      toast.error("Please login first");
+      navigate("/login");
       return;
     }
     if (isInWishlist) dispatch(removeFromWishlist(id));
     else dispatch(addToWishlist(id));
   };
 
-  const handleCartToggle = (id) => {
+  const handleCartToggle = (id, action) => {
     if (!isLoggedIn) {
-      toast.error("Please login first");        // ✅ Show toast
-      navigate("/login");                      // ✅ Redirect to login
+      toast.error("Please login first");
+      navigate("/login");
       return;
     }
-    if (isInCart) dispatch(removeFromCart(id));
-    else dispatch(addToCart(id));
+
+    if (action === "add") dispatch(addToCart(id));
+    else if (action === "remove") dispatch(removeFromCart(id));
   };
 
   const handleClose = () => {
-    if (window.history.length <= 2) navigate("/"); // ✅ Fallback to home
-    else navigate(-1);                             // ✅ Go back
+    if (window.history.length <= 2) navigate("/");
+    else navigate(-1);
   };
 
   if (!clothId) return <div className="p-4">Invalid cloth ID.</div>;
 
   return (
-    <div className="relative min-h-screen bg-gray-100 ">
+    <div className="relative min-h-screen bg-gray-100">
       <ClothDetails
         clothId={clothId}
         isInWishlist={isInWishlist}
         isInCart={isInCart}
         onWishlistToggle={handleWishlistToggle}
         onCartToggle={handleCartToggle}
-        onClose={handleClose} // ✅ Use smart back/home handler
+        onClose={handleClose}
       />
     </div>
   );
