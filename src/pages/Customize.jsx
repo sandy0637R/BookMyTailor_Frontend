@@ -5,14 +5,15 @@ import { toast } from "react-hot-toast";
 import RequestDisplayCard from "../components/RequestDisplayCard";
 import RequestEditForm from "../components/RequestEditForm";
 import RequestUploadForm from "../components/RequestUploadForm";
-import ChatBox from "../components/ChatBox"; // ✅ Import ChatBox
+import ChatBox from "../components/ChatBox";
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
   const role = useSelector((state) => state.auth.role);
-  const profile = useSelector((state) => state.auth.profile); // ✅ Current user
+  const profile = useSelector((state) => state.auth.profile);
 
   const [requests, setRequests] = useState([]);
+  const [history, setHistory] = useState([]);
   const [form, setForm] = useState({
     gender: "",
     measurements: {},
@@ -25,14 +26,16 @@ const Customize = () => {
 
   const [preview, setPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [chatUser, setChatUser] = useState(null); // ✅ For Chat
+  const [chatUser, setChatUser] = useState(null);
 
   const fetchRequests = async () => {
     try {
       const res = await axios.get("http://localhost:5000/users/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setRequests(res.data.customDressRequests || []);
+      const all = res.data.customDressRequests || [];
+      setRequests(all.filter((r) => r.status !== "Confirmed"));
+      setHistory(all.filter((r) => r.status === "Confirmed"));
     } catch (err) {
       toast.error("Failed to load requests");
     }
@@ -61,16 +64,17 @@ const Customize = () => {
     if (file) setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (finalData) => {
     try {
       const fd = new FormData();
-      fd.append("gender", form.gender);
-      fd.append("budget", form.budget);
-      fd.append("duration", form.duration);
-      fd.append("description", form.description);
-      fd.append("quantity", form.quantity);
-      fd.append("image", form.image);
-      fd.append("measurements", JSON.stringify(form.measurements));
+      fd.append("gender", finalData.gender);
+      fd.append("budget", finalData.budget);
+      fd.append("duration", finalData.duration);
+      fd.append("description", finalData.description);
+      fd.append("quantity", finalData.quantity);
+      fd.append("image", finalData.image);
+      fd.append("measurements", JSON.stringify(finalData.measurements));
+      fd.append("submittedAt", finalData.submittedAt);
 
       await axios.post("http://localhost:5000/custom/request", fd, {
         headers: {
@@ -92,18 +96,6 @@ const Customize = () => {
       fetchRequests();
     } catch (err) {
       toast.error("Submit failed");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/custom/request/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Deleted");
-      fetchRequests();
-    } catch {
-      toast.error("Delete failed");
     }
   };
 
@@ -160,7 +152,7 @@ const Customize = () => {
   };
 
   const handleEditSubmit = async (req) => {
-    const maleMeasurements = [
+    const male = [
       "chest",
       "shoulderWidth",
       "sleeveLength",
@@ -172,8 +164,7 @@ const Customize = () => {
       "rise",
       "thigh",
     ];
-
-    const femaleMeasurements = [
+    const female = [
       "bust",
       "topLength",
       "waist",
@@ -182,11 +173,9 @@ const Customize = () => {
       "rise",
       "thigh",
     ];
+    const required = req.gender === "Male" ? male : female;
 
-    const requiredMeasurements =
-      req.gender === "Male" ? maleMeasurements : femaleMeasurements;
-
-    const requiredFieldsFilled = [
+    const filled = [
       req.gender,
       req.budget,
       req.duration,
@@ -194,11 +183,9 @@ const Customize = () => {
       req.measurements,
     ].every(Boolean);
 
-    const measurementsFilled = requiredMeasurements.every(
-      (key) => req.measurements?.[key]
-    );
+    const measurementsFilled = required.every((key) => req.measurements?.[key]);
 
-    if (!requiredFieldsFilled || !measurementsFilled) {
+    if (!filled || !measurementsFilled) {
       toast.error("All required fields must be filled");
       return;
     }
@@ -221,7 +208,6 @@ const Customize = () => {
       setEditingId(null);
       fetchRequests();
     } catch (err) {
-      console.error("Update error:", err);
       toast.error("Update failed");
     }
   };
@@ -267,7 +253,6 @@ const Customize = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Upload Custom Request</h2>
-
       <RequestUploadForm
         form={form}
         handleInput={handleInput}
@@ -278,7 +263,6 @@ const Customize = () => {
       />
 
       <h2 className="text-xl font-bold mt-8 mb-2">My Requests</h2>
-
       {requests.map((req) => (
         <div key={req._id} className="border p-3 my-2 rounded shadow">
           {editingId === req._id ? (
@@ -293,14 +277,28 @@ const Customize = () => {
           ) : (
             <RequestDisplayCard
               req={req}
-              handleDelete={handleDelete}
+              handleDelete={() => {}} // delete disabled
               setEditingId={setEditingId}
               handleConfirm={handleConfirm}
-              setChatUser={setChatUser} // ✅ Pass chat handler
+              setChatUser={setChatUser}
             />
           )}
         </div>
       ))}
+
+      {history.length > 0 && (
+        <>
+          <h2 className="text-xl font-bold mt-8 mb-2">Order History</h2>
+          {history.map((req) => (
+            <div key={req._id} className="border p-3 my-2 rounded shadow">
+              <RequestDisplayCard
+                req={req}
+                setChatUser={setChatUser}
+              />
+            </div>
+          ))}
+        </>
+      )}
 
       {chatUser && (
         <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">

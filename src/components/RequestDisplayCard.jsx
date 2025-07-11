@@ -39,11 +39,29 @@ const RequestDisplayCard = ({
     );
   };
 
+  const getEstimatedDateTime = () => {
+    const base = req.acceptedAt ? new Date(req.acceptedAt) : new Date(req.submittedAt);
+    const end = new Date(req.duration);
+    if (!base || !end || isNaN(base.getTime()) || isNaN(end.getTime())) return "N/A";
+
+    const options = {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+
+    return end.toLocaleString("en-IN", options);
+  };
+
   return (
     <>
       <p><b>Status:</b> {req.status}</p>
       <p><b>Budget:</b> ₹{req.budget}</p>
       <p><b>Duration:</b> {req.duration}</p>
+      <p><b>Estimated Delivery:</b> {getEstimatedDateTime()}</p>
       <p><b>Gender:</b> {req.gender}</p>
       
       <div className="mt-2 text-sm text-gray-700">

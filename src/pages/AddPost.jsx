@@ -41,6 +41,16 @@ const navigate = useNavigate();
   const handleAddPost = async (e) => {
     e.preventDefault();
 
+    if (!caption.trim()) {
+    alert("Caption is required");
+    return;
+  }
+
+  if (images.length === 0) {
+    alert("Please upload a image.");
+    return;
+  }
+
     if (productLink && !productLink.startsWith("http://localhost:5173/cloths/")) {
       alert("If entered, product link must be a valid Book My Tailor link.");
       return;
@@ -122,8 +132,9 @@ const navigate = useNavigate();
         <input
           type="file"
           multiple
-          accept="image/*"
+          accept="image/*"  
           onChange={handleImageChange}
+          required
           className="mb-4"
         />
         <input

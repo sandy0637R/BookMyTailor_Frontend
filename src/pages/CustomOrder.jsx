@@ -2,24 +2,68 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
-import ChatBox from "../components/ChatBox"; // Add ChatBox import
+import ChatBox from "../components/ChatBox";
 
 const CustomOrder = () => {
   const token = useSelector((state) => state.auth.token);
   const roles = useSelector((state) => state.auth.roles);
-  const profile = useSelector((state) => state.auth.profile); // for currentUser
+  const profile = useSelector((state) => state.auth.profile);
 
   const [uploadedRequests, setUploadedRequests] = useState([]);
   const [acceptedRequests, setAcceptedRequests] = useState([]);
+  const [requestHistory, setRequestHistory] = useState([]);
   const [statusMap, setStatusMap] = useState({});
-  const [chatUser, setChatUser] = useState(null); // selectedUser for chat
+  const [chatUser, setChatUser] = useState(null);
+  const [timers, setTimers] = useState({});
 
   useEffect(() => {
     if (roles?.includes("tailor")) {
       fetchUploadedRequests();
       fetchAcceptedRequests();
+      fetchRequestHistory();
     }
   }, [roles]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const updated = {};
+      acceptedRequests.forEach((req) => {
+        if (req.acceptedAt && req.duration) {
+          updated[req._id] = getSmartTimers(req.acceptedAt, req.duration);
+        }
+      });
+      setTimers(updated);
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [acceptedRequests]);
+
+  const getSmartTimers = (acceptedAt, duration) => {
+    const start = new Date(acceptedAt).getTime();
+    const end = new Date(duration).getTime();
+    const now = Date.now();
+    const total = end - start;
+
+    const readyAt = start + total * 0.6;
+    const outAt = start + total * 0.85;
+    const deliveredAt = end;
+
+    const format = (ms) => {
+      if (ms <= 0) return "Now";
+      const h = Math.floor(ms / (1000 * 60 * 60));
+      const m = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+      return `${h}h ${m}m`;
+    };
+
+    const progress = Math.min(100, Math.floor(((now - start) / total) * 100));
+
+    return {
+      readyIn: format(readyAt - now),
+      outIn: format(outAt - now),
+      deliverIn: format(deliveredAt - now),
+      progress,
+    };
+  };
 
   const fetchUploadedRequests = async () => {
     try {
@@ -40,6 +84,17 @@ const CustomOrder = () => {
       setAcceptedRequests(res.data);
     } catch {
       toast.error("Failed to load accepted requests");
+    }
+  };
+
+  const fetchRequestHistory = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/custom/request-history", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRequestHistory(res.data);
+    } catch {
+      toast.error("Failed to load request history");
     }
   };
 
@@ -72,21 +127,6 @@ const CustomOrder = () => {
     }
   };
 
-  const handleDeleteDelivered = async (requestId, customerId) => {
-    try {
-      await axios.delete(
-        `http://localhost:5000/custom/request/${customerId}/${requestId}/tailor-delete`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      toast.success("Delivered request removed");
-      fetchAcceptedRequests();
-    } catch {
-      toast.error("Failed to remove delivered request");
-    }
-  };
-
   const statusOptions = ["Accepted", "Ready", "Out for Delivery", "Delivered"];
 
   if (!roles?.includes("tailor")) {
@@ -100,6 +140,8 @@ const CustomOrder = () => {
   const renderRequestCard = (req, showAccept, showUpdate) => {
     const requestId = req.requestId?.$oid || req._id;
     const customerId = req.customerId?.$oid || req.customer?.userId;
+
+    if (showAccept && customerId === profile._id) return null;
 
     return (
       <div key={requestId} className="border p-4 mb-4 rounded shadow">
@@ -116,6 +158,30 @@ const CustomOrder = () => {
             alt="Dress"
             className="w-32 h-32 object-cover my-2"
           />
+        )}
+
+        {timers[requestId] && (
+          <div className="bg-yellow-50 p-2 rounded text-sm mt-2">
+            <div className="mb-1 font-semibold text-yellow-900">⏳ Deadline Tracker</div>
+            <div className="h-2 bg-gray-200 rounded overflow-hidden mb-2">
+              <div
+                className={`h-full ${
+                  timers[requestId].progress >= 90
+                    ? "bg-red-600"
+                    : timers[requestId].progress >= 60
+                    ? "bg-orange-500"
+                    : "bg-green-500"
+                }`}
+                style={{ width: `${timers[requestId].progress}%` }}
+              ></div>
+            </div>
+            <ul className="list-disc pl-5">
+              <li>🛠️ Ready in: {timers[requestId].readyIn}</li>
+              <li>🚚 Out for Delivery in: {timers[requestId].outIn}</li>
+              <li>✅ Delivered in: {timers[requestId].deliverIn}</li>
+            </ul>
+            <p className="mt-1 text-gray-600">Progress: {timers[requestId].progress}%</p>
+          </div>
         )}
 
         {showAccept && (
@@ -156,21 +222,14 @@ const CustomOrder = () => {
           </div>
         )}
 
-        {req.status === "Delivered" && requestId && customerId && (
-          <button
-            onClick={() => handleDeleteDelivered(requestId, customerId)}
-            className="mt-2 bg-red-600 text-white px-3 py-1 rounded"
-          >
-            Remove Delivered Request
-          </button>
-        )}
-
         {showUpdate && (
           <button
-            onClick={() => setChatUser({ 
-              _id: customerId, 
-              name: req.customer?.name || req.customerName 
-            })}
+            onClick={() =>
+              setChatUser({
+                _id: customerId,
+                name: req.customer?.name || req.customerName,
+              })
+            }
             className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded"
           >
             Send Message
@@ -196,12 +255,16 @@ const CustomOrder = () => {
         acceptedRequests.map((req) => renderRequestCard(req, false, true))
       )}
 
+      <h2 className="text-xl font-bold mb-4 mt-8">Request History</h2>
+      {requestHistory.length === 0 ? (
+        <p>No history available.</p>
+      ) : (
+        requestHistory.map((req) => renderRequestCard(req, false, false))
+      )}
+
       {chatUser && (
         <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
-          <ChatBox 
-            currentUser={profile} 
-            selectedUser={chatUser} 
-          />
+          <ChatBox currentUser={profile} selectedUser={chatUser} />
           <button
             onClick={() => setChatUser(null)}
             className="mt-2 text-sm text-red-600 hover:underline"
