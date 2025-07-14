@@ -11,6 +11,7 @@ const RequestUploadForm = ({
 }) => {
   const dispatch = useDispatch();
   const tailors = useSelector((state) => state.social.tailors);
+  const profile = useSelector((state) => state.auth.profile); // current user
   const [selectedTailorId, setSelectedTailorId] = useState("");
   const [search, setSearch] = useState("");
 
@@ -45,9 +46,11 @@ const RequestUploadForm = ({
     handleSubmit(finalData);
   };
 
-  const filteredTailors = tailors.filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    t.email.toLowerCase().includes(search.toLowerCase())
+  const filteredTailors = tailors.filter(
+    (t) =>
+      t._id !== profile._id &&
+      (t.name.toLowerCase().includes(search.toLowerCase()) ||
+        t.email.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -193,7 +196,7 @@ const RequestUploadForm = ({
 
       <button
         onClick={submitForm}
-        disabled={isSubmitDisabled}
+        disabled={isSubmitDisabled || !preview}
         className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
       >
         Submit

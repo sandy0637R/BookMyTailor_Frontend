@@ -76,11 +76,15 @@ const Customize = () => {
       fd.append("measurements", JSON.stringify(finalData.measurements));
       fd.append("submittedAt", finalData.submittedAt);
 
+      if (finalData.tailorId) {
+  fd.append("tailorId", finalData.tailorId); // ✅ append tailorId
+}
+ 
       await axios.post("http://localhost:5000/custom/request", fd, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      }); 
 
       toast.success("Request submitted");
       setForm({
@@ -150,6 +154,19 @@ const Customize = () => {
       )
     );
   };
+
+  const handleDelete = async (id) => {
+  try {
+    await axios.delete(`http://localhost:5000/custom/request/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    toast.success("Request deleted");
+    fetchRequests();
+  } catch (err) {
+    toast.error("Delete failed");
+  }
+};
+
 
   const handleEditSubmit = async (req) => {
     const male = [
@@ -277,7 +294,7 @@ const Customize = () => {
           ) : (
             <RequestDisplayCard
               req={req}
-              handleDelete={() => {}} // delete disabled
+             handleDelete={() => handleDelete(req._id)}
               setEditingId={setEditingId}
               handleConfirm={handleConfirm}
               setChatUser={setChatUser}
