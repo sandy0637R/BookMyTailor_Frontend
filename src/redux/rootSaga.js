@@ -14,6 +14,7 @@ import {
 import { watchSocial } from './socialSaga';
 import { watchPost } from './postSaga';
 import { watchCustom } from './customSaga';
+import { watchMeasurement } from "./measurementSaga";
 
 
 export default function* rootSaga() {
@@ -30,6 +31,7 @@ export default function* rootSaga() {
     watchPost(),
     watchGetClothById(),
     watchCustom(),
+    watchMeasurement(),
 
   ]);
 }

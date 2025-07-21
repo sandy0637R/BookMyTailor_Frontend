@@ -5,6 +5,7 @@ import socialReducer from "./socialSlice"
 import rootSaga from "./rootSaga";
 import postReducer from "./postSlice"
 import customReducer from "./customSlice"
+import  measurementReducer from "./measurementSlice"
 
 
 // Create the saga middleware
@@ -17,6 +18,7 @@ export const store = configureStore({
     social: socialReducer,
     post: postReducer,
     custom:customReducer,
+    measurement:measurementReducer,
 
   },
   middleware: (getDefaultMiddleware) =>

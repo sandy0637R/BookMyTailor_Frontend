@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchMeasurementsRequest,
+  addMeasurementRequest,
+  deleteMeasurementRequest,
+  updateMeasurementRequest,
+} from "../redux/measurementSlice";
 import { toast } from "react-hot-toast";
 
 const Measurement = () => {
-  const [measurements, setMeasurements] = useState([]);
+  const dispatch = useDispatch();
+  const { token } = useSelector((state) => state.auth);
+  const { measurements } = useSelector((state) => state.measurement);
+
   const [formData, setFormData] = useState({
     name: "",
     gender: "Male",
     measurements: {},
   });
+
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState(null);
-
-  const { token } = useSelector((state) => state.auth);
 
   const maleFields = [
     "chest",
@@ -40,129 +47,82 @@ const Measurement = () => {
 
   const getFields = (gender) => (gender === "Male" ? maleFields : femaleFields);
 
-  const fetchMeasurements = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/measurements/", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMeasurements(res.data || []);
-    } catch (err) {
-      toast.error("Failed to load measurements");
-    }
-  };
-
   const handleChange = (e, isEdit = false) => {
     const { name, value } = e.target;
 
     if (isEdit) {
+      const updated = { ...editData };
       if (["name", "gender"].includes(name)) {
-        const updated = { ...editData, [name]: value };
-        if (name === "gender") {
-          updated.measurements = {};
-        }
-        setEditData(updated);
+        updated[name] = value;
+        if (name === "gender") updated.measurements = {};
       } else {
-        setEditData({
-          ...editData,
-          measurements: {
-            ...editData.measurements,
-            [name]: value,
-          },
-        });
+        updated.measurements = {
+          ...updated.measurements,
+          [name]: value,
+        };
       }
+      setEditData(updated);
     } else {
+      const updated = { ...formData };
       if (["name", "gender"].includes(name)) {
-        const updated = { ...formData, [name]: value };
-        if (name === "gender") {
-          updated.measurements = {};
-        }
-        setFormData(updated);
+        updated[name] = value;
+        if (name === "gender") updated.measurements = {};
       } else {
-        setFormData({
-          ...formData,
-          measurements: {
-            ...formData.measurements,
-            [name]: value,
-          },
-        });
+        updated.measurements = {
+          ...updated.measurements,
+          [name]: value,
+        };
       }
+      setFormData(updated);
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  if (measurements.length >= 5) {
-    toast.error("Maximum 5 measurements allowed. Please delete one to add new.");
-    return;
-  }
-
-  const isDuplicateName = measurements.some(
-    (m) => m.name.trim().toLowerCase() === formData.name.trim().toLowerCase()
-  );
-  if (isDuplicateName) {
-    toast.error("You already have a measurement with this name.");
-    return;
-  }
-
-  const requiredFields = getFields(formData.gender);
-  const missingFields = requiredFields.filter(
-    (field) => !formData.measurements[field]
-  );
-
-  if (missingFields.length > 0) {
-    toast.error(`Please fill all required fields: ${missingFields.join(", ")}`);
-    return;
-  }
-
-  try {
-    await axios.post("http://localhost:5000/measurements/", formData, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success("Measurement added!");
-    setFormData({ name: "", gender: "Male", measurements: {} });
-    fetchMeasurements();
-  } catch (err) {
-    toast.error(err.response?.data?.message || "Failed to save");
-  }
-};
-
-
-
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/measurements/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Deleted");
-      fetchMeasurements();
-    } catch {
-      toast.error("Delete failed");
+    if (measurements.length >= 5) {
+      toast.error("Maximum 5 measurements allowed. Please delete one to add new.");
+      return;
     }
+
+    const isDuplicateName = measurements.some(
+      (m) => m.name.trim().toLowerCase() === formData.name.trim().toLowerCase()
+    );
+    if (isDuplicateName) {
+      toast.error("You already have a measurement with this name.");
+      return;
+    }
+
+    const requiredFields = getFields(formData.gender);
+    const missingFields = requiredFields.filter(
+      (field) => !formData.measurements[field]
+    );
+    if (missingFields.length > 0) {
+      toast.error(`Please fill all required fields: ${missingFields.join(", ")}`);
+      return;
+    }
+
+    dispatch(addMeasurementRequest({ formData, token }));
+    setFormData({ name: "", gender: "Male", measurements: {} });
+  };
+
+  const handleDelete = (id) => {
+    dispatch(deleteMeasurementRequest({ id, token }));
   };
 
   const handleEdit = (item) => {
     setEditId(item._id);
-    setEditData({ ...item }); // shallow copy
+    setEditData({ ...item });
   };
 
-  const handleUpdate = async (id) => {
-    try {
-      await axios.put(`http://localhost:5000/measurements/${id}`, editData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Updated");
-      setEditId(null);
-      fetchMeasurements();
-    } catch (err) {
-      toast.error("Update failed");
-    }
+  const handleUpdate = (id) => {
+    dispatch(updateMeasurementRequest({ id, formData: editData, token }));
+    setEditId(null);
   };
 
   useEffect(() => {
-    fetchMeasurements();
-  }, []);
+    if (token) dispatch(fetchMeasurementsRequest(token));
+  }, [dispatch, token]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -237,15 +197,11 @@ const handleSubmit = async (e) => {
               </>
             ) : (
               <>
-                <h4>
-                  {m.name} ({m.gender})
-                </h4>
+                <h4>{m.name} ({m.gender})</h4>
                 <ul style={{ listStyle: "none", paddingLeft: 0 }}>
                   {Object.entries(m.measurements).map(([key, value]) =>
                     value != null ? (
-                      <li key={key}>
-                        <strong>{key}</strong>: {value}
-                      </li>
+                      <li key={key}><strong>{key}</strong>: {value}</li>
                     ) : null
                   )}
                 </ul>
