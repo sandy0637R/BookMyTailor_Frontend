@@ -15,6 +15,7 @@ import { watchSocial } from './socialSaga';
 import { watchPost } from './postSaga';
 import { watchCustom } from './customSaga';
 
+
 export default function* rootSaga() {
   yield all([
     watchLogin(),
@@ -29,5 +30,6 @@ export default function* rootSaga() {
     watchPost(),
     watchGetClothById(),
     watchCustom(),
+
   ]);
 }

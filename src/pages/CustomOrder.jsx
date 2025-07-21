@@ -205,9 +205,49 @@ const CustomOrder = () => {
         {renderRequestTable(acceptedRequests, false, true)}
       </div>
       <div>
-        <h2 className="text-xl font-bold mb-2">Request History</h2>
-        {renderRequestTable(requestHistory, false, false)}
-      </div>
+  <h2 className="text-xl font-bold mb-2">Request History</h2>
+  <div className="overflow-x-auto shadow rounded-lg">
+    <table className="min-w-full divide-y divide-gray-200 bg-white border border-gray-200 text-sm">
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Delivered On</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Budget</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Gender</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
+          <th className="px-4 py-2 text-left font-semibold text-gray-700">Actions</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-100">
+        {requestHistory.map((req) => (
+          <tr key={req._id} className="hover:bg-gray-50 transition">
+            <td className="px-4 py-2">{req.customer?.name || req.customerName}</td>
+            <td className="px-4 py-2">
+              {req.deliveredAt
+                ? new Date(req.deliveredAt).toLocaleDateString()
+                : "Not Delivered"}
+            </td>
+            <td className="px-4 py-2">₹{req.budget}</td>
+            <td className="px-4 py-2">{req.gender}</td>
+            <td className="px-4 py-2">{req.status}</td>
+            <td className="px-4 py-2 space-x-2">
+              <button
+                onClick={() => {
+                  dispatch(setSelectedRequest(req));
+                  dispatch(setShowModal(true));
+                }}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              >
+                View Request
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
       {showModal && selectedRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

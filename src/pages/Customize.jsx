@@ -11,6 +11,8 @@ const Customize = () => {
   const token = useSelector((state) => state.auth.token);
   const role = useSelector((state) => state.auth.role);
   const profile = useSelector((state) => state.auth.profile);
+  const tailors = useSelector((state) => state.social.tailors || []);
+
 
   const [requests, setRequests] = useState([]);
   const [history, setHistory] = useState([]);
@@ -27,6 +29,8 @@ const Customize = () => {
   const [preview, setPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [chatUser, setChatUser] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [openCardId, setOpenCardId] = useState(null);
 
   const fetchRequests = async () => {
     try {
@@ -77,14 +81,14 @@ const Customize = () => {
       fd.append("submittedAt", finalData.submittedAt);
 
       if (finalData.tailorId) {
-  fd.append("tailorId", finalData.tailorId); // ✅ append tailorId
-}
- 
+        fd.append("tailorId", finalData.tailorId);
+      }
+
       await axios.post("http://localhost:5000/custom/request", fd, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }); 
+      });
 
       toast.success("Request submitted");
       setForm({
@@ -156,17 +160,16 @@ const Customize = () => {
   };
 
   const handleDelete = async (id) => {
-  try {
-    await axios.delete(`http://localhost:5000/custom/request/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    toast.success("Request deleted");
-    fetchRequests();
-  } catch (err) {
-    toast.error("Delete failed");
-  }
-};
-
+    try {
+      await axios.delete(`http://localhost:5000/custom/request/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Request deleted");
+      fetchRequests();
+    } catch (err) {
+      toast.error("Delete failed");
+    }
+  };
 
   const handleEditSubmit = async (req) => {
     const male = [
@@ -294,7 +297,7 @@ const Customize = () => {
           ) : (
             <RequestDisplayCard
               req={req}
-             handleDelete={() => handleDelete(req._id)}
+              handleDelete={() => handleDelete(req._id)}
               setEditingId={setEditingId}
               handleConfirm={handleConfirm}
               setChatUser={setChatUser}
@@ -306,14 +309,71 @@ const Customize = () => {
       {history.length > 0 && (
         <>
           <h2 className="text-xl font-bold mt-8 mb-2">Order History</h2>
-          {history.map((req) => (
-            <div key={req._id} className="border p-3 my-2 rounded shadow">
-              <RequestDisplayCard
-                req={req}
-                setChatUser={setChatUser}
-              />
-            </div>
-          ))}
+          <button
+            onClick={() => setShowHistory((prev) => !prev)}
+            className="mb-4 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 text-sm"
+          >
+            {showHistory ? "Hide History" : "Show History"}
+          </button>
+
+          {showHistory && (
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm border border-gray-300 mb-4">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="p-2 border">Tailor Name</th>
+          <th className="p-2 border">Status</th>
+          <th className="p-2 border">Delivered On</th>
+          <th className="p-2 border">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {history.map((req) => (
+          <React.Fragment key={req._id}>
+            <tr>
+              <td className="p-2 border text-center">
+                {typeof req.tailorId === "object"
+                  ? req.tailorId.name
+                  : (tailors.find((t) => t._id === req.tailorId)?.name || "N/A")}
+              </td>
+              <td className="p-2 border text-center">{req.status}</td>
+              <td className="p-2 border text-center">
+  {req.deliveredAt ? new Date(req.deliveredAt).toLocaleDateString() : "Pending"}
+</td>
+
+              <td className="p-2 border text-center">
+                <button
+                  onClick={() =>
+                    setOpenCardId(openCardId === req._id ? null : req._id)
+                  }
+                  className="text-blue-600 underline"
+                >
+                  {openCardId === req._id ? "Hide Request" : "View Request"}
+                </button>
+              </td>
+            </tr>
+            {openCardId === req._id && (
+              <tr>
+                <td colSpan="4" className="p-2 border">
+                  <div className="p-2">
+                    <RequestDisplayCard
+                      req={req}
+                      setChatUser={setChatUser}
+                      handleDelete={() => {}}
+                      setEditingId={() => {}}
+                      handleConfirm={() => {}}
+                    />
+                  </div>
+                </td>
+              </tr>
+            )}
+          </React.Fragment>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
         </>
       )}
 

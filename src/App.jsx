@@ -19,6 +19,7 @@ import CustomOrder from "./pages/CustomOrder";
 import TailorProfile from "./components/TailorProfile";
 import CustomerProfile from "./pages/CustomerProfile";
 import ClothPage from "./pages/ClothPage";
+import Measurement from "./pages/Measurement";
 const App = () => {
   return (
     <div className="relative min-h-screen">
@@ -43,6 +44,8 @@ const App = () => {
           <Route path="/tailorprofile/:id" element={<TailorProfile />} />
           <Route path="/customerprofile/:id" element={<CustomerProfile />} />
           <Route path="/cloths/:clothId" element={<ClothPage />} />
+          <Route path="/measurement" element={<Measurement />} />
+
 
 
 

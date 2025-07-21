@@ -177,7 +177,7 @@ const RequestDisplayCard = ({
         </div>
       )}
 
-      {["Uploaded", "Confirmed"].includes(req?.status) && (
+      {["Uploaded"].includes(req?.status) && (
         <>
           <button
             onClick={() => handleDelete(req?._id)}
