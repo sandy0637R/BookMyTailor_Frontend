@@ -8,27 +8,37 @@ const Measurement = () => {
   const [formData, setFormData] = useState({
     name: "",
     gender: "Male",
-    measurements: {
-      chest: "",
-      waist: "",
-      hips: "",
-      shoulder: "",
-      sleeveLength: "",
-      neck: "",
-      inseam: "",
-      length: "",
-      bust: "",
-      armhole: "",
-      wrist: "",
-      thigh: "",
-      ankle: "",
-      knee: "",
-    },
+    measurements: {},
   });
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState(null);
 
   const { token } = useSelector((state) => state.auth);
+
+  const maleFields = [
+    "chest",
+    "shoulderWidth",
+    "sleeveLength",
+    "shirtLength",
+    "neck",
+    "waist",
+    "hip",
+    "inseam",
+    "rise",
+    "thigh",
+  ];
+
+  const femaleFields = [
+    "bust",
+    "topLength",
+    "waist",
+    "hip",
+    "inseam",
+    "rise",
+    "thigh",
+  ];
+
+  const getFields = (gender) => (gender === "Male" ? maleFields : femaleFields);
 
   const fetchMeasurements = async () => {
     try {
@@ -46,7 +56,11 @@ const Measurement = () => {
 
     if (isEdit) {
       if (["name", "gender"].includes(name)) {
-        setEditData({ ...editData, [name]: value });
+        const updated = { ...editData, [name]: value };
+        if (name === "gender") {
+          updated.measurements = {};
+        }
+        setEditData(updated);
       } else {
         setEditData({
           ...editData,
@@ -58,7 +72,11 @@ const Measurement = () => {
       }
     } else {
       if (["name", "gender"].includes(name)) {
-        setFormData({ ...formData, [name]: value });
+        const updated = { ...formData, [name]: value };
+        if (name === "gender") {
+          updated.measurements = {};
+        }
+        setFormData(updated);
       } else {
         setFormData({
           ...formData,
@@ -71,18 +89,46 @@ const Measurement = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:5000/measurements/", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Measurement added!");
-      fetchMeasurements();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save");
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (measurements.length >= 5) {
+    toast.error("Maximum 5 measurements allowed. Please delete one to add new.");
+    return;
+  }
+
+  const isDuplicateName = measurements.some(
+    (m) => m.name.trim().toLowerCase() === formData.name.trim().toLowerCase()
+  );
+  if (isDuplicateName) {
+    toast.error("You already have a measurement with this name.");
+    return;
+  }
+
+  const requiredFields = getFields(formData.gender);
+  const missingFields = requiredFields.filter(
+    (field) => !formData.measurements[field]
+  );
+
+  if (missingFields.length > 0) {
+    toast.error(`Please fill all required fields: ${missingFields.join(", ")}`);
+    return;
+  }
+
+  try {
+    await axios.post("http://localhost:5000/measurements/", formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    toast.success("Measurement added!");
+    setFormData({ name: "", gender: "Male", measurements: {} });
+    fetchMeasurements();
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Failed to save");
+  }
+};
+
+
+
 
   const handleDelete = async (id) => {
     try {
@@ -98,7 +144,7 @@ const Measurement = () => {
 
   const handleEdit = (item) => {
     setEditId(item._id);
-    setEditData(item);
+    setEditData({ ...item }); // shallow copy
   };
 
   const handleUpdate = async (id) => {
@@ -122,19 +168,25 @@ const Measurement = () => {
     <div style={{ padding: "20px" }}>
       <h2>Add Measurement</h2>
       <form onSubmit={handleSubmit} style={{ marginBottom: "30px" }}>
-        <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
+        <input
+          name="name"
+          placeholder="Name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
         <select name="gender" value={formData.gender} onChange={handleChange}>
           <option>Male</option>
           <option>Female</option>
         </select>
 
-        {Object.entries(formData.measurements).map(([key, val]) => (
+        {getFields(formData.gender).map((key) => (
           <input
             key={key}
             type="number"
             name={key}
             placeholder={key}
-            value={val}
+            value={formData.measurements[key] || ""}
             onChange={handleChange}
           />
         ))}
@@ -157,18 +209,26 @@ const Measurement = () => {
           >
             {editId === m._id ? (
               <>
-                <input name="name" value={editData.name} onChange={(e) => handleChange(e, true)} />
-                <select name="gender" value={editData.gender} onChange={(e) => handleChange(e, true)}>
+                <input
+                  name="name"
+                  value={editData.name}
+                  onChange={(e) => handleChange(e, true)}
+                />
+                <select
+                  name="gender"
+                  value={editData.gender}
+                  onChange={(e) => handleChange(e, true)}
+                >
                   <option>Male</option>
                   <option>Female</option>
                 </select>
-                {Object.entries(editData.measurements).map(([key, value]) => (
+                {getFields(editData.gender).map((key) => (
                   <input
                     key={key}
                     type="number"
                     name={key}
                     placeholder={key}
-                    value={value}
+                    value={editData.measurements[key] || ""}
                     onChange={(e) => handleChange(e, true)}
                   />
                 ))}
