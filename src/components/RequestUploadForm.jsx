@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { fetchMeasurementsRequest } from "../redux/measurementSlice";
 
 const RequestUploadForm = ({
   form,
@@ -10,14 +12,41 @@ const RequestUploadForm = ({
   handleSubmit,
 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const tailors = useSelector((state) => state.social.tailors);
-  const profile = useSelector((state) => state.auth.profile); // current user
+  const profile = useSelector((state) => state.auth.profile);
+  const token = useSelector((state) => state.auth.token);
+  const { measurements } = useSelector((state) => state.measurement);
+
   const [selectedTailorId, setSelectedTailorId] = useState("");
   const [search, setSearch] = useState("");
+  const [selectedMeasurementName, setSelectedMeasurementName] = useState("");
 
   useEffect(() => {
     dispatch({ type: "FETCH_TAILORS" });
-  }, [dispatch]);
+    if (token) dispatch(fetchMeasurementsRequest(token));
+  }, [dispatch, token]);
+
+useEffect(() => {
+  if (selectedMeasurementName) {
+    const m = measurements.find((m) => m.name === selectedMeasurementName);
+    if (m) {
+      const syntheticEvent = (name, value) => ({
+        target: { name, value },
+      });
+
+      handleInput(syntheticEvent("gender", m.gender));
+      Object.entries(m.measurements || {}).forEach(([key, value]) => {
+        handleInput(syntheticEvent(`measurements.${key}`, value));
+      });
+    }
+  }
+}, [selectedMeasurementName]);
+
+
+
+ 
 
   const getMinDate = () => {
     const date = new Date();
@@ -119,6 +148,36 @@ const RequestUploadForm = ({
           </div>
         )}
       </div>
+
+      {/* New Dropdown for Saved Measurement */}
+     
+        <div>
+  <label className="font-semibold">Use Saved Measurement</label>
+  <select
+    className="border px-3 py-2 rounded w-full mt-1"
+    value={selectedMeasurementName}
+    onChange={(e) => {
+      if (e.target.value === "__go_to_measurement") {
+        navigate("/measurement");
+        return;
+      }
+      setSelectedMeasurementName(e.target.value);
+    }}
+  >
+    <option value="">-- Select Measurement --</option>
+
+    {measurements.length === 0 ? (
+      <option value="__go_to_measurement">➕ Create Measurement</option>
+    ) : (
+      measurements.map((m) => (
+        <option key={m._id} value={m.name}>
+          {m.name} ({m.gender})
+        </option>
+      ))
+    )}
+  </select>
+</div>
+
 
       {/* Upload Image */}
       <input type="file" accept="image/*" onChange={handleFile} />
