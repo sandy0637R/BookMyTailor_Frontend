@@ -14,6 +14,10 @@ const RequestDisplayCard = ({
 
   const tailorId =
     typeof req?.tailorId === "object" ? req?.tailorId?._id : req?.tailorId;
+  const tailor =
+    typeof req.tailorId === "object"
+      ? req.tailorId
+      : tailors.find((t) => t._id === req.tailorId);
 
   useEffect(() => {
     if (tailorId && !tailors.find((t) => t._id === tailorId)) {
@@ -84,14 +88,14 @@ const RequestDisplayCard = ({
         <div className="flex items-center gap-3 mt-2">
           <img
             src={
-              (typeof req.tailorId === "object"
-                ? req.tailorId.profileImage
-                : tailors.find((t) => t._id === tailorId)?.profileImage) ||
-              "/default-profile.png"
+              tailor?.profileImage
+                ? `http://localhost:5000/${tailor.profileImage}`
+                : "/default-profile.png"
             }
-            alt="Tailor"
-            className="w-8 h-8 rounded-full object-cover border"
+            alt="avatar"
+            className="w-8 h-8 rounded-full object-cover"
           />
+
           <span className="text-sm font-semibold">{tailorName()}</span>
           <ViewProfileButton userId={tailorId} buttonClass="text-sm" />
         </div>

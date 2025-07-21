@@ -28,25 +28,21 @@ const RequestUploadForm = ({
     if (token) dispatch(fetchMeasurementsRequest(token));
   }, [dispatch, token]);
 
-useEffect(() => {
-  if (selectedMeasurementName) {
-    const m = measurements.find((m) => m.name === selectedMeasurementName);
-    if (m) {
-      const syntheticEvent = (name, value) => ({
-        target: { name, value },
-      });
+  useEffect(() => {
+    if (selectedMeasurementName) {
+      const m = measurements.find((m) => m.name === selectedMeasurementName);
+      if (m) {
+        const syntheticEvent = (name, value) => ({
+          target: { name, value },
+        });
 
-      handleInput(syntheticEvent("gender", m.gender));
-      Object.entries(m.measurements || {}).forEach(([key, value]) => {
-        handleInput(syntheticEvent(`measurements.${key}`, value));
-      });
+        handleInput(syntheticEvent("gender", m.gender));
+        Object.entries(m.measurements || {}).forEach(([key, value]) => {
+          handleInput(syntheticEvent(`measurements.${key}`, value));
+        });
+      }
     }
-  }
-}, [selectedMeasurementName]);
-
-
-
- 
+  }, [selectedMeasurementName]);
 
   const getMinDate = () => {
     const date = new Date();
@@ -81,6 +77,7 @@ useEffect(() => {
       (t.name.toLowerCase().includes(search.toLowerCase()) ||
         t.email.toLowerCase().includes(search.toLowerCase()))
   );
+
 
   return (
     <div className="grid grid-cols-1 gap-2">
@@ -130,7 +127,7 @@ useEffect(() => {
                 >
                   <div className="flex items-center gap-2">
                     <img
-                      src={tailor.profilePic || "/default-avatar.png"}
+                      src={`http://localhost:5000/${tailor.profileImage}`}
                       alt="avatar"
                       className="w-8 h-8 rounded-full object-cover"
                     />
@@ -139,8 +136,23 @@ useEffect(() => {
                       <p className="text-xs text-gray-500">{tailor.email}</p>
                     </div>
                   </div>
-                  <span className="text-xs font-semibold text-yellow-600">
-                    ⭐ {tailor.averageRating || "N/A"}
+                  <span className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <span
+                        key={i}
+                        className={`text-xs ${
+                          i <=
+                          Math.round(tailor.tailorDetails?.averageRating || 0)
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                    <span className="text-xs text-gray-600">
+                      {(tailor.tailorDetails?.averageRating || 0).toFixed(1)}
+                    </span>
                   </span>
                 </div>
               ))
@@ -150,34 +162,33 @@ useEffect(() => {
       </div>
 
       {/* New Dropdown for Saved Measurement */}
-     
-        <div>
-  <label className="font-semibold">Use Saved Measurement</label>
-  <select
-    className="border px-3 py-2 rounded w-full mt-1"
-    value={selectedMeasurementName}
-    onChange={(e) => {
-      if (e.target.value === "__go_to_measurement") {
-        navigate("/measurement");
-        return;
-      }
-      setSelectedMeasurementName(e.target.value);
-    }}
-  >
-    <option value="">-- Select Measurement --</option>
 
-    {measurements.length === 0 ? (
-      <option value="__go_to_measurement">➕ Create Measurement</option>
-    ) : (
-      measurements.map((m) => (
-        <option key={m._id} value={m.name}>
-          {m.name} ({m.gender})
-        </option>
-      ))
-    )}
-  </select>
-</div>
+      <div>
+        <label className="font-semibold">Use Saved Measurement</label>
+        <select
+          className="border px-3 py-2 rounded w-full mt-1"
+          value={selectedMeasurementName}
+          onChange={(e) => {
+            if (e.target.value === "__go_to_measurement") {
+              navigate("/measurement");
+              return;
+            }
+            setSelectedMeasurementName(e.target.value);
+          }}
+        >
+          <option value="">-- Select Measurement --</option>
 
+          {measurements.length === 0 ? (
+            <option value="__go_to_measurement">➕ Create Measurement</option>
+          ) : (
+            measurements.map((m) => (
+              <option key={m._id} value={m.name}>
+                {m.name} ({m.gender})
+              </option>
+            ))
+          )}
+        </select>
+      </div>
 
       {/* Upload Image */}
       <input type="file" accept="image/*" onChange={handleFile} />
@@ -227,29 +238,114 @@ useEffect(() => {
       {/* Male Measurements */}
       {form.gender === "Male" && (
         <>
-          <input name="measurements.chest" placeholder="Chest" onChange={handleInput} value={form.measurements.chest || ""} />
-          <input name="measurements.shoulderWidth" placeholder="Shoulder Width" onChange={handleInput} value={form.measurements.shoulderWidth || ""} />
-          <input name="measurements.sleeveLength" placeholder="Sleeve Length" onChange={handleInput} value={form.measurements.sleeveLength || ""} />
-          <input name="measurements.shirtLength" placeholder="Shirt Length" onChange={handleInput} value={form.measurements.shirtLength || ""} />
-          <input name="measurements.neck" placeholder="Neck" onChange={handleInput} value={form.measurements.neck || ""} />
-          <input name="measurements.waist" placeholder="Waist" onChange={handleInput} value={form.measurements.waist || ""} />
-          <input name="measurements.hip" placeholder="Hip" onChange={handleInput} value={form.measurements.hip || ""} />
-          <input name="measurements.inseam" placeholder="Inseam" onChange={handleInput} value={form.measurements.inseam || ""} />
-          <input name="measurements.rise" placeholder="Rise" onChange={handleInput} value={form.measurements.rise || ""} />
-          <input name="measurements.thigh" placeholder="Thigh" onChange={handleInput} value={form.measurements.thigh || ""} />
+          <input
+            name="measurements.chest"
+            placeholder="Chest"
+            onChange={handleInput}
+            value={form.measurements.chest || ""}
+          />
+          <input
+            name="measurements.shoulderWidth"
+            placeholder="Shoulder Width"
+            onChange={handleInput}
+            value={form.measurements.shoulderWidth || ""}
+          />
+          <input
+            name="measurements.sleeveLength"
+            placeholder="Sleeve Length"
+            onChange={handleInput}
+            value={form.measurements.sleeveLength || ""}
+          />
+          <input
+            name="measurements.shirtLength"
+            placeholder="Shirt Length"
+            onChange={handleInput}
+            value={form.measurements.shirtLength || ""}
+          />
+          <input
+            name="measurements.neck"
+            placeholder="Neck"
+            onChange={handleInput}
+            value={form.measurements.neck || ""}
+          />
+          <input
+            name="measurements.waist"
+            placeholder="Waist"
+            onChange={handleInput}
+            value={form.measurements.waist || ""}
+          />
+          <input
+            name="measurements.hip"
+            placeholder="Hip"
+            onChange={handleInput}
+            value={form.measurements.hip || ""}
+          />
+          <input
+            name="measurements.inseam"
+            placeholder="Inseam"
+            onChange={handleInput}
+            value={form.measurements.inseam || ""}
+          />
+          <input
+            name="measurements.rise"
+            placeholder="Rise"
+            onChange={handleInput}
+            value={form.measurements.rise || ""}
+          />
+          <input
+            name="measurements.thigh"
+            placeholder="Thigh"
+            onChange={handleInput}
+            value={form.measurements.thigh || ""}
+          />
         </>
       )}
 
       {/* Female Measurements */}
       {form.gender === "Female" && (
         <>
-          <input name="measurements.bust" placeholder="Bust" onChange={handleInput} value={form.measurements.bust || ""} />
-          <input name="measurements.topLength" placeholder="Top Length" onChange={handleInput} value={form.measurements.topLength || ""} />
-          <input name="measurements.waist" placeholder="Waist" onChange={handleInput} value={form.measurements.waist || ""} />
-          <input name="measurements.hip" placeholder="Hip" onChange={handleInput} value={form.measurements.hip || ""} />
-          <input name="measurements.inseam" placeholder="Inseam" onChange={handleInput} value={form.measurements.inseam || ""} />
-          <input name="measurements.rise" placeholder="Rise" onChange={handleInput} value={form.measurements.rise || ""} />
-          <input name="measurements.thigh" placeholder="Thigh" onChange={handleInput} value={form.measurements.thigh || ""} />
+          <input
+            name="measurements.bust"
+            placeholder="Bust"
+            onChange={handleInput}
+            value={form.measurements.bust || ""}
+          />
+          <input
+            name="measurements.topLength"
+            placeholder="Top Length"
+            onChange={handleInput}
+            value={form.measurements.topLength || ""}
+          />
+          <input
+            name="measurements.waist"
+            placeholder="Waist"
+            onChange={handleInput}
+            value={form.measurements.waist || ""}
+          />
+          <input
+            name="measurements.hip"
+            placeholder="Hip"
+            onChange={handleInput}
+            value={form.measurements.hip || ""}
+          />
+          <input
+            name="measurements.inseam"
+            placeholder="Inseam"
+            onChange={handleInput}
+            value={form.measurements.inseam || ""}
+          />
+          <input
+            name="measurements.rise"
+            placeholder="Rise"
+            onChange={handleInput}
+            value={form.measurements.rise || ""}
+          />
+          <input
+            name="measurements.thigh"
+            placeholder="Thigh"
+            onChange={handleInput}
+            value={form.measurements.thigh || ""}
+          />
         </>
       )}
 
