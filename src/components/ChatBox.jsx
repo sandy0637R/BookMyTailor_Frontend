@@ -1,94 +1,61 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { io } from 'socket.io-client';
-
-const api = axios.create({
-  baseURL: 'http://localhost:5000',
-  withCredentials: true,
-});
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchChatRequest,
+  markMessagesReadRequest,
+} from '../redux/chatSlice';
 
 const ChatBox = ({ currentUser, selectedUser }) => {
-  const [messages, setMessages] = useState([]);
+  const dispatch = useDispatch();
+  const { messages, loading, error } = useSelector((state) => state.chat);
   const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [socketConnected, setSocketConnected] = useState(false);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {}, [currentUser, selectedUser]);
+  useEffect(() => {
+    if (!currentUser?._id || !selectedUser?._id) return;
+
+    dispatch(fetchChatRequest({ userId1: currentUser._id, userId2: selectedUser._id }));
+  }, [dispatch, currentUser?._id, selectedUser?._id]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token || !currentUser?._id || !selectedUser?._id) return;
 
     const newSocket = io('http://localhost:5000', {
-      auth: { token },
+      auth: {
+        token,
+        userId: currentUser._id,
+      },
       transports: ['websocket'],
     });
 
-    newSocket.on('connect', () => {
-      setSocketConnected(true);
-    });
+    newSocket.on('connect', () => setSocketConnected(true));
+    newSocket.on('disconnect', () => setSocketConnected(false));
+    newSocket.on('connect_error', () => console.error('Connection error'));
 
-    newSocket.on('disconnect', () => {
-      setSocketConnected(false);
-    });
-
-    newSocket.on('connect_error', () => {
-      setError('Connection error');
+    // 🔄 On receiving new message, fetch latest chat instead of directly adding
+    newSocket.on('newMessage', () => {
+      dispatch(fetchChatRequest({ userId1: currentUser._id, userId2: selectedUser._id }));
     });
 
     setSocket(newSocket);
+    return () => newSocket.disconnect();
+  }, [currentUser?._id, selectedUser?._id, dispatch]);
 
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [currentUser?._id, selectedUser?._id]);
+  useEffect(() => {
+    if (messages.length > 0) {
+      const unreadMessages = messages
+        .filter((msg) => !msg.read && msg.receiver === currentUser._id)
+        .map((msg) => msg._id);
 
-  const fetchConversation = async () => {
-    if (!selectedUser?._id || !currentUser?._id) return;
-    setIsLoading(true);
-    setError('');
-    try {
-      const res = await api.get(`/api/chat/conversation/${currentUser._id}/${selectedUser._id}`);
-      setMessages(res.data);
-    } catch {
-      setError('Failed to load messages');
-    } finally {
-      setIsLoading(false);
+      if (unreadMessages.length > 0) {
+        dispatch(markMessagesReadRequest(unreadMessages));
+      }
     }
-  };
-
-  useEffect(() => {
-    fetchConversation();
-  }, [selectedUser, currentUser]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleNewMessage = (message) => {
-      setMessages(prev => {
-        const exists = prev.some(
-          (m) =>
-            m.message === message.message &&
-            m.sender?._id === message.sender?._id &&
-            m.timestamp === message.timestamp
-        );
-        return exists ? prev : [...prev, message];
-      });
-    };
-
-    socket.on('newMessage', handleNewMessage);
-    return () => socket.off('newMessage', handleNewMessage);
-  }, [socket, currentUser, selectedUser]);
+  }, [messages, currentUser._id, dispatch]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -99,11 +66,16 @@ const ChatBox = ({ currentUser, selectedUser }) => {
     if (!newMessage.trim() || !socket) return;
 
     const payload = {
+      sender: currentUser._id,
       receiver: selectedUser._id,
       message: newMessage,
     };
 
     socket.emit('sendMessage', payload);
+
+    // 🔄 Immediately fetch updated messages
+    dispatch(fetchChatRequest({ userId1: currentUser._id, userId2: selectedUser._id }));
+
     setNewMessage('');
   };
 
@@ -128,7 +100,7 @@ const ChatBox = ({ currentUser, selectedUser }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
-        {isLoading ? (
+        {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>

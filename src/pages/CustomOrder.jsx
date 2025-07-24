@@ -3,11 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import ChatBox from "../components/ChatBox";
 import ViewProfileButton from "../components/ViewProfileButton";
-import {
-  setChatUser,
-  setSelectedRequest,
-  setShowModal,
-} from "../redux/customSlice";
+import { setSelectedRequest, setShowModal } from "../redux/customSlice";
+import { setChatUser } from "../redux/chatSlice";
 
 const CustomOrder = () => {
   const dispatch = useDispatch();
@@ -20,11 +17,12 @@ const CustomOrder = () => {
     acceptedRequests,
     requestHistory,
     directRequests,
-    chatUser,
     timers,
     selectedRequest,
     showModal,
   } = useSelector((state) => state.custom);
+  const chatUser = useSelector((state) => state.chat.chatUser);
+
 
   const statusPhases = ["Accepted", "Ready", "Out for Delivery", "Delivered"];
 
@@ -63,15 +61,37 @@ const CustomOrder = () => {
 
     return (
       <div className="space-y-2">
-        <p><b>Requested by:</b> {req.customer?.name || req.customerName} <ViewProfileButton userId={req.customer?.userId} /></p>
-        <p><b>Status:</b> {req.status}</p>
-        <p><b>Budget:</b> ₹{req.budget}</p>
-        <p><b>Duration:</b> {(statusPhases.includes(req.status) && req.status !== "Delivered" && currentTimer)
-          ? <span className={`font-mono ${currentTimer.color}`}>{currentTimer.timeLeft}</span>
-          : req.duration}</p>
-        <p><b>Gender:</b> {req.gender}</p>
-        <p><b>Description:</b> {req.description || "N/A"}</p>
-        <p><b>Measurements:</b> {JSON.stringify(req.measurements)}</p>
+        <p>
+          <b>Requested by:</b> {req.customer?.name || req.customerName}{" "}
+          <ViewProfileButton userId={req.customer?.userId} />
+        </p>
+        <p>
+          <b>Status:</b> {req.status}
+        </p>
+        <p>
+          <b>Budget:</b> ₹{req.budget}
+        </p>
+        <p>
+          <b>Duration:</b>{" "}
+          {statusPhases.includes(req.status) &&
+          req.status !== "Delivered" &&
+          currentTimer ? (
+            <span className={`font-mono ${currentTimer.color}`}>
+              {currentTimer.timeLeft}
+            </span>
+          ) : (
+            req.duration
+          )}
+        </p>
+        <p>
+          <b>Gender:</b> {req.gender}
+        </p>
+        <p>
+          <b>Description:</b> {req.description || "N/A"}
+        </p>
+        <p>
+          <b>Measurements:</b> {JSON.stringify(req.measurements)}
+        </p>
         {req.image && (
           <img
             src={`http://localhost:5000/uploads/customRequests/${req.image}`}
@@ -82,7 +102,9 @@ const CustomOrder = () => {
         {showUpdate && nextStatus && (
           <div className="flex gap-2 items-center">
             <button
-              onClick={() => handleStatusUpdate(requestId, customerId, nextStatus)}
+              onClick={() =>
+                handleStatusUpdate(requestId, customerId, nextStatus)
+              }
               className="px-3 py-1 bg-blue-600 text-white rounded"
             >
               {nextStatus}
@@ -96,7 +118,9 @@ const CustomOrder = () => {
         )}
         {!showAccept && (
           <button
-            onClick={() => dispatch(setChatUser(req.customer))}
+            onClick={() =>
+  dispatch(setChatUser({ ...req.customer, _id: req.customer?.userId }))
+}
             className="px-3 py-1 bg-indigo-600 text-white rounded"
           >
             Chat
@@ -119,12 +143,24 @@ const CustomOrder = () => {
       <table className="min-w-full divide-y divide-gray-200 bg-white border border-gray-200 text-sm">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
-            <th className="px-4 py-2 text-left font-semibold text-gray-700">Duration/Timer</th>
-            <th className="px-4 py-2 text-left font-semibold text-gray-700">Budget</th>
-            <th className="px-4 py-2 text-left font-semibold text-gray-700">Gender</th>
-            <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
-            <th className="px-4 py-2 text-left font-semibold text-gray-700">Actions</th>
+            <th className="px-4 py-2 text-left font-semibold text-gray-700">
+              Name
+            </th>
+            <th className="px-4 py-2 text-left font-semibold text-gray-700">
+              Duration/Timer
+            </th>
+            <th className="px-4 py-2 text-left font-semibold text-gray-700">
+              Budget
+            </th>
+            <th className="px-4 py-2 text-left font-semibold text-gray-700">
+              Gender
+            </th>
+            <th className="px-4 py-2 text-left font-semibold text-gray-700">
+              Status
+            </th>
+            <th className="px-4 py-2 text-left font-semibold text-gray-700">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
@@ -142,11 +178,19 @@ const CustomOrder = () => {
 
             return (
               <tr key={requestId} className="hover:bg-gray-50 transition">
-                <td className="px-4 py-2">{req.customer?.name || req.customerName}</td>
                 <td className="px-4 py-2">
-                  {(statusPhases.includes(req.status) && req.status !== "Delivered" && currentTimer)
-                    ? <span className={`font-mono ${currentTimer.color}`}>{currentTimer.timeLeft}</span>
-                    : req.duration}
+                  {req.customer?.name || req.customerName}
+                </td>
+                <td className="px-4 py-2">
+                  {statusPhases.includes(req.status) &&
+                  req.status !== "Delivered" &&
+                  currentTimer ? (
+                    <span className={`font-mono ${currentTimer.color}`}>
+                      {currentTimer.timeLeft}
+                    </span>
+                  ) : (
+                    req.duration
+                  )}
                 </td>
                 <td className="px-4 py-2">₹{req.budget}</td>
                 <td className="px-4 py-2">{req.gender}</td>
@@ -171,7 +215,9 @@ const CustomOrder = () => {
                   )}
                   {showUpdate && nextStatus && (
                     <button
-                      onClick={() => handleStatusUpdate(requestId, customerId, nextStatus)}
+                      onClick={() =>
+                        handleStatusUpdate(requestId, customerId, nextStatus)
+                      }
                       className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                     >
                       {nextStatus}
@@ -187,7 +233,11 @@ const CustomOrder = () => {
   );
 
   if (!roles?.includes("tailor")) {
-    return <div className="p-4 text-red-600">You are not authorized to view this page.</div>;
+    return (
+      <div className="p-4 text-red-600">
+        You are not authorized to view this page.
+      </div>
+    );
   }
 
   return (
@@ -205,49 +255,62 @@ const CustomOrder = () => {
         {renderRequestTable(acceptedRequests, false, true)}
       </div>
       <div>
-  <h2 className="text-xl font-bold mb-2">Request History</h2>
-  <div className="overflow-x-auto shadow rounded-lg">
-    <table className="min-w-full divide-y divide-gray-200 bg-white border border-gray-200 text-sm">
-      <thead className="bg-gray-50">
-        <tr>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Name</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Delivered On</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Budget</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Gender</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Status</th>
-          <th className="px-4 py-2 text-left font-semibold text-gray-700">Actions</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-100">
-        {requestHistory.map((req) => (
-          <tr key={req._id} className="hover:bg-gray-50 transition">
-            <td className="px-4 py-2">{req.customer?.name || req.customerName}</td>
-            <td className="px-4 py-2">
-              {req.deliveredAt
-                ? new Date(req.deliveredAt).toLocaleDateString()
-                : "Not Delivered"}
-            </td>
-            <td className="px-4 py-2">₹{req.budget}</td>
-            <td className="px-4 py-2">{req.gender}</td>
-            <td className="px-4 py-2">{req.status}</td>
-            <td className="px-4 py-2 space-x-2">
-              <button
-                onClick={() => {
-                  dispatch(setSelectedRequest(req));
-                  dispatch(setShowModal(true));
-                }}
-                className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-              >
-                View Request
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-
+        <h2 className="text-xl font-bold mb-2">Request History</h2>
+        <div className="overflow-x-auto shadow rounded-lg">
+          <table className="min-w-full divide-y divide-gray-200 bg-white border border-gray-200 text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                  Name
+                </th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                  Delivered On
+                </th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                  Budget
+                </th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                  Gender
+                </th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                  Status
+                </th>
+                <th className="px-4 py-2 text-left font-semibold text-gray-700">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {requestHistory.map((req) => (
+                <tr key={req._id} className="hover:bg-gray-50 transition">
+                  <td className="px-4 py-2">
+                    {req.customer?.name || req.customerName}
+                  </td>
+                  <td className="px-4 py-2">
+                    {req.deliveredAt
+                      ? new Date(req.deliveredAt).toLocaleDateString()
+                      : "Not Delivered"}
+                  </td>
+                  <td className="px-4 py-2">₹{req.budget}</td>
+                  <td className="px-4 py-2">{req.gender}</td>
+                  <td className="px-4 py-2">{req.status}</td>
+                  <td className="px-4 py-2 space-x-2">
+                    <button
+                      onClick={() => {
+                        dispatch(setSelectedRequest(req));
+                        dispatch(setShowModal(true));
+                      }}
+                      className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    >
+                      View Request
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {showModal && selectedRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -258,22 +321,27 @@ const CustomOrder = () => {
             >
               ✕
             </button>
-            {renderRequestCard(selectedRequest, false, selectedRequest.status !== "Delivered")}
+            {renderRequestCard(
+              selectedRequest,
+              false,
+              selectedRequest.status !== "Delivered"
+            )}
           </div>
         </div>
       )}
 
-      {chatUser && (
-        <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
-          <ChatBox currentUser={profile} selectedUser={chatUser} />
-          <button
-            onClick={() => dispatch(setChatUser(null))}
-            className="mt-2 text-sm text-red-600 hover:underline"
-          >
-            Close Chat
-          </button>
-        </div>
-      )}
+      {chatUser && profile && chatUser._id && profile._id && (
+  <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
+    <ChatBox currentUser={profile} selectedUser={chatUser} />
+    <button
+      onClick={() => dispatch(setChatUser(null))}
+      className="mt-2 text-sm text-red-600 hover:underline"
+    >
+      Close Chat
+    </button>
+  </div>
+)}
+
     </div>
   );
 };

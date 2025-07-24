@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector ,useDispatch} from "react-redux";
 import { toast } from "react-hot-toast";
 import RequestDisplayCard from "../components/RequestDisplayCard";
 import RequestEditForm from "../components/RequestEditForm";
 import RequestUploadForm from "../components/RequestUploadForm";
 import ChatBox from "../components/ChatBox";
+import { setChatUser } from "../redux/chatSlice";
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
   const role = useSelector((state) => state.auth.role);
   const profile = useSelector((state) => state.auth.profile);
   const tailors = useSelector((state) => state.social.tailors || []);
-
+const dispatch = useDispatch();
+const chatUser = useSelector((state) => state.chat.chatUser);
 
   const [requests, setRequests] = useState([]);
   const [history, setHistory] = useState([]);
@@ -28,7 +30,7 @@ const Customize = () => {
 
   const [preview, setPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [chatUser, setChatUser] = useState(null);
+  
   const [showHistory, setShowHistory] = useState(false);
   const [openCardId, setOpenCardId] = useState(null);
 
@@ -300,7 +302,7 @@ const Customize = () => {
               handleDelete={() => handleDelete(req._id)}
               setEditingId={setEditingId}
               handleConfirm={handleConfirm}
-              setChatUser={setChatUser}
+              setChatUser={(user) => dispatch(setChatUser(user))}
             />
           )}
         </div>
@@ -358,7 +360,7 @@ const Customize = () => {
                   <div className="p-2">
                     <RequestDisplayCard
                       req={req}
-                      setChatUser={setChatUser}
+                       setChatUser={(user) => dispatch(setChatUser(user))}
                       handleDelete={() => {}}
                       setEditingId={() => {}}
                       handleConfirm={() => {}}
@@ -381,7 +383,7 @@ const Customize = () => {
         <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
           <ChatBox currentUser={profile} selectedUser={chatUser} />
           <button
-            onClick={() => setChatUser(null)}
+            onClick={() => dispatch(setChatUser(null))}
             className="mt-2 text-sm text-red-600 hover:underline"
           >
             Close Chat

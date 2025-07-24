@@ -9,7 +9,7 @@ const initialState = {
   timers: {},
   selectedRequest: null,
   showModal: false,
-  chatUser: null,
+  
 };
 
 const customSlice = createSlice({
@@ -37,9 +37,7 @@ const customSlice = createSlice({
     setShowModal: (state, action) => {
       state.showModal = action.payload;
     },
-    setChatUser: (state, action) => {
-      state.chatUser = action.payload;
-    },
+    
   },
 });
 
@@ -51,7 +49,7 @@ export const {
   setTimers,
   setSelectedRequest,
   setShowModal,
-  setChatUser,
+
 } = customSlice.actions;
 
 export default customSlice.reducer;

@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ViewProfileButton from "./ViewProfileButton";
+import { setChatUser } from "../redux/chatSlice";
 
 const RequestDisplayCard = ({
   req,
   handleDelete,
   setEditingId,
   handleConfirm,
-  setChatUser,
 }) => {
   const dispatch = useDispatch();
   const tailors = useSelector((state) => state.social.tailors || []);
@@ -212,10 +212,13 @@ const RequestDisplayCard = ({
       {req?.tailorId && req?.status !== "Uploaded" && (
         <button
           onClick={() =>
-            setChatUser({
-              _id: tailorId,
-              name: tailorName(),
-            })
+           dispatch(
+  setChatUser({
+    _id: tailorId,
+    name: tailorName(),
+  })
+)
+
           }
           className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded"
         >
