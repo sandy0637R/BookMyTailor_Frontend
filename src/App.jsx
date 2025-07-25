@@ -20,6 +20,8 @@ import TailorProfile from "./components/TailorProfile";
 import CustomerProfile from "./pages/CustomerProfile";
 import ClothPage from "./pages/ClothPage";
 import Measurement from "./pages/Measurement";
+import ChatPage from "./pages/ChatPage";
+
 const App = () => {
   return (
     <div className="relative min-h-screen">
@@ -45,6 +47,7 @@ const App = () => {
           <Route path="/customerprofile/:id" element={<CustomerProfile />} />
           <Route path="/cloths/:clothId" element={<ClothPage />} />
           <Route path="/measurement" element={<Measurement />} />
+          <Route path="/chat" element={<ChatPage/>}/>
 
 
 

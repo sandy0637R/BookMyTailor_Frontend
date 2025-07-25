@@ -7,6 +7,7 @@ const chatSlice = createSlice({
     loading: false,
     error: null,
     chatUser: null, // 👈 added here
+    chatUsers: [], // 👈 added here
   },
   reducers: {
     fetchChatRequest: (state) => {
@@ -32,6 +33,19 @@ const chatSlice = createSlice({
     },
     setChatUser: (state, action) => {  // 👈 added here
       state.chatUser = action.payload;
+      state.loading = false; 
+    },
+    fetchChatUsersRequest: (state) => {  // ✅ REQUIRED for saga to listen
+      state.loading = true;
+      state.error = null;
+    },
+    fetchChatUsersSuccess: (state, action) => { // 👈 added here
+      state.loading = false;
+      state.chatUsers = action.payload;
+    },
+    fetchChatUsersFailure: (state, action) => { // 👈 added here
+      state.loading = false;
+      state.error = action.payload;
     },
   },
 });
@@ -46,6 +60,9 @@ export const {
   markMessagesReadFailure,
   clearChat,
   setChatUser, // 👈 added here
+  fetchChatUsersRequest, // ✅ now included here
+  fetchChatUsersSuccess, // 👈 added here
+  fetchChatUsersFailure, // 👈 added here
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

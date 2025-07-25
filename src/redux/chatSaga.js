@@ -6,6 +6,9 @@ import {
   fetchChatFailure,
   markMessagesReadSuccess,
   markMessagesReadFailure,
+  fetchChatUsersRequest,
+  fetchChatUsersSuccess,
+  fetchChatUsersFailure,
 } from "./chatSlice";
 import { toast } from "react-hot-toast";
 
@@ -47,8 +50,26 @@ function* markMessagesReadSaga(action) {
   }
 }
 
+// 👥 Fetch chat user list
+function* fetchChatUsersSaga() {
+  try {
+    const token = yield select((state) => state.auth.token);
+
+    const { data } = yield call(axios.get, `${BASE_URL}/api/chat/chat-users`, {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    });
+
+    yield put(fetchChatUsersSuccess(data));
+  } catch (error) {
+    yield put(fetchChatUsersFailure(error.message));
+    toast.error("Failed to load chat users");
+  }
+}
+
 // 👀 Watcher saga
 export function* watchChat() {
   yield takeLatest(fetchChatRequest.type, fetchChatSaga);
   yield takeLatest("chat/markMessagesReadRequest", markMessagesReadSaga);
+  yield takeLatest(fetchChatUsersRequest.type, fetchChatUsersSaga);
 }
