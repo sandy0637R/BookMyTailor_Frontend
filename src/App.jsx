@@ -48,6 +48,8 @@ const App = () => {
           <Route path="/cloths/:clothId" element={<ClothPage />} />
           <Route path="/measurement" element={<Measurement />} />
           <Route path="/chat" element={<ChatPage/>}/>
+          <Route path="/chat/:userId" element={<ChatPage/>}/>
+          
 
 
 

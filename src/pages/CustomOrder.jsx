@@ -4,10 +4,12 @@ import { toast } from "react-hot-toast";
 import ChatBox from "../components/ChatBox";
 import ViewProfileButton from "../components/ViewProfileButton";
 import { setSelectedRequest, setShowModal } from "../redux/customSlice";
-import { setChatUser } from "../redux/chatSlice";
+import { useNavigate } from "react-router-dom"; // ✅ import useNavigate
 
 const CustomOrder = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // ✅ create navigate instance
+
   const token = useSelector((state) => state.auth.token);
   const roles = useSelector((state) => state.auth.roles);
   const profile = useSelector((state) => state.auth.profile);
@@ -22,7 +24,6 @@ const CustomOrder = () => {
     showModal,
   } = useSelector((state) => state.custom);
   const chatUser = useSelector((state) => state.chat.chatUser);
-
 
   const statusPhases = ["Accepted", "Ready", "Out for Delivery", "Delivered"];
 
@@ -119,8 +120,8 @@ const CustomOrder = () => {
         {!showAccept && (
           <button
             onClick={() =>
-  dispatch(setChatUser({ ...req.customer, _id: req.customer?.userId }))
-}
+              navigate(`/chat/${req.customer?.userId}`) // ✅ navigate to ChatPage
+            }
             className="px-3 py-1 bg-indigo-600 text-white rounded"
           >
             Chat
@@ -329,19 +330,6 @@ const CustomOrder = () => {
           </div>
         </div>
       )}
-
-      {chatUser && profile && chatUser._id && profile._id && (
-  <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
-    <ChatBox currentUser={profile} selectedUser={chatUser} />
-    <button
-      onClick={() => dispatch(setChatUser(null))}
-      className="mt-2 text-sm text-red-600 hover:underline"
-    >
-      Close Chat
-    </button>
-  </div>
-)}
-
     </div>
   );
 };

@@ -5,16 +5,15 @@ import { toast } from "react-hot-toast";
 import RequestDisplayCard from "../components/RequestDisplayCard";
 import RequestEditForm from "../components/RequestEditForm";
 import RequestUploadForm from "../components/RequestUploadForm";
-import ChatBox from "../components/ChatBox";
 import { setChatUser } from "../redux/chatSlice";
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
   const role = useSelector((state) => state.auth.role);
-  const profile = useSelector((state) => state.auth.profile);
+ 
   const tailors = useSelector((state) => state.social.tailors || []);
-const dispatch = useDispatch();
-const chatUser = useSelector((state) => state.chat.chatUser);
+  const dispatch = useDispatch();
+ 
 
   const [requests, setRequests] = useState([]);
   const [history, setHistory] = useState([]);
@@ -30,7 +29,6 @@ const chatUser = useSelector((state) => state.chat.chatUser);
 
   const [preview, setPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  
   const [showHistory, setShowHistory] = useState(false);
   const [openCardId, setOpenCardId] = useState(null);
 
@@ -319,76 +317,73 @@ const chatUser = useSelector((state) => state.chat.chatUser);
           </button>
 
           {showHistory && (
-  <div className="overflow-x-auto">
-    <table className="w-full text-sm border border-gray-300 mb-4">
-      <thead className="bg-gray-100">
-        <tr>
-          <th className="p-2 border">Tailor Name</th>
-          <th className="p-2 border">Status</th>
-          <th className="p-2 border">Delivered On</th>
-          <th className="p-2 border">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {history.map((req) => (
-          <React.Fragment key={req._id}>
-            <tr>
-              <td className="p-2 border text-center">
-                {typeof req.tailorId === "object"
-                  ? req.tailorId.name
-                  : (tailors.find((t) => t._id === req.tailorId)?.name || "N/A")}
-              </td>
-              <td className="p-2 border text-center">{req.status}</td>
-              <td className="p-2 border text-center">
-  {req.deliveredAt ? new Date(req.deliveredAt).toLocaleDateString() : "Pending"}
-</td>
-
-              <td className="p-2 border text-center">
-                <button
-                  onClick={() =>
-                    setOpenCardId(openCardId === req._id ? null : req._id)
-                  }
-                  className="text-blue-600 underline"
-                >
-                  {openCardId === req._id ? "Hide Request" : "View Request"}
-                </button>
-              </td>
-            </tr>
-            {openCardId === req._id && (
-              <tr>
-                <td colSpan="4" className="p-2 border">
-                  <div className="p-2">
-                    <RequestDisplayCard
-                      req={req}
-                       setChatUser={(user) => dispatch(setChatUser(user))}
-                      handleDelete={() => {}}
-                      setEditingId={() => {}}
-                      handleConfirm={() => {}}
-                    />
-                  </div>
-                </td>
-              </tr>
-            )}
-          </React.Fragment>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
-
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border border-gray-300 mb-4">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2 border">Tailor Name</th>
+                    <th className="p-2 border">Status</th>
+                    <th className="p-2 border">Delivered On</th>
+                    <th className="p-2 border">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((req) => (
+                    <React.Fragment key={req._id}>
+                      <tr>
+                        <td className="p-2 border text-center">
+                          {typeof req.tailorId === "object"
+                            ? req.tailorId.name
+                            : (
+                                tailors.find((t) => t._id === req.tailorId)
+                                  ?.name || "N/A"
+                              )}
+                        </td>
+                        <td className="p-2 border text-center">{req.status}</td>
+                        <td className="p-2 border text-center">
+                          {req.deliveredAt
+                            ? new Date(req.deliveredAt).toLocaleDateString()
+                            : "Pending"}
+                        </td>
+                        <td className="p-2 border text-center">
+                          <button
+                            onClick={() =>
+                              setOpenCardId(
+                                openCardId === req._id ? null : req._id
+                              )
+                            }
+                            className="text-blue-600 underline"
+                          >
+                            {openCardId === req._id
+                              ? "Hide Request"
+                              : "View Request"}
+                          </button>
+                        </td>
+                      </tr>
+                      {openCardId === req._id && (
+                        <tr>
+                          <td colSpan="4" className="p-2 border">
+                            <div className="p-2">
+                              <RequestDisplayCard
+                                req={req}
+                                setChatUser={(user) =>
+                                  dispatch(setChatUser(user))
+                                }
+                                handleDelete={() => {}}
+                                setEditingId={() => {}}
+                                handleConfirm={() => {}}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
-      )}
-
-      {chatUser && (
-        <div className="fixed bottom-0 right-0 w-full max-w-md p-4 bg-white shadow-lg z-50">
-          <ChatBox currentUser={profile} selectedUser={chatUser} />
-          <button
-            onClick={() => dispatch(setChatUser(null))}
-            className="mt-2 text-sm text-red-600 hover:underline"
-          >
-            Close Chat
-          </button>
-        </div>
       )}
     </div>
   );

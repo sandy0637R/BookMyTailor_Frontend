@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ViewProfileButton from "./ViewProfileButton";
 import { setChatUser } from "../redux/chatSlice";
+import { useNavigate } from "react-router-dom"; 
 
 const RequestDisplayCard = ({
   req,
@@ -11,6 +12,7 @@ const RequestDisplayCard = ({
 }) => {
   const dispatch = useDispatch();
   const tailors = useSelector((state) => state.social.tailors || []);
+  const navigate = useNavigate();
 
   const tailorId =
     typeof req?.tailorId === "object" ? req?.tailorId?._id : req?.tailorId;
@@ -29,6 +31,18 @@ const RequestDisplayCard = ({
     if (typeof req?.tailorId === "object") return req?.tailorId?.name;
     const found = tailors.find((t) => t._id === req?.tailorId);
     return found?.name || "Tailor";
+  };
+
+  const handleSendMessage = () => {
+    // ✅ 1. Set chat user in redux
+    dispatch(
+      setChatUser({
+        _id: tailorId,
+        name: tailorName(),
+      })
+    );
+    // ✅ 2. Navigate to /chat/:userId
+    navigate(`/chat/${tailorId}`);
   };
 
   const renderTrackingStatus = (status) => {
@@ -209,17 +223,9 @@ const RequestDisplayCard = ({
         </button>
       )}
 
-      {req?.tailorId && req?.status !== "Uploaded" && (
+       {req?.tailorId && req?.status !== "Uploaded" && (
         <button
-          onClick={() =>
-           dispatch(
-  setChatUser({
-    _id: tailorId,
-    name: tailorName(),
-  })
-)
-
-          }
+          onClick={handleSendMessage} // ✅ Call combined handler
           className="mt-2 bg-indigo-600 text-white px-3 py-1 rounded"
         >
           Send Message

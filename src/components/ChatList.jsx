@@ -4,12 +4,11 @@ import { setChatUser, fetchChatUsersRequest } from '../redux/chatSlice';
 
 const ChatList = ({ currentUser }) => {
   const dispatch = useDispatch();
-
-  const { chatUsers, loading, error } = useSelector((state) => state.chat);
+  const { chatUsers, loading, error, messages } = useSelector((state) => state.chat);
 
   useEffect(() => {
     dispatch(fetchChatUsersRequest());
-  }, [dispatch]);
+  }, [dispatch, messages]); // ✅ re-fetch chat users when new message arrives
 
   const openChat = (user) => {
     dispatch(setChatUser(user));
@@ -24,17 +23,19 @@ const ChatList = ({ currentUser }) => {
       ) : chatUsers.length === 0 ? (
         <p>No chats yet</p>
       ) : (
-        chatUsers.map(({ user, lastMessage, timestamp }) => (
-          <div
-            key={user._id}
-            onClick={() => openChat(user)}
-            className="p-3 border rounded-lg cursor-pointer hover:bg-gray-100"
-          >
-            <div className="font-semibold">{user.name}</div>
-            <div className="text-sm text-gray-600 truncate">{lastMessage}</div>
-            <div className="text-xs text-gray-400">{new Date(timestamp).toLocaleString()}</div>
-          </div>
-        ))
+        [...chatUsers]
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // ✅ latest message first
+          .map(({ user, lastMessage, timestamp }) => (
+            <div
+              key={user._id}
+              onClick={() => openChat(user)}
+              className="p-3 border rounded-lg cursor-pointer hover:bg-gray-100"
+            >
+              <div className="font-semibold">{user.name}</div>
+              <div className="text-sm text-gray-600 truncate">{lastMessage}</div>
+              <div className="text-xs text-gray-400">{new Date(timestamp).toLocaleString()}</div>
+            </div>
+          ))
       )}
     </div>
   );

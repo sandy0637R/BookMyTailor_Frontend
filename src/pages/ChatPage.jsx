@@ -1,11 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router-dom";
 import ChatList from "../components/ChatList";
 import ChatBox from "../components/ChatBox";
 import { fetchChatUsersRequest, setChatUser } from "../redux/chatSlice";
 
 const ChatPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { userId } = useParams();
+  const initialized = useRef(false); // ✅ Track if user was set from URL
+
   const profile = useSelector((state) => state.auth.profile);
   const chatUser = useSelector((state) => state.chat.chatUser);
   const chatUsers = useSelector((state) => state.chat.chatUsers);
@@ -15,12 +20,19 @@ const ChatPage = () => {
     dispatch(fetchChatUsersRequest());
   }, [dispatch]);
 
-  // TEMP: auto-select chatUser if none selected
+  // ✅ Set chat user from URL only once
   useEffect(() => {
-    if (profile && !chatUser && chatUsers.length > 0) {
-      dispatch(setChatUser(chatUsers[0]));
+    if (!initialized.current && userId && chatUsers.length > 0) {
+      const selected = chatUsers.find((item) => item.user._id === userId);
+      if (selected) {
+        dispatch(setChatUser(selected.user));
+        initialized.current = true;
+
+        // ✅ Clean the URL after setting chat user
+        navigate("/chat", { replace: true });
+      }
     }
-  }, [dispatch, profile, chatUser, chatUsers]);
+  }, [userId, chatUsers, dispatch, navigate]);
 
   return (
     <div className="flex h-full">
@@ -29,15 +41,13 @@ const ChatPage = () => {
         <ChatList chatUsers={chatUsers} currentUser={profile} />
       </div>
 
-      {/* Right: ChatBox or Placeholder */}
-      <div className="w-2/3">
+      {/* Right: Chat Box or Placeholder */}
+      <div className="w-2/3 relative">
         {chatUser ? (
           <ChatBox currentUser={profile} selectedUser={chatUser} />
-        ) : loading ? (
-          <div className="flex items-center justify-center h-full">Loading...</div>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            Select a user to start chatting
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-lg">
+            {loading ? "Loading..." : "Select a user to start chatting"}
           </div>
         )}
       </div>

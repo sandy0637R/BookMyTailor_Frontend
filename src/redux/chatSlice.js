@@ -6,8 +6,10 @@ const chatSlice = createSlice({
     messages: [],
     loading: false,
     error: null,
-    chatUser: null, // 👈 added here
-    chatUsers: [], // 👈 added here
+    chatUser: null,
+    chatUsers: [],
+    sendMessageLoading: false,
+    sendMessageError: null,
   },
   reducers: {
     fetchChatRequest: (state) => {
@@ -31,21 +33,51 @@ const chatSlice = createSlice({
     clearChat: (state) => {
       state.messages = [];
     },
-    setChatUser: (state, action) => {  // 👈 added here
+    setChatUser: (state, action) => {
       state.chatUser = action.payload;
-      state.loading = false; 
+      state.loading = false;
     },
-    fetchChatUsersRequest: (state) => {  // ✅ REQUIRED for saga to listen
+    fetchChatUsersRequest: (state) => {
       state.loading = true;
       state.error = null;
     },
-    fetchChatUsersSuccess: (state, action) => { // 👈 added here
+    fetchChatUsersSuccess: (state, action) => {
       state.loading = false;
       state.chatUsers = action.payload;
     },
-    fetchChatUsersFailure: (state, action) => { // 👈 added here
+    fetchChatUsersFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
+    },
+
+    updateLastMessageInChatUsers: (state, action) => {
+      const { recipientId, message, timestamp } = action.payload;
+      const existingUser = state.chatUsers.find(
+        (chat) => chat.user._id === recipientId
+      );
+      if (existingUser) {
+        existingUser.lastMessage = message;
+        existingUser.timestamp = timestamp;
+      } else {
+        state.chatUsers.unshift({
+          user: { _id: recipientId, name: "New Chat" },
+          lastMessage: message,
+          timestamp,
+        });
+      }
+    },
+
+    // ✅ Added for sendMessage logic
+    sendMessageRequest: (state) => {
+      state.sendMessageLoading = true;
+      state.sendMessageError = null;
+    },
+    sendMessageSuccess: (state) => {
+      state.sendMessageLoading = false;
+    },
+    sendMessageFailure: (state, action) => {
+      state.sendMessageLoading = false;
+      state.sendMessageError = action.payload;
     },
   },
 });
@@ -59,10 +91,14 @@ export const {
   markMessagesReadSuccess,
   markMessagesReadFailure,
   clearChat,
-  setChatUser, // 👈 added here
-  fetchChatUsersRequest, // ✅ now included here
-  fetchChatUsersSuccess, // 👈 added here
-  fetchChatUsersFailure, // 👈 added here
+  setChatUser,
+  fetchChatUsersRequest,
+  fetchChatUsersSuccess,
+  fetchChatUsersFailure,
+  updateLastMessageInChatUsers,
+  sendMessageRequest,
+  sendMessageSuccess,
+  sendMessageFailure,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

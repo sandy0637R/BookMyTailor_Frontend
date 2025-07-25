@@ -9,6 +9,8 @@ import {
   fetchChatUsersRequest,
   fetchChatUsersSuccess,
   fetchChatUsersFailure,
+  sendMessageSuccess,
+  sendMessageFailure, 
 } from "./chatSlice";
 import { toast } from "react-hot-toast";
 
@@ -67,9 +69,34 @@ function* fetchChatUsersSaga() {
   }
 }
 
+// 📨 Send message saga
+function* sendMessageSaga(action) {
+  try {
+    const token = yield select((state) => state.auth.token);
+    const { senderId, receiverId, message } = action.payload;
+
+    yield call(axios.post, `${BASE_URL}/api/chat/send`, {
+      sender: senderId,
+      receiver: receiverId,
+      message,
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    });
+
+    yield put(sendMessageSuccess());
+    yield put(fetchChatUsersRequest()); // ✅ Refresh chat users after message
+  } catch (error) {
+    yield put(sendMessageFailure(error.message));
+    toast.error("Failed to send message");
+  }
+}
+
 // 👀 Watcher saga
 export function* watchChat() {
   yield takeLatest(fetchChatRequest.type, fetchChatSaga);
   yield takeLatest("chat/markMessagesReadRequest", markMessagesReadSaga);
   yield takeLatest(fetchChatUsersRequest.type, fetchChatUsersSaga);
+  yield takeLatest("chat/sendMessageRequest", sendMessageSaga);
+
 }
