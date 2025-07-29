@@ -10,7 +10,11 @@ import {
   fetchChatUsersSuccess,
   fetchChatUsersFailure,
   sendMessageSuccess,
-  sendMessageFailure, 
+  sendMessageFailure,
+  startChatWithUserRequest,
+  startChatWithUserSuccess,
+  startChatWithUserFailure,
+  setChatUser
 } from "./chatSlice";
 import { toast } from "react-hot-toast";
 
@@ -22,10 +26,14 @@ function* fetchChatSaga(action) {
     const token = yield select((state) => state.auth.token);
     const { userId1, userId2 } = action.payload;
 
-    const { data } = yield call(axios.get, `${BASE_URL}/api/chat/conversation/${userId1}/${userId2}`, {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
-    });
+    const { data } = yield call(
+      axios.get,
+      `${BASE_URL}/api/chat/conversation/${userId1}/${userId2}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      }
+    );
 
     yield put(fetchChatSuccess(data));
   } catch (error) {
@@ -40,10 +48,15 @@ function* markMessagesReadSaga(action) {
     const token = yield select((state) => state.auth.token);
     const messageIds = action.payload;
 
-    yield call(axios.put, `${BASE_URL}/api/chat/mark-read`, { messageIds }, {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
-    });
+    yield call(
+      axios.put,
+      `${BASE_URL}/api/chat/mark-read`,
+      { messageIds },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      }
+    );
 
     yield put(markMessagesReadSuccess());
   } catch (error) {
@@ -75,14 +88,19 @@ function* sendMessageSaga(action) {
     const token = yield select((state) => state.auth.token);
     const { senderId, receiverId, message } = action.payload;
 
-    yield call(axios.post, `${BASE_URL}/api/chat/send`, {
-      sender: senderId,
-      receiver: receiverId,
-      message,
-    }, {
-      headers: { Authorization: `Bearer ${token}` },
-      withCredentials: true,
-    });
+    yield call(
+      axios.post,
+      `${BASE_URL}/api/chat/send`,
+      {
+        sender: senderId,
+        receiver: receiverId,
+        message,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      }
+    );
 
     yield put(sendMessageSuccess());
     yield put(fetchChatUsersRequest()); // ✅ Refresh chat users after message
@@ -92,11 +110,42 @@ function* sendMessageSaga(action) {
   }
 }
 
+// 💬 Start chat saga using `startChatWithUserRequest`
+function* startChatWithUserSaga(action) {
+  try {
+    const token = yield select((state) => state.auth.token);
+    const { senderId, receiverId } = action.payload;
+
+    if (!senderId || !receiverId) {
+      throw new Error("Invalid sender or receiver ID");
+    }
+
+    const { data } = yield call(
+      axios.post,
+      `${BASE_URL}/api/chat/start`,
+      { sender: senderId.toString(), receiver: receiverId.toString() },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      }
+    );
+
+    // 👇 Set chatUser manually for navigation
+    yield put(startChatWithUserSuccess({ _id: receiverId }));
+    toast.success("Chat started");
+  } catch (error) {
+    yield put(startChatWithUserFailure(error.message));
+    toast.error("Failed to start chat");
+  }
+}
+
+
+
 // 👀 Watcher saga
 export function* watchChat() {
   yield takeLatest(fetchChatRequest.type, fetchChatSaga);
   yield takeLatest("chat/markMessagesReadRequest", markMessagesReadSaga);
   yield takeLatest(fetchChatUsersRequest.type, fetchChatUsersSaga);
   yield takeLatest("chat/sendMessageRequest", sendMessageSaga);
-
+  yield takeLatest(startChatWithUserRequest.type, startChatWithUserSaga); // ✅ Correct watcher
 }

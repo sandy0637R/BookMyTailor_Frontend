@@ -5,6 +5,7 @@ import ChatBox from "../components/ChatBox";
 import ViewProfileButton from "../components/ViewProfileButton";
 import { setSelectedRequest, setShowModal } from "../redux/customSlice";
 import { useNavigate } from "react-router-dom"; // ✅ import useNavigate
+import { startChatWithUserRequest,setChatUser } from "../redux/chatSlice";
 
 const CustomOrder = () => {
   const dispatch = useDispatch();
@@ -47,6 +48,20 @@ const CustomOrder = () => {
       payload: { requestId, customerId, newStatus },
     });
   };
+
+ const handleStartChat = (receiverId) => {
+  dispatch(startChatWithUserRequest({
+    senderId: profile._id,
+    receiverId,
+  }));
+
+  // Wait for Redux state to update, then navigate
+  setTimeout(() => {
+    navigate(`/chat/${receiverId}`);
+  }, 300); // 300ms is usually safe, can adjust if needed
+};
+
+
 
   const renderRequestCard = (req, showAccept, showUpdate) => {
     const requestId = req._id;
@@ -119,13 +134,12 @@ const CustomOrder = () => {
         )}
         {!showAccept && (
           <button
-            onClick={() =>
-              navigate(`/chat/${req.customer?.userId}`) // ✅ navigate to ChatPage
-            }
-            className="px-3 py-1 bg-indigo-600 text-white rounded"
-          >
-            Chat
-          </button>
+  onClick={() => handleStartChat(req.customer?.userId)}
+  className="px-3 py-1 bg-indigo-600 text-white rounded"
+>
+  Chat
+</button>
+
         )}
         {showAccept && req.status === "Uploaded" && (
           <button

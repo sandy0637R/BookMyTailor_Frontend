@@ -67,7 +67,6 @@ const chatSlice = createSlice({
       }
     },
 
-    // ✅ Added for sendMessage logic
     sendMessageRequest: (state) => {
       state.sendMessageLoading = true;
       state.sendMessageError = null;
@@ -78,6 +77,21 @@ const chatSlice = createSlice({
     sendMessageFailure: (state, action) => {
       state.sendMessageLoading = false;
       state.sendMessageError = action.payload;
+    },
+
+    // ✅ New reducers for starting chat with user
+    startChatWithUserRequest: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+   startChatWithUserSuccess: (state, action) => {
+  state.loading = false;
+  state.chatUser = action.payload;
+},
+
+    startChatWithUserFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
     },
   },
 });
@@ -99,6 +113,9 @@ export const {
   sendMessageRequest,
   sendMessageSuccess,
   sendMessageFailure,
+  startChatWithUserRequest,
+  startChatWithUserSuccess,
+  startChatWithUserFailure,
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

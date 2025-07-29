@@ -38,7 +38,7 @@ const ChatPage = () => {
     <div className="flex h-full">
       {/* Left: Chat List */}
       <div className="w-1/3 border-r overflow-y-auto">
-        <ChatList chatUsers={chatUsers} currentUser={profile} />
+        <ChatList currentUser={profile} />
       </div>
 
       {/* Right: Chat Box or Placeholder */}

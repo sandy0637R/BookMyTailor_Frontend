@@ -14,6 +14,16 @@ const ChatList = ({ currentUser }) => {
     dispatch(setChatUser(user));
   };
 
+  // ✅ Check if user has unread messages
+  const hasUnreadMessages = (userId) => {
+    return messages.some(
+      (msg) =>
+        msg.sender?._id === userId &&
+        msg.receiver?._id === currentUser._id &&
+        msg.read === false
+    );
+  };
+
   return (
     <div className="p-4 space-y-4">
       {loading ? (
@@ -25,17 +35,22 @@ const ChatList = ({ currentUser }) => {
       ) : (
         [...chatUsers]
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // ✅ latest message first
-          .map(({ user, lastMessage, timestamp }) => (
-            <div
-              key={user._id}
-              onClick={() => openChat(user)}
-              className="p-3 border rounded-lg cursor-pointer hover:bg-gray-100"
-            >
-              <div className="font-semibold">{user.name}</div>
-              <div className="text-sm text-gray-600 truncate">{lastMessage}</div>
-              <div className="text-xs text-gray-400">{new Date(timestamp).toLocaleString()}</div>
-            </div>
-          ))
+          .map(({ user, lastMessage, timestamp }) => {
+            const isUnread = hasUnreadMessages(user._id);
+            return (
+              <div
+                key={user._id}
+                onClick={() => openChat(user)}
+                className={`p-3 border rounded-lg cursor-pointer hover:bg-gray-100 ${
+                  isUnread ? 'bg-yellow-100 font-semibold' : ''
+                }`}
+              >
+                <div className="font-semibold">{user.name}</div>
+                <div className="text-sm text-gray-600 truncate">{lastMessage}</div>
+                <div className="text-xs text-gray-400">{new Date(timestamp).toLocaleString()}</div>
+              </div>
+            );
+          })
       )}
     </div>
   );
