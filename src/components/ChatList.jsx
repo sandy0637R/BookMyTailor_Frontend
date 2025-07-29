@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setChatUser, fetchChatUsersRequest } from '../redux/chatSlice';
 
 const ChatList = ({ currentUser }) => {
   const dispatch = useDispatch();
   const { chatUsers, loading, error, chatUser, unreadCounts } = useSelector((state) => state.chat);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     dispatch(fetchChatUsersRequest());
@@ -18,16 +19,28 @@ const ChatList = ({ currentUser }) => {
     return unreadCounts?.[userId] || 0;
   };
 
+  const filteredUsers = chatUsers.filter(({ user }) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-4 space-y-4">
+      <input
+        type="text"
+        placeholder="Search user..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full p-2 border rounded-md mb-2"
+      />
+
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
         <p className="text-red-500">Error loading chats</p>
-      ) : chatUsers.length === 0 ? (
-        <p>No chats yet</p>
+      ) : filteredUsers.length === 0 ? (
+        <p>No chats found</p>
       ) : (
-        [...chatUsers]
+        [...filteredUsers]
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
           .map(({ user, lastMessage, timestamp }) => {
             const unreadCount = getUnreadCount(user._id);
