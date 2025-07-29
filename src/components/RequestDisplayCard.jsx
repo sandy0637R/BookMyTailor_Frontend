@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import ViewProfileButton from "./ViewProfileButton";
 import { setChatUser } from "../redux/chatSlice";
 import { useNavigate } from "react-router-dom"; 
+import { startChatWithUserRequest } from "../redux/chatSlice"; 
 
 const RequestDisplayCard = ({
   req,
@@ -12,6 +13,8 @@ const RequestDisplayCard = ({
 }) => {
   const dispatch = useDispatch();
   const tailors = useSelector((state) => state.social.tailors || []);
+  const profile = useSelector((state) => state.auth.profile); // ✅ Add this
+ 
   const navigate = useNavigate();
 
   const tailorId =
@@ -33,17 +36,45 @@ const RequestDisplayCard = ({
     return found?.name || "Tailor";
   };
 
-  const handleSendMessage = () => {
-    // ✅ 1. Set chat user in redux
-    dispatch(
-      setChatUser({
-        _id: tailorId,
-        name: tailorName(),
-      })
-    );
-    // ✅ 2. Navigate to /chat/:userId
-    navigate(`/chat/${tailorId}`);
-  };
+ const handleSendMessage = () => {
+  const confirmStart = window.confirm(
+    "Do you want to start a conversation with this tailor?"
+  );
+  if (!confirmStart) return;
+
+
+  // ✅ Use tailorId (extracted from req.tailorId)
+  const receiverId =  req.tailorId;
+
+  if (!profile?._id || !receiverId) {
+    alert("Missing profile or user ID");
+    return;
+  }
+
+  dispatch(
+    startChatWithUserRequest({
+      senderId: profile._id,
+      receiverId,
+    })
+  );
+
+  dispatch(
+    setChatUser({
+      _id: receiverId,
+      name: tailorName(),
+    })
+  );
+
+  setTimeout(() => {
+    navigate(`/chat/${receiverId}`);
+  }, 300);
+};
+
+
+
+
+
+
 
   const renderTrackingStatus = (status) => {
     const steps = [

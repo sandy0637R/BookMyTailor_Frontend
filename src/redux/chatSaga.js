@@ -132,7 +132,6 @@ function* startChatWithUserSaga(action) {
 
     // 👇 Set chatUser manually for navigation
     yield put(startChatWithUserSuccess({ _id: receiverId }));
-    toast.success("Chat started");
   } catch (error) {
     yield put(startChatWithUserFailure(error.message));
     toast.error("Failed to start chat");

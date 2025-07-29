@@ -1,11 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Load each key individually
+// Load profile safely
+const savedProfile = JSON.parse(localStorage.getItem("profile")) || null;
 const savedAuth = {
   isLoggedIn: JSON.parse(localStorage.getItem("isLoggedIn")) || false,
   roles: JSON.parse(localStorage.getItem("roles")) || ["customer"],
   tailorDetails: JSON.parse(localStorage.getItem("tailorDetails")) || null,
-  profile: JSON.parse(localStorage.getItem("profile")) || null,
+  profile: savedProfile,
+  userId: savedProfile?._id || "",
   token: localStorage.getItem("token") || null,
   role: localStorage.getItem("role") || "customer",
   profileImage: localStorage.getItem("profileImage") || null,
@@ -18,16 +20,19 @@ const initialState = {
   loading: false,
   error: null,
   cloths: [],
-  singleCloth: null, // ✅ added
+  singleCloth: null,
 };
 
 const saveToLocalStorage = (state) => {
+ 
+
   localStorage.setItem("isLoggedIn", JSON.stringify(state.isLoggedIn));
   localStorage.setItem("user", state.user || "");
   localStorage.setItem("email", state.email || "");
   localStorage.setItem("roles", JSON.stringify(state.roles || ["customer"]));
   localStorage.setItem("tailorDetails", JSON.stringify(state.tailorDetails));
   localStorage.setItem("profile", JSON.stringify(state.profile));
+  localStorage.setItem("userId", state.profile?._id || "");
   localStorage.setItem("token", state.token || "");
   localStorage.setItem("role", state.role || "customer");
   localStorage.setItem("profileImage", state.profileImage || "");
@@ -70,7 +75,15 @@ const authSlice = createSlice({
         quantity: entry.quantity,
       }));
 
-      state.profile = { _id, name, email, roles, tailorDetails, profileImage };
+      state.profile = {
+        _id,
+        name,
+        email,
+        roles,
+        tailorDetails,
+        profileImage,
+      };
+
       state.loading = false;
       state.roleError = null;
       state.error = null;
@@ -97,6 +110,7 @@ const authSlice = createSlice({
     },
     setProfile: (state, action) => {
       const {
+        _id,
         name,
         email,
         roles = ["customer"],
@@ -106,7 +120,15 @@ const authSlice = createSlice({
         cart = [],
       } = action.payload;
 
-      state.profile = action.payload;
+      state.profile = {
+        _id,
+        name,
+        email,
+        roles,
+        tailorDetails,
+        profileImage,
+      };
+
       state.user = name;
       state.email = email;
       state.roles = roles.map((role) => role.toLowerCase());
@@ -147,8 +169,6 @@ const authSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
-
-    // ✅ Cloth by ID actions
     getClothByIdRequest: (state) => {
       state.loading = true;
       state.error = null;
@@ -162,7 +182,6 @@ const authSlice = createSlice({
       state.error = action.payload;
       state.loading = false;
     },
-
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
@@ -180,8 +199,6 @@ const authSlice = createSlice({
       state.role = action.payload;
       localStorage.setItem("role", action.payload);
     },
-
-    // ✅ Wishlist + Cart actions
     addToWishlist: (state, action) => {},
     removeFromWishlist: (state, action) => {},
     addToCart: (state, action) => {},
@@ -205,9 +222,9 @@ export const {
   getClothsRequest,
   setCloths,
   setClothsError,
-  getClothByIdRequest,   // ✅ added
-  setSingleCloth,        // ✅ added
-  setSingleClothError,   // ✅ added
+  getClothByIdRequest,
+  setSingleCloth,
+  setSingleClothError,
   addToWishlist,
   removeFromWishlist,
   addToCart,

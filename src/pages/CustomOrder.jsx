@@ -49,16 +49,20 @@ const CustomOrder = () => {
     });
   };
 
- const handleStartChat = (receiverId) => {
+const handleStartChat = async (receiverId) => {
+  const confirmStart = window.confirm("Do you want to start a conversation with this user?");
+  
+  if (!confirmStart) return;
+
   dispatch(startChatWithUserRequest({
     senderId: profile._id,
     receiverId,
   }));
 
-  // Wait for Redux state to update, then navigate
+  // Slight delay to ensure Redux updates before navigation
   setTimeout(() => {
     navigate(`/chat/${receiverId}`);
-  }, 300); // 300ms is usually safe, can adjust if needed
+  }, 300);
 };
 
 
