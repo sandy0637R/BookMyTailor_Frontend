@@ -10,6 +10,8 @@ const chatSlice = createSlice({
     chatUsers: [],
     sendMessageLoading: false,
     sendMessageError: null,
+    unreadCounts: {}, 
+
   },
   reducers: {
     fetchChatRequest: (state) => {
@@ -43,7 +45,11 @@ const chatSlice = createSlice({
     },
     fetchChatUsersSuccess: (state, action) => {
       state.loading = false;
-      state.chatUsers = action.payload;
+    const { chatUsers, unreadCounts } = action.payload;
+state.chatUsers = chatUsers || [];
+state.unreadCounts = unreadCounts || {};
+
+
     },
     fetchChatUsersFailure: (state, action) => {
       state.loading = false;

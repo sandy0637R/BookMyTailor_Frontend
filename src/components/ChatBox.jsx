@@ -13,6 +13,7 @@ const ChatBox = ({ currentUser, selectedUser }) => {
   const [socket, setSocket] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
   const messagesEndRef = useRef(null);
+  const [firstUnreadId, setFirstUnreadId] = useState(null); // ✅ changed from ref to state
 
   useEffect(() => {
     if (!currentUser?._id || !selectedUser?._id) return;
@@ -44,7 +45,6 @@ const ChatBox = ({ currentUser, selectedUser }) => {
     return () => newSocket.disconnect();
   }, [currentUser?._id, selectedUser?._id, dispatch]);
 
-  // ✅ NEW: Create conversation if it doesn't exist
   useEffect(() => {
     if (socket && messages.length === 0 && currentUser?._id && selectedUser?._id) {
       socket.emit('startConversation', {
@@ -56,12 +56,20 @@ const ChatBox = ({ currentUser, selectedUser }) => {
 
   useEffect(() => {
     if (messages.length > 0) {
-      const unreadMessages = messages
-        .filter((msg) => !msg.read && msg.receiver === currentUser._id)
-        .map((msg) => msg._id);
+      const unreadMessages = messages.filter((msg) => {
+        const receiverId = typeof msg.receiver === 'string' ? msg.receiver : msg.receiver?._id;
+        return !msg.read && receiverId === currentUser._id;
+      });
 
       if (unreadMessages.length > 0) {
-        dispatch(markMessagesReadRequest(unreadMessages));
+        setFirstUnreadId(unreadMessages[0]._id); // ✅ store before marking read
+
+        setTimeout(() => {
+          const unreadIds = unreadMessages.map((msg) => msg._id);
+          dispatch(markMessagesReadRequest(unreadIds));
+        }, 100);
+      } else {
+        setFirstUnreadId(null);
       }
     }
   }, [messages, currentUser._id, dispatch]);
@@ -120,29 +128,39 @@ const ChatBox = ({ currentUser, selectedUser }) => {
           </div>
         ) : (
           messages.map((msg) => (
-            <div
-              key={msg._id}
-              className={`flex max-w-xs break-words p-3 rounded-lg ${
-                msg.sender?._id === currentUser._id
-                  ? 'self-end bg-blue-500 text-white ml-auto'
-                  : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 mr-auto'
-              }`}
-            >
-              <div>
-                <div className="text-xs font-semibold opacity-80">
-                  {msg.sender?._id === currentUser._id ? 'You' : msg.sender?.name || 'Unknown'}
+            <React.Fragment key={msg._id}>
+              {firstUnreadId === msg._id && (
+                <div className="text-center text-xs text-gray-500 dark:text-gray-400 my-2">
+                  ── New Messages ──
                 </div>
-                <div className="mt-1 text-sm">{msg.message}</div>
-                <div className="text-xs opacity-70 mt-1">
-                  {msg.timestamp
-                    ? new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                    : 'Just now'}
+              )}
+
+              <div
+                className={`flex max-w-xs break-words p-3 rounded-lg ${
+                  msg.sender?._id === currentUser._id
+                    ? 'self-end bg-blue-500 text-white ml-auto'
+                    : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 mr-auto'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-semibold opacity-80">
+                    {msg.sender?._id === currentUser._id ? 'You' : msg.sender?.name || 'Unknown'}
+                  </div>
+                  <div className="mt-1 text-sm">{msg.message}</div>
+                  <div className="text-xs opacity-70 mt-1 flex items-center gap-1">
+                    {msg.timestamp
+                      ? new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : 'Just now'}
+                    {msg.sender?._id === currentUser._id && (
+                      <span>{msg.read ? '✔✔' : '✔'}</span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            </React.Fragment>
           ))
         )}
         <div ref={messagesEndRef} />

@@ -86,6 +86,9 @@ export default function Drawer() {
               <Link to="/pallete">
                 <li className={getLinkClass("/pallete")}>Color Tone</li>
               </Link>
+                            <Link to="/chat">
+                <li className={getLinkClass("/chat")}>Messages</li>
+              </Link>
               {currentRole === "tailor" && (
                 <Link to="/addpost">
                   <li className={getLinkClass("/addpost")}>Posts</li>

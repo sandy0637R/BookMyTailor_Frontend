@@ -14,7 +14,7 @@ import {
   startChatWithUserRequest,
   startChatWithUserSuccess,
   startChatWithUserFailure,
-  setChatUser
+  setChatUser,
 } from "./chatSlice";
 import { toast } from "react-hot-toast";
 
@@ -42,13 +42,12 @@ function* fetchChatSaga(action) {
   }
 }
 
-// ✅ Mark messages as read
 function* markMessagesReadSaga(action) {
   try {
     const token = yield select((state) => state.auth.token);
     const messageIds = action.payload;
 
-    yield call(
+    const { data } = yield call(
       axios.put,
       `${BASE_URL}/api/chat/mark-read`,
       { messageIds },
@@ -61,7 +60,6 @@ function* markMessagesReadSaga(action) {
     yield put(markMessagesReadSuccess());
   } catch (error) {
     yield put(markMessagesReadFailure(error.message));
-    toast.error("Failed to mark messages as read");
   }
 }
 
@@ -137,8 +135,6 @@ function* startChatWithUserSaga(action) {
     toast.error("Failed to start chat");
   }
 }
-
-
 
 // 👀 Watcher saga
 export function* watchChat() {

@@ -4,24 +4,18 @@ import { setChatUser, fetchChatUsersRequest } from '../redux/chatSlice';
 
 const ChatList = ({ currentUser }) => {
   const dispatch = useDispatch();
-  const { chatUsers, loading, error, messages } = useSelector((state) => state.chat);
+  const { chatUsers, loading, error, chatUser, unreadCounts } = useSelector((state) => state.chat);
 
   useEffect(() => {
     dispatch(fetchChatUsersRequest());
-  }, [dispatch, messages]); // ✅ re-fetch chat users when new message arrives
+  }, [dispatch]);
 
   const openChat = (user) => {
     dispatch(setChatUser(user));
   };
 
-  // ✅ Check if user has unread messages
-  const hasUnreadMessages = (userId) => {
-    return messages.some(
-      (msg) =>
-        msg.sender?._id === userId &&
-        msg.receiver?._id === currentUser._id &&
-        msg.read === false
-    );
+  const getUnreadCount = (userId) => {
+    return unreadCounts?.[userId] || 0;
   };
 
   return (
@@ -34,20 +28,34 @@ const ChatList = ({ currentUser }) => {
         <p>No chats yet</p>
       ) : (
         [...chatUsers]
-          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // ✅ latest message first
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
           .map(({ user, lastMessage, timestamp }) => {
-            const isUnread = hasUnreadMessages(user._id);
+            const unreadCount = getUnreadCount(user._id);
+            const isActive = chatUser?._id === user._id;
+            const showUnreadBadge = unreadCount > 0 && !isActive;
+
             return (
               <div
                 key={user._id}
                 onClick={() => openChat(user)}
                 className={`p-3 border rounded-lg cursor-pointer hover:bg-gray-100 ${
-                  isUnread ? 'bg-yellow-100 font-semibold' : ''
-                }`}
+                  showUnreadBadge ? 'bg-yellow-100 font-semibold' : ''
+                } flex items-center justify-between`}
               >
-                <div className="font-semibold">{user.name}</div>
-                <div className="text-sm text-gray-600 truncate">{lastMessage}</div>
-                <div className="text-xs text-gray-400">{new Date(timestamp).toLocaleString()}</div>
+                <div className="flex items-center space-x-2">
+                  {showUnreadBadge && (
+                    <span className="text-xs bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                  <div>
+                    <div className="font-semibold">{user.name}</div>
+                    <div className="text-sm text-gray-600 truncate">{lastMessage}</div>
+                    <div className="text-xs text-gray-400">
+                      {new Date(timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
               </div>
             );
           })
