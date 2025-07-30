@@ -21,6 +21,7 @@ import CustomerProfile from "./pages/CustomerProfile";
 import ClothPage from "./pages/ClothPage";
 import Measurement from "./pages/Measurement";
 import ChatPage from "./pages/ChatPage";
+import ClothForm from "./components/ClothForm";
 
 const App = () => {
   return (
@@ -49,7 +50,7 @@ const App = () => {
           <Route path="/measurement" element={<Measurement />} />
           <Route path="/chat" element={<ChatPage/>}/>
           <Route path="/chat/:userId" element={<ChatPage/>}/>
-          
+<Route path="/cloth" element={<ClothForm/>}/>
 
 
 
