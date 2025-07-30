@@ -7,6 +7,7 @@ import postReducer from "./postSlice"
 import customReducer from "./customSlice"
 import  measurementReducer from "./measurementSlice"
 import chatReducer from "./chatSlice"
+import clothReducer from "./clothSlice"; 
 
 
 // Create the saga middleware
@@ -21,9 +22,10 @@ export const store = configureStore({
     custom:customReducer,
     measurement:measurementReducer,
     chat:chatReducer,
+    cloth:clothReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(sagaMiddleware),
+    getDefaultMiddleware( {serializableCheck: false,} ).concat(sagaMiddleware),
 });
 
 // Run the root saga

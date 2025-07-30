@@ -16,6 +16,7 @@ import { watchPost } from './postSaga';
 import { watchCustom } from './customSaga';
 import { watchMeasurement } from "./measurementSaga";
 import {watchChat} from "./chatSaga"
+import {watchCloth} from "./clothSaga"
 
 export default function* rootSaga() {
   yield all([
@@ -33,5 +34,6 @@ export default function* rootSaga() {
     watchCustom(),
     watchMeasurement(),
     watchChat(),
+    watchCloth(),
   ]);
 }

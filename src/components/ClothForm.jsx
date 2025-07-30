@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchClothsRequest,
+  addClothRequest,
+  updateClothRequest,
+  deleteClothRequest,
+} from "../redux/clothSlice";
 import { toast } from "react-hot-toast";
 
 const ClothForm = () => {
-  const [cloths, setCloths] = useState([]);
+  const dispatch = useDispatch();
+  const { cloths } = useSelector((state) => state.cloth);
+
   const [editClothId, setEditClothId] = useState(null);
   const [formData, setFormData] = useState({
     type: "",
@@ -18,20 +26,8 @@ const ClothForm = () => {
   const [editImagePreview, setEditImagePreview] = useState(null);
 
   useEffect(() => {
-    fetchCloths();
-  }, []);
-
-  const fetchCloths = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/cloths/my-cloths", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCloths(res.data);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to fetch cloths.");
-    }
-  };
+    dispatch(fetchClothsRequest());
+  }, [dispatch]);
 
   const handleChange = (e, isEdit = false) => {
     const { name, value, files } = e.target;
@@ -76,76 +72,20 @@ const ClothForm = () => {
     setEditImagePreview(null);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      const user = JSON.parse(localStorage.getItem("profile"));
-      const form = new FormData();
-
-      Object.entries(formData).forEach(([key, val]) => {
-        if (key === "size") val.forEach((s) => form.append("size", s));
-        else if (val) form.append(key, val);
-      });
-
-      if (user?.name) {
-        form.set("name", user.name);
-      }
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      };
-
-      await axios.post("http://localhost:5000/cloths", form, config);
-      toast.success("Cloth added successfully!");
-      resetForm();
-      fetchCloths();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error submitting cloth.");
-    }
+    dispatch(addClothRequest(formData));
+    resetForm();
   };
 
-  const handleEditSubmit = async (e) => {
+  const handleEditSubmit = (e) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      const form = new FormData();
-
-      Object.entries(editFormData).forEach(([key, val]) => {
-        if (key === "size") val.forEach((s) => form.append("size", s));
-        else if (val) form.append(key, val);
-      });
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      };
-
-      await axios.put(`http://localhost:5000/cloths/${editClothId}`, form, config);
-      toast.success("Cloth updated successfully!");
-      resetEditForm();
-      fetchCloths();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Error updating cloth.");
-    }
+    dispatch(updateClothRequest({ id: editClothId, data: editFormData }));
+    resetEditForm();
   };
 
-  const handleDelete = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/cloths/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Cloth deleted successfully!");
-      fetchCloths();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Delete failed.");
-    }
+  const handleDelete = (id) => {
+    dispatch(deleteClothRequest(id));
   };
 
   const handleEdit = (cloth) => {
