@@ -22,7 +22,7 @@ import ClothPage from "./pages/ClothPage";
 import Measurement from "./pages/Measurement";
 import ChatPage from "./pages/ChatPage";
 import ClothHandeling from "./pages/ClothHandeling";
-
+import RoleRoute from "./utils/RoleRoute";
 const App = () => {
   return (
     <div className="relative min-h-screen">
@@ -47,13 +47,8 @@ const App = () => {
           <Route path="/tailorprofile/:id" element={<TailorProfile />} />
           <Route path="/customerprofile/:id" element={<CustomerProfile />} />
           <Route path="/cloths/:clothId" element={<ClothPage />} />
-          <Route path="/measurement" element={<Measurement />} />
-          <Route path="/chat" element={<ChatPage/>}/>
-          <Route path="/chat/:userId" element={<ChatPage/>}/>
-<Route path="/cloth" element={<ClothHandeling/>}/>
 
-
-
+          <Route path="/pallete" element={<PalletePage />} />
 
           {/* Private Route */}
           <Route
@@ -64,6 +59,31 @@ const App = () => {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/measurement"
+            element={
+              <PrivateRoute>
+                <Measurement />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <PrivateRoute>
+                <ChatPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/chat/:userId"
+            element={
+              <PrivateRoute>
+                <ChatPage />
+              </PrivateRoute>
+            }
+          />
+
           <Route
             path="/cart"
             element={
@@ -81,18 +101,22 @@ const App = () => {
             }
           />
           <Route
-            path="/pallete"
+            path="/addpost"
             element={
               <PrivateRoute>
-                <PalletePage />
+                <RoleRoute allowedRoles={["tailor"]}>
+                  <AddPost />
+                </RoleRoute>
               </PrivateRoute>
             }
           />
           <Route
-            path="/addpost"
+            path="/cloth"
             element={
               <PrivateRoute>
-                <AddPost />
+                <RoleRoute allowedRoles={["tailor"]}>
+                  <ClothHandeling />
+                </RoleRoute>
               </PrivateRoute>
             }
           />
@@ -100,7 +124,9 @@ const App = () => {
             path="/custom"
             element={
               <PrivateRoute>
-                <Customize />
+                <RoleRoute allowedRoles={["customer"]}>
+                  <Customize />
+                </RoleRoute>
               </PrivateRoute>
             }
           />
@@ -108,7 +134,9 @@ const App = () => {
             path="/tailorcustom"
             element={
               <PrivateRoute>
-                <CustomOrder />
+                <RoleRoute allowedRoles={["tailor"]}>
+                  <CustomOrder />
+                </RoleRoute>
               </PrivateRoute>
             }
           />

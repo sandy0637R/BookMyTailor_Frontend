@@ -8,14 +8,9 @@ export default function Drawer() {
   const [open, setOpen] = useState(false);
   const drawerRef = useRef();
   const location = useLocation();
-
-  // Get isLoggedIn from Redux
   const { isLoggedIn } = useSelector((state) => state.auth);
-
-  // Get current role from localStorage or default to "customer"
   const currentRole = localStorage.getItem("role") || "customer";
 
-  // Handle outside click to close drawer
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (drawerRef.current && !drawerRef.current.contains(event.target)) {
@@ -37,6 +32,16 @@ export default function Drawer() {
       ? "drawer-btn bg-[var(--secondary)] text-[var(--highlight-color)] rounded-sm"
       : "drawer-btn";
   };
+
+  const tailorLinks = [
+    { to: "/addpost", label: "Posts" },
+    { to: "/tailorcustom", label: "Customer Requests" },
+    { to: "/cloth", label: "Cloth" },
+  ];
+
+  const customerLinks = [
+    { to: "/custom", label: "Customize" },
+  ];
 
   return (
     <div className="relative" ref={drawerRef}>
@@ -86,25 +91,15 @@ export default function Drawer() {
               <Link to="/pallete">
                 <li className={getLinkClass("/pallete")}>Color Tone</li>
               </Link>
-                            <Link to="/chat">
+              <Link to="/chat">
                 <li className={getLinkClass("/chat")}>Messages</li>
               </Link>
-              {currentRole === "tailor" && (
-                <Link to="/addpost">
-                  <li className={getLinkClass("/addpost")}>Posts</li>
-                </Link>
-              )}
-              {currentRole === "tailor" && (
-  <Link to="/tailorcustom">
-    <li className={getLinkClass("/tailorcustom")}>Customer Requests</li>
-  </Link>
-)}
-{currentRole === "customer" && (
-  <Link to="/custom">
-    <li className={getLinkClass("/custom")}>Customize</li>
-  </Link>
-)}
 
+              {(currentRole === "tailor" ? tailorLinks : customerLinks).map((link) => (
+                <Link to={link.to} key={link.to}>
+                  <li className={getLinkClass(link.to)}>{link.label}</li>
+                </Link>
+              ))}
             </>
           )}
 
