@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { getClothByIdRequest } from "../redux/authSlice";
+import ViewProfileButton from "./ViewProfileButton"; // ✅ Imported child component
 
 const ClothDetails = ({
   cloth,
@@ -71,7 +72,11 @@ const ClothDetails = ({
         {/* Left - Image */}
         <div className="w-1/2 bg-gray-100">
           <img
-            src={resolvedCloth.image}
+            src={
+              resolvedCloth.image?.startsWith("/uploads")
+                ? `http://localhost:5000${resolvedCloth.image}`
+                : "/placeholder.jpg"
+            }
             alt={resolvedCloth.name}
             className="w-full h-full object-cover"
           />
@@ -87,15 +92,28 @@ const ClothDetails = ({
             <p className="text-gray-600 mb-1">
               <strong>Type:</strong> {resolvedCloth.type}
             </p>
-            <p className="text-gray-600 mb-1">
-              <strong>Brand:</strong> {resolvedCloth.manufacturer}
-            </p>
+            {resolvedCloth.manufacturer && (
+              <p className="text-gray-600 mb-1">
+                <strong>Brand:</strong> {resolvedCloth.manufacturer}
+              </p>
+            )}
             <p className="text-gray-600 mb-1">
               <strong>Sizes:</strong> {resolvedCloth.size.join(", ")}
             </p>
             <p className="text-gray-600 mb-1">
               <strong>Gender:</strong> {resolvedCloth.gender}
             </p>
+            {resolvedCloth.tailor && resolvedCloth.tailor._id && (
+              <>
+                <p className="text-gray-600 mb-1">
+                  <strong>Tailor:</strong> {resolvedCloth.tailor.name}
+                </p>
+                <div className="mt-2">
+                  <ViewProfileButton userId={resolvedCloth.tailor._id} />
+                </div>
+              </>
+            )}
+
             <p className="text-xl font-bold text-green-600 mt-4">
               ₹{resolvedCloth.price}
             </p>

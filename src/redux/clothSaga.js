@@ -34,7 +34,6 @@ function* fetchClothsSaga() {
 function* addClothSaga(action) {
   try {
     const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("profile"));
     const form = new FormData();
 
     const data = action.payload;
@@ -42,7 +41,6 @@ function* addClothSaga(action) {
       if (key === "size") val.forEach((s) => form.append("size", s));
       else if (val) form.append(key, val);
     });
-    if (user?.name) form.set("name", user.name);
 
     const config = {
       headers: {
@@ -60,6 +58,7 @@ function* addClothSaga(action) {
     toast.error(error.response?.data?.message || "Error submitting cloth.");
   }
 }
+
 
 function* updateClothSaga(action) {
   try {

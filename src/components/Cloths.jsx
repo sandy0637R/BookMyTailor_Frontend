@@ -28,19 +28,18 @@ const Cloths = () => {
   const getCartQuantity = (id) =>
     cart.find((entry) => entry.item === id)?.quantity || 0;
 
- const handleCartToggle = (id, action) => {
-  if (action === "add") {
-    dispatch(addToCart(id));
-  } else if (action === "remove") {
-    const existing = cart.find((entry) => entry.item === id);
-    if (existing?.quantity > 1) {
-      dispatch(removeFromCart(id)); // Decrease quantity
-    } else {
-      dispatch(removeFromCart(id)); // Remove completely
+  const handleCartToggle = (id, action) => {
+    if (action === "add") {
+      dispatch(addToCart(id));
+    } else if (action === "remove") {
+      const existing = cart.find((entry) => entry.item === id);
+      if (existing?.quantity > 1) {
+        dispatch(removeFromCart(id)); // Decrease quantity
+      } else {
+        dispatch(removeFromCart(id)); // Remove completely
+      }
     }
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -61,21 +60,32 @@ const Cloths = () => {
                 className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300"
               >
                 <img
-                  src={cloth.image}
+                  src={
+                    cloth.image?.startsWith("/uploads")
+                      ? `http://localhost:5000${cloth.image}`
+                      : cloth.image || "/placeholder.jpg"
+                  }
                   alt={cloth.name}
                   className="w-full h-64 object-cover"
                 />
                 <div className="p-4 space-y-2">
                   <h3 className="text-xl font-semibold">{cloth.name}</h3>
+                  {cloth.tailor?.name && (
+                    <p className="text-sm text-gray-500">
+                      Manufacturer: {cloth.tailor.name}
+                    </p>
+                  )}
                   <p className="text-lg font-bold text-green-600">
                     ₹{cloth.price}
                   </p>
 
                   <div className="flex justify-between mt-2 flex-wrap gap-2">
-                    {!inCart && (
-                      isInWishlist(cloth._id) ? (
+                    {!inCart &&
+                      (isInWishlist(cloth._id) ? (
                         <button
-                          onClick={() => dispatch(removeFromWishlist(cloth._id))}
+                          onClick={() =>
+                            dispatch(removeFromWishlist(cloth._id))
+                          }
                           className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-red-600 hover:bg-red-600 hover:text-white transition"
                         >
                           <FaTrashAlt /> Remove Wishlist
@@ -87,8 +97,7 @@ const Cloths = () => {
                         >
                           <FaHeart /> Wishlist
                         </button>
-                      )
-                    )}
+                      ))}
 
                     <button
                       onClick={() =>
@@ -104,7 +113,9 @@ const Cloths = () => {
                     {inCart ? (
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleCartToggle(cloth._id, "remove")}
+                          onClick={() =>
+                            handleCartToggle(cloth._id, "remove")
+                          }
                           className="px-2 py-1 text-lg font-bold border rounded hover:bg-red-100"
                         >
                           -
