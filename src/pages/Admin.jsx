@@ -1,95 +1,41 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import {
+  fetchStatsRequest,
+  fetchUsersRequest,
+  fetchClothsRequest,
+  blockUnblockUserRequest,
+  deleteClothRequest,
+  editClothRequest,
+} from "../redux/adminSlice";
 
 const Admin = () => {
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    onlyCustomers: 0,
-    tailors: 0,
-    totalCloths: 0,
-    totalPosts: 0, // <-- Added
-  });
+  const dispatch = useDispatch();
 
-  const [users, setUsers] = useState([]);
-  const [cloths, setCloths] = useState([]);
+  const { stats, users, cloths } = useSelector((state) => state.admin);
+
   const [editClothId, setEditClothId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", price: "" });
 
-  const token = localStorage.getItem("token");
+  useEffect(() => {
+    dispatch(fetchStatsRequest());
+    dispatch(fetchUsersRequest());
+    dispatch(fetchClothsRequest());
+  }, [dispatch]);
 
- const fetchStats = async () => {
-  try {
-    const res = await axios.get("http://localhost:5000/admin/user-stats", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    setStats((prev) => ({
-      ...prev,
-      ...res.data, // totalPosts will come from here
-    }));
-  } catch (err) {
-    console.error("Stats fetch error", err);
-  }
-};
-
-
-  const fetchUsers = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/admin/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data);
-    } catch (err) {
-      console.error("Users fetch error", err);
-    }
-  };
-
-  const fetchCloths = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/cloths/allcloths", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCloths(res.data);
-      setStats((prev) => ({ ...prev, totalCloths: res.data.length }));
-    } catch (err) {
-      console.error("Cloths fetch error", err);
-    }
-  };
-
-  const handleBlock = async (id, isBlocked) => {
+  const handleBlock = (id, isBlocked) => {
     const confirmMsg = isBlocked
       ? "Are you sure you want to unblock this user?"
       : "Are you sure you want to block this user?";
     if (!window.confirm(confirmMsg)) return;
 
-    try {
-      const url = isBlocked
-        ? `http://localhost:5000/admin/unblock-user/${id}`
-        : `http://localhost:5000/admin/block-user/${id}`;
-
-      await axios.put(url, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      toast.success(isBlocked ? "User unblocked" : "User blocked");
-      fetchUsers();
-    } catch (err) {
-      toast.error("Action failed");
-    }
+    dispatch(blockUnblockUserRequest({ id, isBlocked }));
   };
 
-  const handleDeleteCloth = async (clothId) => {
+  const handleDeleteCloth = (clothId) => {
     if (!window.confirm("Are you sure you want to delete this cloth?")) return;
-    try {
-      await axios.delete(`http://localhost:5000/cloths/${clothId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Cloth deleted");
-      fetchCloths();
-    } catch (err) {
-      toast.error("Failed to delete cloth");
-    }
+    dispatch(deleteClothRequest({clothId}));
   };
 
   const handleEditCloth = (cloth) => {
@@ -97,32 +43,16 @@ const Admin = () => {
     setEditForm({ name: cloth.name, price: cloth.price });
   };
 
-  const handleSaveEdit = async (clothId) => {
+  const handleSaveEdit = (clothId) => {
     if (!window.confirm("Do you want to save the changes?")) return;
-    try {
-      await axios.put(
-        `http://localhost:5000/cloths/${clothId}`,
-        { name: editForm.name, price: editForm.price },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      toast.success("Cloth updated");
-      setEditClothId(null);
-      fetchCloths();
-    } catch (err) {
-      toast.error("Update failed");
-    }
+    dispatch(editClothRequest({ clothId, name: editForm.name, price: editForm.price }));
+    setEditClothId(null);
   };
 
-  useEffect(() => {
-    fetchStats();
-    fetchUsers();
-    fetchCloths();
-  }, []);
-
   const tailorUsers = users.filter((u) => u.roles.includes("tailor"));
-  const customerUsers = users.filter((u) => JSON.stringify(u.roles) === JSON.stringify(["customer"]));
+  const customerUsers = users.filter(
+    (u) => JSON.stringify(u.roles) === JSON.stringify(["customer"])
+  );
 
   return (
     <div className="p-6 space-y-8">
