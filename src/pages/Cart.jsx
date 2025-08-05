@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router";
+
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrash, FaEye } from "react-icons/fa";
 import {
@@ -12,10 +15,20 @@ import ClothDetails from "../components/ClothDetails";
 
 const Cart = () => {
   const dispatch = useDispatch();
+  const userId = useSelector((state) => state.auth.userId);
+
   const cart = useSelector((state) => state.auth.cart);
   const cloths = useSelector((state) => state.auth.cloths);
   const token = useSelector((state) => state.auth.token);
+  const profile = useSelector((state) => state.auth.user);
   const [expandedId, setExpandedId] = useState(null);
+  const [address, setAddress] = useState("");
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [paymentMode, setPaymentMode] = useState("");
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
+    const navigate = useNavigate();
+  
 
   useEffect(() => {
     if (token) {
@@ -23,6 +36,12 @@ const Cart = () => {
     }
     dispatch(getClothsRequest());
   }, [dispatch, token]);
+
+  useEffect(() => {
+    if (profile?.address) {
+      setAddress(profile.address);
+    }
+  }, [profile]);
 
   const cartItems = useMemo(
     () =>
@@ -35,17 +54,78 @@ const Cart = () => {
     [cart, cloths]
   );
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const isInCart = (id) => cart.some((entry) => entry.item === id);
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+ const handlePlaceOrder = async () => {
+  if (!address || !paymentMode) return;
+
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    // Convert cartItems to backend format
+    const items = cartItems.map((item) => ({
+      product: item._id,
+      quantity: item.quantity,
+    }));
+
+    const orderData = {
+      items,
+      address,
+      paymentMode,
+      totalAmount: totalPrice,
+    };
+
+    const response = await axios.post(
+      "http://localhost:5000/orders/place",
+      orderData,
+      config
+    );
+    alert("Order placed successfully!");
+    await handleClearCart(); // Clear backend cart
+    setOrderPlaced(true);
+    setShowOrderSummary(false);
+    navigate("/orders")
+  } catch (error) {
+    console.error("Failed to place order:", error);
+    alert("Failed to place order. Please try again.");
+  }
+};
+
+
+  const handleClearCart = async () => {
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    await axios.delete(`http://localhost:5000/users/cart/clear/${userId}`, config);
+    dispatch(fetchProfileRequest()); // Update Redux cart
+  } catch (error) {
+    console.error("Failed to clear cart:", error);
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <h2 className="text-3xl font-bold text-center mb-8">Your Cart</h2>
 
-      {cartItems.length === 0 ? (
-        <p className="text-center text-lg text-gray-600">Cart is empty.</p>
+      {cartItems.length === 0 || orderPlaced ? (
+        <p className="text-center text-lg text-gray-600">
+          {orderPlaced ? "Your order has been placed!" : "Cart is empty."}
+        </p>
       ) : (
         <>
+          {/* Cart Items */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {cartItems.map((item) => (
               <div
@@ -62,10 +142,7 @@ const Cart = () => {
                   <p className="text-gray-600">
                     Brand: <span className="text-black">{item.manufacturer}</span>
                   </p>
-                  <p className="text-lg font-bold text-green-600">
-                    ₹{item.price}
-                  </p>
-
+                  <p className="text-lg font-bold text-green-600">₹{item.price}</p>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => dispatch(removeFromCart(item._id))}
@@ -81,7 +158,6 @@ const Cart = () => {
                       +
                     </button>
                   </div>
-
                   <div className="flex justify-between mt-4 flex-wrap gap-2">
                     <button
                       onClick={() => dispatch(removeFromCart(item._id))}
@@ -89,7 +165,6 @@ const Cart = () => {
                     >
                       <FaTrash /> Remove
                     </button>
-
                     <button
                       onClick={() => setExpandedId(item._id)}
                       className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-blue-600 hover:bg-blue-600 hover:text-white transition"
@@ -120,9 +195,101 @@ const Cart = () => {
             ))}
           </div>
 
-          <div className="mt-8 text-center text-xl font-bold">
-            Total: ₹{totalPrice}
-          </div>
+          {/* Buy Now Button */}
+          {!showOrderSummary && (
+            <div className="mt-10 max-w-2xl mx-auto text-center">
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded"
+                onClick={() => setShowOrderSummary(true)}
+              >
+                Buy Now
+              </button>
+            </div>
+          )}
+
+          {/* Order Summary */}
+          {showOrderSummary && (
+            <div className="mt-10 max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+              <h3 className="text-2xl font-semibold mb-4">Order Summary</h3>
+
+              <ul className="divide-y">
+                {cartItems.map((item) => (
+                  <li key={item._id} className="flex justify-between py-2">
+                    <span>
+                      {item.name} x{item.quantity}
+                    </span>
+                    <span>₹{item.price * item.quantity}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="text-right font-bold text-xl mt-4">
+                Total: ₹{totalPrice}
+              </div>
+
+              {/* Payment Mode */}
+              <div className="mt-6">
+                <label className="block font-medium mb-2">
+                  Select Payment Mode:
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="cod"
+                    checked={paymentMode === "cod"}
+                    onChange={() => setPaymentMode("cod")}
+                  />
+                  Cash on Delivery
+                </label>
+              </div>
+
+              {/* Address Section */}
+              <div className="mt-6">
+                <label className="block font-medium mb-2">Delivery Address:</label>
+
+                {isEditingAddress || !address ? (
+                  <>
+                    <textarea
+                      className="w-full border p-2 rounded"
+                      rows={3}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                    <button
+                      onClick={() => setIsEditingAddress(false)}
+                      className="mt-2 px-4 py-1 border rounded bg-green-600 text-white"
+                    >
+                      Save Address
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex justify-between items-start">
+                    <p>{address}</p>
+                    <button
+                      onClick={() => setIsEditingAddress(true)}
+                      className="text-blue-600 underline"
+                    >
+                      Change Address
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Place Order */}
+              <button
+                className={`mt-6 w-full py-2 rounded text-white font-bold ${
+                  address && paymentMode
+                    ? "bg-blue-600 hover:bg-blue-700"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+                disabled={!address || !paymentMode}
+                onClick={handlePlaceOrder}
+              >
+                Place Order
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

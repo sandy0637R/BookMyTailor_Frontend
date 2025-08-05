@@ -24,6 +24,7 @@ import ChatPage from "./pages/ChatPage";
 import ClothHandeling from "./pages/ClothHandeling";
 import RoleRoute from "./utils/RoleRoute";
 import Admin from "./pages/Admin";
+import MyOrders from "./pages/MyOrder";
 const App = () => {
   return (
     <div className="relative min-h-screen">
@@ -49,6 +50,8 @@ const App = () => {
           <Route path="/customerprofile/:id" element={<CustomerProfile />} />
           <Route path="/cloths/:clothId" element={<ClothPage />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/orders" element={<MyOrders/>} />
+
 
           <Route path="/pallete" element={<PalletePage />} />
 
