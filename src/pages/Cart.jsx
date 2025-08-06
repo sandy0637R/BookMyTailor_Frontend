@@ -10,6 +10,7 @@ import {
   fetchProfileRequest,
   getClothsRequest,
   addToCart,
+  updateProfileRequest,
 } from "../redux/authSlice";
 import ClothDetails from "../components/ClothDetails";
 
@@ -20,15 +21,14 @@ const Cart = () => {
   const cart = useSelector((state) => state.auth.cart);
   const cloths = useSelector((state) => state.auth.cloths);
   const token = useSelector((state) => state.auth.token);
-  const profile = useSelector((state) => state.auth.user);
+  const profile = useSelector((state) => state.auth.profile);
   const [expandedId, setExpandedId] = useState(null);
   const [address, setAddress] = useState("");
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [paymentMode, setPaymentMode] = useState("");
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
-    const navigate = useNavigate();
-  
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (token) {
@@ -40,6 +40,7 @@ const Cart = () => {
   useEffect(() => {
     if (profile?.address) {
       setAddress(profile.address);
+      setIsEditingAddress(false);
     }
   }, [profile]);
 
@@ -59,61 +60,60 @@ const Cart = () => {
     0
   );
 
- const handlePlaceOrder = async () => {
-  if (!address || !paymentMode) return;
+  const handlePlaceOrder = async () => {
+    if (!address || !paymentMode) return;
 
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
 
-    // Convert cartItems to backend format
-    const items = cartItems.map((item) => ({
-      product: item._id,
-      quantity: item.quantity,
-    }));
+      const items = cartItems.map((item) => ({
+        product: item._id,
+        quantity: item.quantity,
+      }));
 
-    const orderData = {
-      items,
-      address,
-      paymentMode,
-      totalAmount: totalPrice,
-    };
+      const orderData = {
+        items,
+        address,
+        paymentMode,
+        totalAmount: totalPrice,
+      };
 
-    const response = await axios.post(
-      "http://localhost:5000/orders/place",
-      orderData,
-      config
-    );
-    alert("Order placed successfully!");
-    await handleClearCart(); // Clear backend cart
-    setOrderPlaced(true);
-    setShowOrderSummary(false);
-    navigate("/orders")
-  } catch (error) {
-    console.error("Failed to place order:", error);
-    alert("Failed to place order. Please try again.");
-  }
-};
-
+      const response = await axios.post(
+        "http://localhost:5000/orders/place",
+        orderData,
+        config
+      );
+      alert("Order placed successfully!");
+      await handleClearCart();
+      setOrderPlaced(true);
+      setShowOrderSummary(false);
+      navigate("/orders");
+    } catch (error) {
+      console.error("Failed to place order:", error);
+      alert("Failed to place order. Please try again.");
+    }
+  };
 
   const handleClearCart = async () => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-    await axios.delete(`http://localhost:5000/users/cart/clear/${userId}`, config);
-    dispatch(fetchProfileRequest()); // Update Redux cart
-  } catch (error) {
-    console.error("Failed to clear cart:", error);
-  }
-};
-
-
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await axios.delete(
+        `http://localhost:5000/users/cart/clear/${userId}`,
+        config
+      );
+      dispatch(fetchProfileRequest());
+    } catch (error) {
+      console.error("Failed to clear cart:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -248,7 +248,7 @@ const Cart = () => {
               <div className="mt-6">
                 <label className="block font-medium mb-2">Delivery Address:</label>
 
-                {isEditingAddress || !address ? (
+                {isEditingAddress ? (
                   <>
                     <textarea
                       className="w-full border p-2 rounded"
@@ -257,7 +257,11 @@ const Cart = () => {
                       onChange={(e) => setAddress(e.target.value)}
                     />
                     <button
-                      onClick={() => setIsEditingAddress(false)}
+                      onClick={() => {
+                        dispatch(updateProfileRequest({ address }));
+                        dispatch(fetchProfileRequest()); // ← ensures Redux stays updated
+                        setIsEditingAddress(false);
+                      }}
                       className="mt-2 px-4 py-1 border rounded bg-green-600 text-white"
                     >
                       Save Address
@@ -265,7 +269,7 @@ const Cart = () => {
                   </>
                 ) : (
                   <div className="flex justify-between items-start">
-                    <p>{address}</p>
+                    <p>{address || "No address saved."}</p>
                     <button
                       onClick={() => setIsEditingAddress(true)}
                       className="text-blue-600 underline"

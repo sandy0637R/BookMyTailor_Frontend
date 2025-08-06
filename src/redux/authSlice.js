@@ -60,6 +60,7 @@ const authSlice = createSlice({
         profileImage = null,
         wishlist = [],
         cart = [],
+        address="",
       } = action.payload;
 
       state.isLoggedIn = true;
@@ -82,6 +83,7 @@ const authSlice = createSlice({
         roles,
         tailorDetails,
         profileImage,
+        address,
       };
 
       state.loading = false;
@@ -118,6 +120,8 @@ const authSlice = createSlice({
         profileImage = null,
         wishlist = [],
         cart = [],
+         
+    address = "",
       } = action.payload;
 
       state.profile = {
@@ -126,6 +130,7 @@ const authSlice = createSlice({
         email,
         roles,
         tailorDetails,
+        address,
         profileImage,
       };
 
