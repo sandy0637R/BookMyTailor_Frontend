@@ -1,25 +1,17 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchOrdersRequest } from "../redux/orderSlice";
+import { useEffect } from "react";
 
 const MyOrders = () => {
-  const [orders, setOrders] = useState([]);
-  const token = localStorage.getItem("token");
+  const dispatch = useDispatch();
+const token = useSelector((state) => state.auth.token);
+const orders = useSelector((state) => state.order.orders);;
 
 useEffect(() => {
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/orders/my", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setOrders(res.data || []);
-    } catch (err) {
-      console.error("Failed to fetch orders:", err);
-    }
-  };
-
-  fetchOrders();
-}, []);
+  if (token) {
+    dispatch(fetchOrdersRequest({ token }));
+  }
+}, [dispatch, token]);
 
 
   return (

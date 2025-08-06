@@ -10,8 +10,10 @@ import {
   setRole,
   setCloths,
   setClothsError,
-  setSingleCloth,        // ✅ added
-  setSingleClothError    // ✅ added
+  setSingleCloth,        
+  setSingleClothError,
+  clearCart, 
+  clearCartRequest,    
 } from "./authSlice";
 
 // Utility to get token from localStorage
@@ -53,6 +55,12 @@ const addToCartApi = (itemId) =>
 
 const removeFromCartApi = (itemId) =>
   axios.delete(`http://localhost:5000/users/cart/${itemId}`, { headers: authHeader() });
+
+const clearCartApi = (userId) =>
+  axios.delete(`http://localhost:5000/users/cart/clear/${userId}`, {
+    headers: authHeader(),
+  });
+
 
 // ✅ Cloths Saga
 function* getClothsSaga() {
@@ -111,6 +119,20 @@ function* removeFromCartSaga(action) {
     yield put(setError(err.message));
   }
 }
+
+function* clearCartSaga(action) {
+  try {
+    yield call(clearCartApi, action.payload); // payload is userId
+    yield put(clearCart());                   // clear Redux state
+    yield put(fetchProfileRequest());         // refresh profile
+  } catch (err) {
+    yield put(setError(err.message));
+  }
+}
+
+
+
+
 
 // Login Saga
 function* loginSaga(action) {
@@ -239,3 +261,8 @@ export function* watchAddToCart() {
 export function* watchRemoveFromCart() {
   yield takeLatest("auth/removeFromCart", removeFromCartSaga);
 }
+
+export function* watchClearCart() {
+  yield takeLatest("auth/clearCartRequest", clearCartSaga);
+}
+

@@ -9,6 +9,7 @@ import {
   watchAddToCart,
   watchRemoveFromCart,
   watchGetClothById,
+  watchClearCart,
 } from './authSaga';
 
 import { watchSocial } from './socialSaga';
@@ -18,6 +19,7 @@ import { watchMeasurement } from "./measurementSaga";
 import {watchChat} from "./chatSaga"
 import {watchCloth} from "./clothSaga"
 import {watchAdmin} from "./adminSaga"
+import { watchOrder } from './orderSaga';
 export default function* rootSaga() {
   yield all([
     watchLogin(),
@@ -36,5 +38,7 @@ export default function* rootSaga() {
     watchChat(),
     watchCloth(),
     watchAdmin(),
+    watchClearCart(),
+    watchOrder(),
   ]);
 }

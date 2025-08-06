@@ -12,6 +12,7 @@ import {
   addToCart,
   updateProfileRequest,
 } from "../redux/authSlice";
+import { placeOrderRequest } from "../redux/orderSlice";
 import ClothDetails from "../components/ClothDetails";
 
 const Cart = () => {
@@ -60,60 +61,32 @@ const Cart = () => {
     0
   );
 
-  const handlePlaceOrder = async () => {
-    if (!address || !paymentMode) return;
+  const handlePlaceOrder = () => {
+  if (!address || !paymentMode) return;
 
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+  const items = cartItems.map((item) => ({
+    product: item._id,
+    quantity: item.quantity,
+  }));
 
-      const items = cartItems.map((item) => ({
-        product: item._id,
-        quantity: item.quantity,
-      }));
-
-      const orderData = {
-        items,
-        address,
-        paymentMode,
-        totalAmount: totalPrice,
-      };
-
-      const response = await axios.post(
-        "http://localhost:5000/orders/place",
-        orderData,
-        config
-      );
-      alert("Order placed successfully!");
-      await handleClearCart();
-      setOrderPlaced(true);
-      setShowOrderSummary(false);
-      navigate("/orders");
-    } catch (error) {
-      console.error("Failed to place order:", error);
-      alert("Failed to place order. Please try again.");
-    }
+  const orderData = {
+    items,
+    address,
+    paymentMode,
+    totalAmount: totalPrice,
   };
 
-  const handleClearCart = async () => {
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      await axios.delete(
-        `http://localhost:5000/users/cart/clear/${userId}`,
-        config
-      );
-      dispatch(fetchProfileRequest());
-    } catch (error) {
-      console.error("Failed to clear cart:", error);
-    }
-  };
+  dispatch(
+    placeOrderRequest({
+      token,
+      orderData,
+      userId: profile._id,
+      navigate,
+    })
+  );
+};
+
+ 
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">

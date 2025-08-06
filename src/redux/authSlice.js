@@ -24,8 +24,6 @@ const initialState = {
 };
 
 const saveToLocalStorage = (state) => {
- 
-
   localStorage.setItem("isLoggedIn", JSON.stringify(state.isLoggedIn));
   localStorage.setItem("user", state.user || "");
   localStorage.setItem("email", state.email || "");
@@ -60,7 +58,7 @@ const authSlice = createSlice({
         profileImage = null,
         wishlist = [],
         cart = [],
-        address="",
+        address = "",
       } = action.payload;
 
       state.isLoggedIn = true;
@@ -120,8 +118,7 @@ const authSlice = createSlice({
         profileImage = null,
         wishlist = [],
         cart = [],
-         
-    address = "",
+        address = "",
       } = action.payload;
 
       state.profile = {
@@ -208,6 +205,13 @@ const authSlice = createSlice({
     removeFromWishlist: (state, action) => {},
     addToCart: (state, action) => {},
     removeFromCart: (state, action) => {},
+    clearCart: (state, action) => {
+      state.cart = [];
+      localStorage.setItem("cart", JSON.stringify([]));
+    },
+    clearCartRequest: (state, action) => {
+      state.loading = true;
+    },
   },
 });
 
@@ -234,6 +238,8 @@ export const {
   removeFromWishlist,
   addToCart,
   removeFromCart,
+  clearCart,
+  clearCartRequest,
 } = authSlice.actions;
 
 export default authSlice.reducer;
