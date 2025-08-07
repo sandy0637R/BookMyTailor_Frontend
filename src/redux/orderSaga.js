@@ -6,6 +6,8 @@ import {
   placeOrderFailure,
   fetchOrdersSuccess,
   fetchOrdersFailure,
+  deleteOrderSuccess,
+  deleteOrderFailure,
 } from "./orderSlice";
 import { clearCartRequest } from "./authSlice";
 import { toast } from "react-hot-toast";
@@ -53,8 +55,29 @@ function* fetchOrdersSaga(action) {
   }
 }
 
+function* deleteOrderSaga(action) {
+  try {
+    const { token, orderId } = action.payload;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    yield call(axios.delete, `http://localhost:5000/orders/delete/${orderId}`, config);
+    yield put(deleteOrderSuccess(orderId));
+    toast.success("Order deleted successfully.");
+  } catch (error) {
+    yield put(deleteOrderFailure(error.response?.data?.message || error.message));
+    toast.error(error.response?.data?.message || "Failed to delete order.");
+  }
+}
+
+
 // Watchers
 export function* watchOrder() {
   yield takeLatest("order/placeOrderRequest", placeOrderSaga);
   yield takeLatest("order/fetchOrdersRequest", fetchOrdersSaga);
+  yield takeLatest("order/deleteOrderRequest", deleteOrderSaga);
 }

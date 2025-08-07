@@ -33,6 +33,18 @@ const orderSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    deleteOrderRequest: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    deleteOrderSuccess: (state, action) => {
+      state.loading = false;
+      state.orders = state.orders.filter(order => order._id !== action.payload);
+    },
+    deleteOrderFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -43,6 +55,9 @@ export const {
   fetchOrdersRequest,
   fetchOrdersSuccess,
   fetchOrdersFailure,
+  deleteOrderRequest,
+  deleteOrderSuccess,
+  deleteOrderFailure,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;
