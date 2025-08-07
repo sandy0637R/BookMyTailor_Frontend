@@ -164,12 +164,32 @@ const RequestDisplayCard = ({
       <p>
         <b>Budget:</b> ₹{req?.budget}
       </p>
-      <p>
-        <b>Duration:</b> {req?.duration}
-      </p>
-      <p>
-        <b>Estimated Delivery:</b> {getEstimatedDateTime()}
-      </p>
+      {/* ✅ Conditionally render Duration and Estimated Delivery */}
+{req?.status !== "Confirmed" && (
+  <>
+    <p>
+      <b>Duration:</b> {req?.duration}
+    </p>
+    <p>
+      <b>Estimated Delivery:</b> {getEstimatedDateTime()}
+    </p>
+  </>
+)}
+
+{/* ✅ Show Delivered At only if status is Confirmed */}
+{req?.status === "Confirmed" && req?.deliveredAt && (
+  <p>
+    <b>Delivered At:</b>{" "}
+    {new Date(req.deliveredAt).toLocaleString("en-IN", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })}
+  </p>
+)}
       <p>
         <b>Gender:</b> {req?.gender}
       </p>
