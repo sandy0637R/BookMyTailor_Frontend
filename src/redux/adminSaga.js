@@ -13,6 +13,12 @@ import {
   blockUnblockUserRequest,
   deleteClothRequest,
   editClothRequest,
+   fetchOrdersRequest,
+  fetchOrdersSuccess,
+  fetchOrdersFailure,
+  updateOrderStatusRequest,
+updateOrderStatusSuccess,
+updateOrderStatusFailure,
 } from "./adminSlice";
 import { toast } from "react-hot-toast";
 
@@ -111,6 +117,41 @@ function* editClothSaga(action) {
   }
 }
 
+function* fetchOrdersSaga() {
+  try {
+    const token = yield select((state) => state.auth.token);
+    const { data } = yield call(axios.get, `${BASE_URL}/admin/all-orders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    yield put(fetchOrdersSuccess(data));
+  } catch (error) {
+    yield put(fetchOrdersFailure(error.message));
+  }
+}
+
+function* updateOrderStatusSaga(action) {
+  try {
+    const token = yield select((state) => state.auth.token);
+    const { orderId, status } = action.payload;
+
+    const { data } = yield call(
+      axios.put,
+      `${BASE_URL}/admin/orders/${orderId}/status`,
+      { deliveryStatus: status },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    toast.success("Order status updated");
+    yield put({ type: updateOrderStatusSuccess.type, payload: data });
+  } catch (error) {
+    toast.error("Failed to update order status");
+    yield put({ type: updateOrderStatusFailure.type, payload: error.message });
+  }
+}
+
+
+
 export function* watchAdmin() {
   yield takeLatest(fetchStatsRequest.type, fetchStatsSaga);
   yield takeLatest(fetchUsersRequest.type, fetchUsersSaga);
@@ -118,4 +159,7 @@ export function* watchAdmin() {
   yield takeLatest(blockUnblockUserRequest.type, blockUnblockUserSaga);
   yield takeLatest(deleteClothRequest.type, deleteClothSaga);
   yield takeLatest(editClothRequest.type, editClothSaga);
+  yield takeLatest(fetchOrdersRequest.type, fetchOrdersSaga);
+  yield takeLatest(updateOrderStatusRequest.type, updateOrderStatusSaga);
+
 }

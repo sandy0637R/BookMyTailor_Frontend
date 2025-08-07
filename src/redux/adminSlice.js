@@ -12,6 +12,7 @@ const adminSlice = createSlice({
     },
     users: [],
     cloths: [],
+    orders: [],
     loading: false,
     error: null,
   },
@@ -52,6 +53,31 @@ const adminSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+fetchOrdersRequest: (state) => {
+  state.loading = true;
+},
+fetchOrdersSuccess: (state, action) => {
+  state.orders = action.payload;
+  state.loading = false;
+},
+fetchOrdersFailure: (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+},
+updateOrderStatusRequest: () => {},
+
+updateOrderStatusSuccess: (state, action) => {
+  const updatedOrder = action.payload.order; // ✅ extract correct object
+
+  state.orders = state.orders.map((order) =>
+    order._id === updatedOrder._id ? { ...order, ...updatedOrder } : order
+  );
+},
+
+
+updateOrderStatusFailure: (state, action) => {
+  state.error = action.payload;
+},
 
     blockUnblockUserRequest: () => {},
     deleteClothRequest: () => {},
@@ -72,6 +98,13 @@ export const {
   blockUnblockUserRequest,
   deleteClothRequest,
   editClothRequest,
+  fetchOrdersRequest,
+  fetchOrdersSuccess,
+  fetchOrdersFailure,
+  updateOrderStatusRequest,
+updateOrderStatusSuccess,
+updateOrderStatusFailure,
+
 } = adminSlice.actions;
 
 export default adminSlice.reducer;

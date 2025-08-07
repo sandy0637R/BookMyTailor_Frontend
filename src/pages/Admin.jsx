@@ -8,20 +8,24 @@ import {
   blockUnblockUserRequest,
   deleteClothRequest,
   editClothRequest,
+  fetchOrdersRequest,
+  updateOrderStatusRequest,
 } from "../redux/adminSlice";
 
 const Admin = () => {
   const dispatch = useDispatch();
-
-  const { stats, users, cloths } = useSelector((state) => state.admin);
+  const { stats, users, cloths, orders } = useSelector((state) => state.admin);
 
   const [editClothId, setEditClothId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", price: "" });
+
+  const DELIVERY_STATUSES = ["Pending", "Shipped", "Out for Delivery", "Delivered"];
 
   useEffect(() => {
     dispatch(fetchStatsRequest());
     dispatch(fetchUsersRequest());
     dispatch(fetchClothsRequest());
+    dispatch(fetchOrdersRequest());
   }, [dispatch]);
 
   const handleBlock = (id, isBlocked) => {
@@ -35,7 +39,7 @@ const Admin = () => {
 
   const handleDeleteCloth = (clothId) => {
     if (!window.confirm("Are you sure you want to delete this cloth?")) return;
-    dispatch(deleteClothRequest({clothId}));
+    dispatch(deleteClothRequest({ clothId }));
   };
 
   const handleEditCloth = (cloth) => {
@@ -54,9 +58,36 @@ const Admin = () => {
     (u) => JSON.stringify(u.roles) === JSON.stringify(["customer"])
   );
 
+  const handleUpdateStatus = (order) => {
+    const currentIndex = DELIVERY_STATUSES.indexOf(order.deliveryStatus);
+    const nextStatus = DELIVERY_STATUSES[currentIndex + 1];
+
+    if (!nextStatus) {
+      toast("Order is already delivered");
+      return;
+    }
+
+    const confirmUpdate = window.confirm(`Change status to "${nextStatus}"?`);
+    if (!confirmUpdate) return;
+
+    dispatch(updateOrderStatusRequest({ orderId: order._id, status: nextStatus }));
+  };
+
+  const handleCancelOrder = (order) => {
+    if (order.deliveryStatus === "Delivered") {
+      toast.error("Cannot cancel a delivered order");
+      return;
+    }
+
+    const confirmCancel = window.confirm("Are you sure you want to cancel this order?");
+    if (!confirmCancel) return;
+
+    dispatch(updateOrderStatusRequest({ orderId: order._id, status: "Cancelled" }));
+  };
+
   return (
     <div className="p-6 space-y-8">
-      {/* Stats Block */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-gray-100 p-6 text-center rounded shadow text-xl font-semibold">
           Total Users: {stats.totalUsers}
@@ -75,7 +106,7 @@ const Admin = () => {
         </div>
       </div>
 
-      {/* Tailor Table */}
+      {/* Tailor Users */}
       <h2 className="text-2xl font-bold">Tailor Users</h2>
       <div className="overflow-auto">
         <table className="min-w-full table-auto border border-gray-300">
@@ -119,7 +150,7 @@ const Admin = () => {
         </table>
       </div>
 
-      {/* Customer Table */}
+      {/* Customer Users */}
       <h2 className="text-2xl font-bold mt-6">Customer Users</h2>
       <div className="overflow-auto">
         <table className="min-w-full table-auto border border-gray-300">
@@ -155,7 +186,7 @@ const Admin = () => {
         </table>
       </div>
 
-      {/* Cloths Table */}
+      {/* Cloths */}
       <h2 className="text-2xl font-bold mt-6">Cloths</h2>
       <div className="overflow-auto">
         <table className="min-w-full table-auto border border-gray-300">
@@ -220,6 +251,75 @@ const Admin = () => {
                   >
                     Delete
                   </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Orders */}
+      <h2 className="text-2xl font-bold mt-6">Orders</h2>
+      <div className="overflow-auto">
+        <table className="min-w-full table-auto border border-gray-300">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-2 border">User</th>
+              <th className="p-2 border">Items</th>
+              <th className="p-2 border">Total Amount</th>
+              <th className="p-2 border">Payment Mode</th>
+              <th className="p-2 border">Address</th>
+              <th className="p-2 border">Date</th>
+              <th className="p-2 border">Delivery Status</th>
+              <th className="p-2 border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders
+  .filter((order) => order.deliveryStatus !== "Delivered" && order.deliveryStatus !== "Cancelled")
+  .map((order) => (
+
+              <tr key={order._id + order.deliveryStatus} className="text-center">
+                <td className="p-2 border">{order.user?.name || "Unknown"}</td>
+                <td className="p-2 border">
+                  {order.items.map((item) => (
+                    <div key={item.product?._id}>
+                      {item.product?.name} x {item.quantity}
+                    </div>
+                  ))}
+                </td>
+                <td className="p-2 border">₹{order.totalAmount}</td>
+                <td className="p-2 border">{order.paymentMode}</td>
+                <td className="p-2 border">{order.address}</td>
+                <td className="p-2 border">{new Date(order.createdAt).toLocaleDateString()}</td>
+                <td className="p-2 border font-semibold">
+                  {order.deliveryStatus || "Pending"}
+                </td>
+                <td className="p-2 border space-y-2 flex flex-col items-center">
+                  <button
+                    onClick={() => handleUpdateStatus(order)}
+                    disabled={["Delivered", "Cancelled"].includes(order.deliveryStatus)}
+                    className={`${
+                      ["Delivered", "Cancelled"].includes(order.deliveryStatus)
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    } text-white px-3 py-1 rounded`}
+                  >
+                    {(() => {
+                      const index = DELIVERY_STATUSES.indexOf(order.deliveryStatus);
+                      return DELIVERY_STATUSES[index + 1] || "Completed";
+                    })()}
+                  </button>
+
+                  {order.deliveryStatus !== "Delivered" &&
+                    order.deliveryStatus !== "Cancelled" && (
+                      <button
+                        onClick={() => handleCancelOrder(order)}
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                      >
+                        Cancel
+                      </button>
+                    )}
                 </td>
               </tr>
             ))}
