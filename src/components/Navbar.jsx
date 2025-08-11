@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import Drawer from "./Drawer";
 
 const Navbar = () => {
   const location = useLocation();
@@ -10,16 +11,22 @@ const Navbar = () => {
 
   const activelink = (path) =>
     location.pathname === path
-      ? "nav-btn bg-[var(--secondary)] text-[var(--highlight-color)] rounded-sm shadow-[0_0_3px_var(--highlight-color)]"
+      ? "nav-btn bg-brown-300 text-yellow-300 rounded-sm shadow-[0_0_3px_rgb(230,179,37)]"
       : "nav-btn";
 
   return (
     <>
-      <div className="bg-[var(--primary)] h-13 fixed w-screen top-0 p-2 flex text-[var(--content-color)] justify-between items-center z-30 ">
-        <div className="ml-13 font-bold">
-          <span className="text-[var(--highlight-color)]">Book</span>MyTailor
+      <div className="bg-brown-300 h-13 fixed w-screen top-0 p-2 flex text-neutral-100 justify-between items-center z-30">
+        
+        {/* <======== Left Side ========> */}
+        <div className="flex items-center gap-3">
+          <Drawer />
+          <div className="font-bold">
+            <span className="text-yellow-300 ml-8">Book</span>MyTailor
+          </div>
         </div>
 
+        {/* <======== Right Side ========> */}
         <ul className="flex items-center gap-3">
           <Link to="/">
             <li className={activelink("/")}>Home</li>
@@ -29,7 +36,7 @@ const Navbar = () => {
           <li className="nav-btn">About Us</li>
           <li className="nav-btn">Services</li>
 
-          {/* Wishlist Link */}
+          {/* <======== Wishlist ========> */}
           <Link to="/wishlist">
             <li className={activelink("/wishlist") + " relative flex items-center"}>
               <FaHeart className="mr-1" />
@@ -42,7 +49,7 @@ const Navbar = () => {
             </li>
           </Link>
 
-          {/* Cart Link */}
+          {/* <======== Cart ========> */}
           <Link to="/cart">
             <li className={activelink("/cart") + " relative flex items-center"}>
               <FaShoppingCart className="mr-1" />
@@ -57,7 +64,6 @@ const Navbar = () => {
         </ul>
       </div>
 
-      {/* 👇 Added spacing below fixed navbar */}
       <div className="h-14" />
     </>
   );

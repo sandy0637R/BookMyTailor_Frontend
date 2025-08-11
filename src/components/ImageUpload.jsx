@@ -3,15 +3,30 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setProfile } from "../redux/authSlice";
+import { FaEdit, FaUserCircle } from "react-icons/fa"; // added icon
 
 const ImageUpload = ({ profileImage, setProfileImage }) => {
-  const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const dispatch = useDispatch();
 
-  const handleUpload = async () => {
-    if (!file) return toast.error("Please select an image file");
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
     if (!file.type.startsWith("image/")) return toast.error("Only image files allowed");
+
+    // If there is an existing image, delete it before uploading
+    if (profileImage) {
+      try {
+        await axios.delete("http://localhost:5000/users/profile/image", {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Old image deletion failed!");
+      }
+    }
 
     const formData = new FormData();
     formData.append("profileImage", file);
@@ -29,70 +44,46 @@ const ImageUpload = ({ profileImage, setProfileImage }) => {
       const newImagePath = res.data.user.profileImage.replace(/\\/g, "/");
       const fullUrl = `http://localhost:5000/${newImagePath}`;
 
-      // Update profile image via prop setter
       setProfileImage(fullUrl);
-
-      // Update Redux store
       dispatch(setProfile({ ...res.data.user, profileImage: newImagePath }));
-
-      setFile(null);
-      toast.success("Image uploaded successfully!");
+      toast.success("Profile image updated!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Upload failed!");
     } finally {
       setUploading(false);
-    }
-  };
-
-  const handleDeleteImage = async () => {
-    try {
-      const res = await axios.delete("http://localhost:5000/users/profile/image", {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (res.status === 200) {
-        setProfileImage("");
-        dispatch(setProfile({ ...res.data.user, profileImage: "" }));
-        toast.success("Image deleted successfully!");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Image deletion failed!");
+      e.target.value = ""; 
     }
   };
 
   return (
-    <div className="mb-4">
+    <div className="relative w-50 h-50">
+      {/* Profile Image OR Default Icon */}
+      {profileImage ? (
+        <img
+          src={profileImage}
+          alt="Profile"
+          className="w-50 h-50 object-cover rounded-full border-3 border-brown-100 shadow-custom  "
+        />
+      ) : (
+        <FaUserCircle className="w-32 h-32 text-gray-400" />
+      )}
+
+      {/* Floating Edit Button */}
+      <label
+        htmlFor="fileInput"
+        className="absolute bottom-1 right-5 bg-yellow-300 h-10 w-10 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-brown flex items-center justify-center"
+        title="Change Profile Image"
+      >
+        <FaEdit />
+      </label>
       <input
+        id="fileInput"
         type="file"
         accept="image/*"
-        onChange={(e) => setFile(e.target.files[0])}
-      />
-      <button
-        onClick={handleUpload}
+        onChange={handleFileChange}
+        className="hidden"
         disabled={uploading}
-        className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
-      >
-        {uploading ? "Uploading..." : "Submit"}
-      </button>
-
-      {profileImage && (
-        <div className="mt-4">
-          <img
-            src={profileImage}
-            alt="Profile"
-            className="w-32 h-32 object-cover rounded-full border"
-          />
-          <button
-            onClick={handleDeleteImage}
-            className="mt-2 ml-2 bg-red-500 text-white px-4 py-2 rounded-md"
-          >
-            Delete Image
-          </button>
-        </div>
-      )}
+      />
     </div>
   );
 };

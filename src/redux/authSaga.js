@@ -168,6 +168,7 @@ function* loginSaga(action) {
       localStorage.setItem("roles", JSON.stringify(roles || ["customer"]));
       localStorage.setItem("tailorDetails", JSON.stringify(tailorDetails || null));
       localStorage.setItem("profileImage", fixedLoginImage);
+      yield put(fetchProfileRequest());
     } else {
       yield put(setError(message));
     }

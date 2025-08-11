@@ -7,33 +7,40 @@
   list-style: none;
   box-sizing: border-box;
 }
-:root {
-  --primary: #222831;
-  --secondary: #393e46;
-  --highlight-color: #00adb5;
-  --content-color: #eeeeee;
-}
 
 @theme {
+ --color-yellow-100: #fbf1a4;
+  --color-yellow-200: #F2D974;
+  --color-yellow-300: #E6B325;
+
+  --color-brown-100: #91684A;
+  --color-brown-200: #493323;
+  --color-brown-300: #2e221f;
+
+  --color-neutral-100: #F7F7F7;
+
   --font-manrope: "Inter", sans-serif;
+
+
+  --shadow-custom: 0px 0px 4px #2e221f ;
 }
 
 .drawer-btn {
-  @apply mb-2 border-b-2 border-[var(--secondary)] p-2 hover:text-[var(--highlight-color)] hover:border-[var(--highlight-color)] hover:bg-[var(--secondary)] hover:rounded-sm transition-all duration-200 ease-in-out;
+  @apply mb-2 border-b-2 border-brown-200 p-2 hover:text-yellow-300 hover:border-yellow-300 hover:bg-brown-300 hover:rounded-sm transition-all duration-200 ease-in-out;
 }
 
 .nav-btn {
-  @apply ml-2 mr-2  p-1 pr-3 pl-3 hover:text-[var(--highlight-color)]  hover:bg-[var(--secondary)] hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_var(--highlight-color)];
+  @apply ml-2 mr-2 p-1 pr-3 pl-3 hover:text-yellow-300 hover:bg-brown-300 hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_#E6B325];
 }
+
 
 @keyframes scrub {
   0% {
-    transform: scaleX(0); /* Start with no progress */
-    transform-origin: right; /* Start from the right side */
+    transform: scaleX(0);
+    transform-origin: right;
   }
   100% {
-    transform: scaleX(1); /* Fill the progress bar */
-    transform-origin: left; /* End on the left side */
+    transform: scaleX(1);
+    transform-origin: left;
   }
 }
-

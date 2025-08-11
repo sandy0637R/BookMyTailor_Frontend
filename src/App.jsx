@@ -1,5 +1,4 @@
 import React from "react";
-import Drawer from "./components/Drawer";
 import { Routes, Route } from "react-router-dom";
 import { CookiesProvider } from "react-cookie";
 import Home from "./pages/Home";
@@ -25,133 +24,118 @@ import ClothHandeling from "./pages/ClothHandeling";
 import RoleRoute from "./utils/RoleRoute";
 import Admin from "./pages/Admin";
 import MyOrders from "./pages/MyOrder";
+
 const App = () => {
   return (
     <div className="relative min-h-screen">
-      {/* 🔔 Toaster for notifications */}
       <ToastContainer />
+      <Navbar />
 
-      {/* Drawer overlays above content */}
-      <div className="fixed top-0 left-0 z-50">
-        <Drawer />
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/tailors" element={<TailorPost />} />
+        <Route path="/tailorprofile/:id" element={<TailorProfile />} />
+        <Route path="/customerprofile/:id" element={<CustomerProfile />} />
+        <Route path="/cloths/:clothId" element={<ClothPage />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/orders" element={<MyOrders />} />
+        <Route path="/pallete" element={<PalletePage />} />
 
-      {/* Main content behind drawer */}
-      <div className="flex flex-col w-full min-h-screen">
-        <Navbar />
-
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/tailors" element={<TailorPost />} />
-          <Route path="/tailorprofile/:id" element={<TailorProfile />} />
-          <Route path="/customerprofile/:id" element={<CustomerProfile />} />
-          <Route path="/cloths/:clothId" element={<ClothPage />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/orders" element={<MyOrders/>} />
-
-
-          <Route path="/pallete" element={<PalletePage />} />
-
-          {/* Private Route */}
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/measurement"
-            element={
-              <PrivateRoute>
-                <Measurement />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/chat"
-            element={
-              <PrivateRoute>
-                <ChatPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/chat/:userId"
-            element={
-              <PrivateRoute>
-                <ChatPage />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/cart"
-            element={
-              <PrivateRoute>
-                <Cart />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/wishlist"
-            element={
-              <PrivateRoute>
-                <Wishlist />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/addpost"
-            element={
-              <PrivateRoute>
-                <RoleRoute allowedRoles={["tailor"]}>
-                  <AddPost />
-                </RoleRoute>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/cloth"
-            element={
-              <PrivateRoute>
-                <RoleRoute allowedRoles={["tailor"]}>
-                  <ClothHandeling />
-                </RoleRoute>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/custom"
-            element={
-              <PrivateRoute>
-                <RoleRoute allowedRoles={["customer"]}>
-                  <Customize />
-                </RoleRoute>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/tailorcustom"
-            element={
-              <PrivateRoute>
-                <RoleRoute allowedRoles={["tailor"]}>
-                  <CustomOrder />
-                </RoleRoute>
-              </PrivateRoute>
-            }
-          />
-        </Routes>
-      </div>
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/measurement"
+          element={
+            <PrivateRoute>
+              <Measurement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <PrivateRoute>
+              <ChatPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/chat/:userId"
+          element={
+            <PrivateRoute>
+              <ChatPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <PrivateRoute>
+              <Cart />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <PrivateRoute>
+              <Wishlist />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/addpost"
+          element={
+            <PrivateRoute>
+              <RoleRoute allowedRoles={["tailor"]}>
+                <AddPost />
+              </RoleRoute>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/cloth"
+          element={
+            <PrivateRoute>
+              <RoleRoute allowedRoles={["tailor"]}>
+                <ClothHandeling />
+              </RoleRoute>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/custom"
+          element={
+            <PrivateRoute>
+              <RoleRoute allowedRoles={["customer"]}>
+                <Customize />
+              </RoleRoute>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tailorcustom"
+          element={
+            <PrivateRoute>
+              <RoleRoute allowedRoles={["tailor"]}>
+                <CustomOrder />
+              </RoleRoute>
+            </PrivateRoute>
+          }
+        />
+      </Routes>
     </div>
   );
 };
 
-// Export wrapped with CookiesProvider
 export default () => (
   <CookiesProvider>
     <App />

@@ -5,26 +5,19 @@ import {
   logout,
   updateProfileRequest,
 } from "../redux/authSlice";
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,Link} from "react-router-dom";
 import toast from "react-hot-toast";
 import ImageUpload from "../components/ImageUpload";
 import TailorForm from "../components/TailorForm";
 import TailorDetails from "../components/TailorDetails";
 import FollowersList from "../components/FollowersList";
 import FollowingList from "../components/FollowingList";
-import FollowerButton from "../components/FollowerButton";
-import RatingList from "../components/RatingList";
-import Rating from "../components/Rating";
-import AddPost from "./AddPost";
 import { setSelectedUser } from "../redux/socialSlice";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile, loading } = useSelector((state) => state.auth);
-  const posts = useSelector((state) => state.post.posts);
-  const avgRating = useSelector((state) => state.social.ratings[profile?._id] || 0);
-  const userRateValue = useSelector((state) => state.social.userRating[profile?._id]);
 
   const [profileImage, setProfileImage] = useState(() => localStorage.getItem("profileImage") || "");
   const [currentRole, setCurrentRole] = useState(localStorage.getItem("role") || "customer");
@@ -32,7 +25,6 @@ const Profile = () => {
   const [showTailorForm, setShowTailorForm] = useState(false);
   const [showFollowersId, setShowFollowersId] = useState(null);
   const [showFollowingId, setShowFollowingId] = useState(null);
-  const [showRatingId, setShowRatingId] = useState(null);
   const [tailorForm, setTailorForm] = useState({ experience: "", specialization: "", fees: "", description: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", email: "", address: "", experience: "", specialization: "", fees: "", description: "" });
@@ -117,7 +109,6 @@ const Profile = () => {
   e.preventDefault();
   const { experience, specialization, fees, description } = tailorForm;
 
-  // ✅ Allow empty description, but validate others
   if (
     experience === "" ||
     !specialization?.trim() ||
@@ -167,10 +158,13 @@ const Profile = () => {
   if (loading) return <div className="text-center">Loading...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-15">
-      <h1 className="text-2xl font-semibold mb-4">Profile</h1>
-
-      <ImageUpload profileImage={profileImage} setProfileImage={setProfileImage} />
+    <><div className="flex items-center  justify-center  w-screen">
+      <div className="w-[800px] p-6 bg-white shadow-custom rounded-lg my-[50px]">
+      <h1 className="text-3xl font-semibold mb-10 ml-8">Profile</h1>
+<div>
+  
+      <ImageUpload profileImage={profileImage} setProfileImage={setProfileImage}  className="w-36 bg-amber-800"/>
+</div>
 
       {isEditing ? (
         <>
@@ -226,23 +220,20 @@ const Profile = () => {
         <TailorForm tailorForm={tailorForm} setTailorForm={setTailorForm} onSubmit={handleTailorFormSubmit} />
       )}
 
-      {currentRole === "customer" && (
+      
         <FollowingList userId={profile._id} showFollowingId={showFollowingId} setShowFollowingId={setShowFollowingId} defaultFollowing={profile.following || []} />
-      )}
 
       {currentRole === "tailor" && profile?.roles?.includes("tailor") && profile.tailorDetails && (
         <>
-          <FollowerButton tailorId={profile._id} followers={profile.tailorDetails.followers || []} currentUserId={profile._id} followerName={profile.name} />
           <FollowersList tailorId={profile._id} showFollowersId={showFollowersId} setShowFollowersId={setShowFollowersId} defaultFollowers={profile.tailorDetails.followers || []} />
-          <RatingList tailorId={profile._id} showRatingId={showRatingId} setShowRatingId={setShowRatingId} />
-          <Rating tailorId={profile._id} currentUserId={profile._id} avgRating={avgRating} userRateValue={userRateValue} />
-          <AddPost />
           <TailorDetails details={profile.tailorDetails} />
+          <Link to="/addpost">AddPost</Link>
         </>
       )}
 
       <button onClick={handleLogout} className="mt-6 w-full bg-red-500 text-white py-2 px-4 rounded-md">Logout</button>
     </div>
+      </div></>
   );
 };
 
