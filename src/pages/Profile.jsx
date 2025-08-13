@@ -5,7 +5,7 @@ import {
   logout,
   updateProfileRequest,
 } from "../redux/authSlice";
-import { useNavigate ,Link} from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import ImageUpload from "../components/ImageUpload";
 import TailorForm from "../components/TailorForm";
@@ -13,21 +13,40 @@ import TailorDetails from "../components/TailorDetails";
 import FollowersList from "../components/FollowersList";
 import FollowingList from "../components/FollowingList";
 import { setSelectedUser } from "../redux/socialSlice";
+import { FaPlus } from "react-icons/fa";
+import { GiClothes } from "react-icons/gi";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { profile, loading } = useSelector((state) => state.auth);
 
-  const [profileImage, setProfileImage] = useState(() => localStorage.getItem("profileImage") || "");
-  const [currentRole, setCurrentRole] = useState(localStorage.getItem("role") || "customer");
+  const [profileImage, setProfileImage] = useState(
+    () => localStorage.getItem("profileImage") || ""
+  );
+  const [currentRole, setCurrentRole] = useState(
+    localStorage.getItem("role") || "customer"
+  );
   const [showTailorConfirm, setShowTailorConfirm] = useState(false);
   const [showTailorForm, setShowTailorForm] = useState(false);
   const [showFollowersId, setShowFollowersId] = useState(null);
   const [showFollowingId, setShowFollowingId] = useState(null);
-  const [tailorForm, setTailorForm] = useState({ experience: "", specialization: "", fees: "", description: "" });
+  const [tailorForm, setTailorForm] = useState({
+    experience: "",
+    specialization: "",
+    fees: "",
+    description: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", email: "", address: "", experience: "", specialization: "", fees: "", description: "" });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    address: "",
+    experience: "",
+    specialization: "",
+    fees: "",
+    description: "",
+  });
 
   const isAdmin = profile?.roles?.includes("admin");
 
@@ -51,7 +70,8 @@ const Profile = () => {
         email: profile?.email || "",
         address: profile?.address || "",
         experience: profile?.tailorDetails?.experience || "",
-        specialization: profile?.tailorDetails?.specialization?.join(", ") || "",
+        specialization:
+          profile?.tailorDetails?.specialization?.join(", ") || "",
         fees: profile?.tailorDetails?.fees || "",
         description: profile?.tailorDetails?.description || "",
       });
@@ -59,7 +79,8 @@ const Profile = () => {
       if (hasTailor && profile.tailorDetails) {
         setTailorForm({
           experience: profile.tailorDetails.experience || "",
-          specialization: profile.tailorDetails.specialization?.join(", ") || "",
+          specialization:
+            profile.tailorDetails.specialization?.join(", ") || "",
           fees: profile.tailorDetails.fees || "",
           description: profile.tailorDetails.description || "",
         });
@@ -68,7 +89,10 @@ const Profile = () => {
       localStorage.setItem("user", profile.name || "");
       localStorage.setItem("email", profile.email || "");
       localStorage.setItem("roles", JSON.stringify(roles));
-      localStorage.setItem("tailorDetails", JSON.stringify(profile.tailorDetails || null));
+      localStorage.setItem(
+        "tailorDetails",
+        JSON.stringify(profile.tailorDetails || null)
+      );
       localStorage.setItem("profile", JSON.stringify(profile));
     }
   }, [profile]);
@@ -106,35 +130,31 @@ const Profile = () => {
   };
 
   const handleTailorFormSubmit = (e) => {
-  e.preventDefault();
-  const { experience, specialization, fees, description } = tailorForm;
+    e.preventDefault();
+    const { experience, specialization, fees, description } = tailorForm;
 
-  if (
-    experience === "" ||
-    !specialization?.trim() ||
-    fees === ""
-  ) {
-    toast.error("Experience, Specialization and Fees are required");
-    return;
-  }
+    if (experience === "" || !specialization?.trim() || fees === "") {
+      toast.error("Experience, Specialization and Fees are required");
+      return;
+    }
 
-  const tailorDetails = {
-    experience: Number(experience),
-    specialization: specialization.split(",").map((s) => s.trim()),
-    fees: Number(fees),
-    description: description?.trim() || "",
+    const tailorDetails = {
+      experience: Number(experience),
+      specialization: specialization.split(",").map((s) => s.trim()),
+      fees: Number(fees),
+      description: description?.trim() || "",
+    };
+    const roles = profile?.roles?.includes("customer")
+      ? ["customer", "tailor"]
+      : ["tailor"];
+
+    dispatch(updateProfileRequest({ roles, tailorDetails }));
+    dispatch(fetchProfileRequest());
+    toast.success("Tailor profile submitted!");
+    setShowTailorForm(false);
+    setCurrentRole("tailor");
+    localStorage.setItem("role", "tailor");
   };
-  const roles = profile?.roles?.includes("customer")
-    ? ["customer", "tailor"]
-    : ["tailor"];
-
-  dispatch(updateProfileRequest({ roles, tailorDetails }));
-  dispatch(fetchProfileRequest());
-  toast.success("Tailor profile submitted!");
-  setShowTailorForm(false);
-  setCurrentRole("tailor");
-  localStorage.setItem("role", "tailor");
-};
 
   const handleEditSubmit = () => {
     const payload = {
@@ -158,82 +178,257 @@ const Profile = () => {
   if (loading) return <div className="text-center">Loading...</div>;
 
   return (
-    <><div className="flex items-center  justify-center  w-screen">
-      <div className="w-[800px] p-6 bg-white shadow-custom rounded-lg my-[50px]">
-      <h1 className="text-3xl font-semibold mb-10 ml-8">Profile</h1>
-<div>
-  
-      <ImageUpload profileImage={profileImage} setProfileImage={setProfileImage}  className="w-36 bg-amber-800"/>
-</div>
+    <>
+      <div className="flex items-center  justify-center  w-screen">
+        <div className="w-[800px] p-6 bg-neutral-primary shadow-custom rounded-lg my-[50px]">
+          <h1 className="text-4xl font-semibold  mb-12  p-2 border-b-3 border-brown-primary">
+            Profile
+          </h1>
 
-      {isEditing ? (
-        <>
-          <input className="mb-2 border px-2 py-1 w-full rounded" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
-          <input className="mb-2 border px-2 py-1 w-full rounded" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
-          <input className="mb-4 border px-2 py-1 w-full rounded" placeholder="Address" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
-          {currentRole === "tailor" && (
-            <>
-              
-              <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Specialization" value={editForm.specialization} onChange={(e) => setEditForm({ ...editForm, specialization: e.target.value })} />
-              <input className="mb-2 border px-2 py-1 w-full rounded" placeholder="Fees" value={editForm.fees} onChange={(e) => setEditForm({ ...editForm, fees: e.target.value })} />
-              <textarea className="mb-4 border px-2 py-1 w-full rounded" placeholder="Description" value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} />
-            </>
+          <div className="flex justify-between items-center ">
+            <div>
+              <ImageUpload
+                profileImage={profileImage}
+                setProfileImage={setProfileImage}
+              />
+            </div>
+
+            <div className="p-5 text-brown-tertiary  text-[22px]">
+              {isEditing ? (
+                <>
+                  <input
+                    className="mb-2 border px-2 py-1 w-full rounded"
+                    value={editForm.name}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, name: e.target.value })
+                    }
+                  />
+                  <input
+                    className="mb-2 border px-2 py-1 w-full rounded"
+                    value={editForm.email}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, email: e.target.value })
+                    }
+                  />
+                  <input
+                    className="mb-4 border px-2 py-1 w-full rounded"
+                    placeholder="Address"
+                    value={editForm.address}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, address: e.target.value })
+                    }
+                  />
+                  {currentRole === "tailor" && (
+                    <>
+                      <input
+                        className="mb-2 border px-2 py-1 w-full rounded"
+                        placeholder="Specialization"
+                        value={editForm.specialization}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            specialization: e.target.value,
+                          })
+                        }
+                      />
+                      <input
+                        className="mb-2 border px-2 py-1 w-full rounded"
+                        placeholder="Fees"
+                        value={editForm.fees}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, fees: e.target.value })
+                        }
+                      />
+                      <textarea
+                        className="mb-4 border px-2 py-1 w-full rounded"
+                        placeholder="Description"
+                        value={editForm.description}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                    </>
+                  )}
+
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      onClick={handleEditSubmit}
+                      className="bg-green-500 text-white px-4 py-2 rounded"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="bg-gray-400 text-white px-4 py-2 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className=" mb-2 flex">
+                    <span className="font-medium mr-1 text-brown-primary ">
+                      Name:
+                    </span>{" "}
+                    <span>{profile?.name}</span>
+                  </p>
+                  <p className=" mb-2 flex">
+                    <span className="font-medium mr-1 text-brown-primary ">
+                      Email:
+                    </span>
+                    <span> {profile?.email}</span>
+                  </p>
+
+                  <p className="font-medium mr-1 text-brown-primary w-[90px]">
+                    Address:
+                  </p>
+                  <p className="inline-block w-72 h-20 text-[16px] font-medium overflow-y-auto bg-yellow-primary p-2 rounded-md">
+                    {profile?.address || "N/A"}
+                  </p>
+                </>
+              )}
+
+              <div className="flex justify-between w-[300px] items-baseline-last">
+                {isAdmin ? (
+                  <p className=" mb-4">
+                    <span className="font-medium mr-1 text-brown-primary">
+                      Role:
+                    </span>{" "}
+                    Admin
+                  </p>
+                ) : (
+                  <div className="mb-4">
+                    <label
+                      htmlFor="role"
+                      className="block text-sm font-medium text-brown-tertiary"
+                    >
+                      Switch Role
+                    </label>
+                    <select
+                      id="role"
+                      value={currentRole}
+                      onChange={handleRoleChange}
+                      className="w-[150px] mt-1 px-3 py-2 bg-brown-secondary text-neutral-primary rounded-md text-[17px]"
+                    >
+                      <option value="customer">Customer</option>
+                      <option value="tailor">Tailor</option>
+                    </select>
+                  </div>
+                )}
+                <div className="relative h-[30px] w-[150px] ml-5">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className=" text-neutral-primary bg-brown-secondary px-4 py-2 rounded mb-4 text-[17px]
+             transform transition-transform  ease-in-out
+             hover:bg-brown-primary hover:scale-105 hover:shadow-custom hover:border border-yellow-primary"
+                  >
+                    Edit Profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {showTailorConfirm && (
+            <div className="bg-yellow-100 p-4 mb-4 rounded-md">
+              <p className="text-gray-700">
+                Do you want to become a tailor? Please provide your details.
+              </p>
+              <div className="flex mt-2">
+                <button
+                  onClick={() => handleTailorConfirm(true)}
+                  className="bg-blue-500 text-white py-2 px-4 rounded-md mr-2"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => handleTailorConfirm(false)}
+                  className="bg-red-500 text-white py-2 px-4 rounded-md"
+                >
+                  No
+                </button>
+              </div>
+            </div>
           )}
 
-          <div className="flex gap-2 mb-4">
-            <button onClick={handleEditSubmit} className="bg-green-500 text-white px-4 py-2 rounded">Save</button>
-            <button onClick={() => setIsEditing(false)} className="bg-gray-400 text-white px-4 py-2 rounded">Cancel</button>
+          {showTailorForm && (
+            <TailorForm
+              tailorForm={tailorForm}
+              setTailorForm={setTailorForm}
+              onSubmit={handleTailorFormSubmit}
+            />
+          )}
+
+          {currentRole === "tailor" &&
+            profile?.roles?.includes("tailor") &&
+            profile.tailorDetails && (
+              <div className="mb-10">
+                <TailorDetails details={profile.tailorDetails} />
+              </div>
+            )}
+          <div className="flex gap-4 items-center">
+            <div className="ml-5 mr-10">
+              <FollowingList
+                userId={profile._id}
+                showFollowingId={showFollowingId}
+                setShowFollowingId={setShowFollowingId}
+                defaultFollowing={profile.following || []}
+              />
+            </div>
+            {currentRole === "customer" && (
+              <div className="border-t-3 border-brown-primary p-5 w-[600px] flex justify-around">
+                <Link
+                  to="/measurement"
+                  className="h-10 inline-flex items-center p-2  bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary transition-all duration-100 ease-in-out"
+                >
+                  <span className="p-1 mr-1">Add Measurement</span>{" "}
+                  <FaPlus size={20} />
+                </Link>
+                <Link
+                  to="/custom"
+                  className="h-10  inline-flex items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary transition-all duration-100 ease-in-out"
+                >
+                  <span className="p-1 mr-1">Customize Cloth</span>{" "}
+                  <GiClothes size={20} />
+                </Link>
+              </div>
+            )}
+            {currentRole === "tailor" &&
+              profile?.roles?.includes("tailor") &&
+              profile.tailorDetails && (
+                <div className="flex items-center">
+                  <div className=" mr-20">
+                    <FollowersList
+                      tailorId={profile._id}
+                      showFollowersId={showFollowersId}
+                      setShowFollowersId={setShowFollowersId}
+                      defaultFollowers={profile.tailorDetails.followers || []}
+                    />
+                  </div>
+                  <Link
+                    to="/addpost"
+                    className="inline-flex items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary transition-all duration-100 ease-in-out"
+                  >
+                    <span className="p-1 mr-1">Add Post</span>{" "}
+                    <FaPlus size={20} />
+                  </Link>
+                </div>
+              )}
           </div>
-        </>
-      ) : (
-        <>
-          <p className="text-lg mb-2">Name: {profile?.name}</p>
-          <p className="text-lg mb-2">Email: {profile?.email}</p>
-          <p className="text-lg mb-4">Address: {profile?.address || "N/A"}</p>
-          <button onClick={() => setIsEditing(true)} className="bg-blue-500 text-white px-4 py-2 rounded mb-4">Edit Profile</button>
-        </>
-      )}
 
-      {isAdmin ? (
-        <p className="text-lg mb-4">Role: Admin</p>
-      ) : (
-        <div className="mb-4">
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700">Switch Role</label>
-          <select id="role" value={currentRole} onChange={handleRoleChange} className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md">
-            <option value="customer">Customer</option>
-            <option value="tailor">Tailor</option>
-          </select>
+          <button
+            onClick={handleLogout}
+            className="mt-6 w-full bg-red-500 text-white py-2 px-4 rounded-md"
+          >
+            Logout
+          </button>
         </div>
-      )}
-
-      {showTailorConfirm && (
-        <div className="bg-yellow-100 p-4 mb-4 rounded-md">
-          <p className="text-gray-700">Do you want to become a tailor? Please provide your details.</p>
-          <div className="flex mt-2">
-            <button onClick={() => handleTailorConfirm(true)} className="bg-blue-500 text-white py-2 px-4 rounded-md mr-2">Yes</button>
-            <button onClick={() => handleTailorConfirm(false)} className="bg-red-500 text-white py-2 px-4 rounded-md">No</button>
-          </div>
-        </div>
-      )}
-
-      {showTailorForm && (
-        <TailorForm tailorForm={tailorForm} setTailorForm={setTailorForm} onSubmit={handleTailorFormSubmit} />
-      )}
-
-      
-        <FollowingList userId={profile._id} showFollowingId={showFollowingId} setShowFollowingId={setShowFollowingId} defaultFollowing={profile.following || []} />
-
-      {currentRole === "tailor" && profile?.roles?.includes("tailor") && profile.tailorDetails && (
-        <>
-          <FollowersList tailorId={profile._id} showFollowersId={showFollowersId} setShowFollowersId={setShowFollowersId} defaultFollowers={profile.tailorDetails.followers || []} />
-          <TailorDetails details={profile.tailorDetails} />
-          <Link to="/addpost">AddPost</Link>
-        </>
-      )}
-
-      <button onClick={handleLogout} className="mt-6 w-full bg-red-500 text-white py-2 px-4 rounded-md">Logout</button>
-    </div>
-      </div></>
+      </div>
+    </>
   );
 };
 

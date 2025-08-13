@@ -11,18 +11,17 @@ const Navbar = () => {
 
   const activelink = (path) =>
     location.pathname === path
-      ? "nav-btn bg-brown-300 text-yellow-300 rounded-sm shadow-[0_0_3px_rgb(230,179,37)]"
+      ? "nav-btn bg-brown-tertiary text-yellow-tertiary rounded-sm shadow-[0_0_3px_rgb(230,179,37)]"
       : "nav-btn";
 
   return (
     <>
-      <div className="bg-brown-300 h-13 fixed w-screen top-0 p-2 flex text-neutral-100 justify-between items-center z-30">
-        
+      <div className="bg-brown-tertiary h-13 fixed w-screen top-0 p-2 flex text-neutral-primary justify-between items-center z-30">
         {/* <======== Left Side ========> */}
         <div className="flex items-center gap-3">
           <Drawer />
           <div className="font-bold">
-            <span className="text-yellow-300 ml-8">Book</span>MyTailor
+            <span className="text-yellow-tertiary ml-8">Book</span>MyTailor
           </div>
         </div>
 
@@ -38,7 +37,11 @@ const Navbar = () => {
 
           {/* <======== Wishlist ========> */}
           <Link to="/wishlist">
-            <li className={activelink("/wishlist") + " relative flex items-center"}>
+            <li
+              className={
+                activelink("/wishlist") + " relative flex items-center"
+              }
+            >
               <FaHeart className="mr-1" />
               Wishlist
               {wishlist.length > 0 && (

@@ -23,7 +23,7 @@ const TailorDetails = ({ details }) => {
   }, [details]);
 
   return (
-    <div className="mt-6 p-4 bg-gray-100 rounded-md">
+    <div className="mt-6 p-4 bg-yellow-primary rounded-md">
       <h3 className="text-lg font-semibold">Your Tailor Details</h3>
       <p className="mt-2">Experience: {experienceInWords}</p>
       <p className="mt-2">Specialization: {details.specialization?.join(", ") || "N/A"}</p>

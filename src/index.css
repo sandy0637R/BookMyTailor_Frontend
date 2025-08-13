@@ -8,16 +8,19 @@
   box-sizing: border-box;
 }
 
+
+
 @theme {
- --color-yellow-100: #fbf1a4;
-  --color-yellow-200: #F2D974;
-  --color-yellow-300: #E6B325;
+--color-yellow-primary: #fbf1a4;
+--color-yellow-secondary: #F2D974;
+--color-yellow-tertiary: #E6B325;
 
-  --color-brown-100: #91684A;
-  --color-brown-200: #493323;
-  --color-brown-300: #2e221f;
+--color-brown-primary: #91684A;
+--color-brown-secondary: #493323;
+--color-brown-tertiary: #2e221f;
 
-  --color-neutral-100: #F7F7F7;
+--color-neutral-primary: #fffff3;
+
 
   --font-manrope: "Inter", sans-serif;
 
@@ -26,12 +29,13 @@
 }
 
 .drawer-btn {
-  @apply mb-2 border-b-2 border-brown-200 p-2 hover:text-yellow-300 hover:border-yellow-300 hover:bg-brown-300 hover:rounded-sm transition-all duration-200 ease-in-out;
+  @apply mb-2 border-b-2 border-brown-secondary p-2 hover:text-yellow-tertiary hover:border-yellow-tertiary hover:bg-brown-tertiary hover:rounded-sm transition-all duration-200 ease-in-out;
 }
 
 .nav-btn {
-  @apply ml-2 mr-2 p-1 pr-3 pl-3 hover:text-yellow-300 hover:bg-brown-300 hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_#E6B325];
+  @apply ml-2 mr-2 p-1 pr-3 pl-3 hover:text-yellow-tertiary hover:bg-brown-tertiary hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_#E6B325];
 }
+
 
 
 @keyframes scrub {

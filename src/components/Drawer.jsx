@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"; 
+import React, { useState, useEffect, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
 import { IoMdArrowDropright } from "react-icons/io";
 import { Link, useLocation } from "react-router-dom";
@@ -25,7 +25,7 @@ export default function Drawer() {
 
   const getLinkClass = (path) =>
     location.pathname === path
-      ? "drawer-btn bg-brown-300 text-yellow-300 rounded-sm"
+      ? "drawer-btn bg-brown-tertiary text-yellow-tertiary rounded-sm"
       : "drawer-btn";
 
   const tailorLinks = [
@@ -41,7 +41,7 @@ export default function Drawer() {
       {/* ===== Hamburger Button ===== */}
       <button
         onClick={() => setOpen(true)}
-        className={`fixed top-2.5 left-2 bg-brown-300 text-neutral-100 w-8 h-8 transition-transform duration-300 flex 
+        className={`fixed top-2.5 left-2 bg-brown-tertiary text-neutral-primary w-8 h-8 transition-transform duration-300 flex 
                     items-center justify-center rounded cursor-pointer z-50 shadow-[0_0px_3px_black]
                     ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Open menu"
@@ -51,13 +51,15 @@ export default function Drawer() {
 
       {/* ===== Drawer Panel ===== */}
       <div
-        className={`fixed top-0 left-0 h-screen bg-brown-300 text-neutral-100 transform transition-transform duration-300 ease-in-out 
-                    ${open ? "translate-x-0" : "-translate-x-full"} w-[280px] p-4 z-40`}
+        className={`fixed top-0 left-0 h-screen bg-brown-tertiary text-neutral-primary transform transition-transform duration-300 ease-in-out 
+                    ${
+                      open ? "translate-x-0" : "-translate-x-full"
+                    } w-[280px] p-4 z-40`}
       >
         {/* ===== Close Icon ===== */}
         <IoMdArrowDropright
-          className="absolute right-2 top-2 text-neutral-100 text-3xl cursor-pointer rotate-180 rounded-sm hover:text-yellow-300 
-                     hover:scale-110 hover:border-t-2 hover:bg-brown-300 hover:border-yellow-300"
+          className="absolute right-2 top-2 text-neutral-primary text-3xl cursor-pointer rotate-180 rounded-sm hover:text-yellow-tertiary 
+                     hover:scale-110 hover:border-t-2 hover:bg-brown-tertiary hover:border-yellow-tertiary"
           onClick={() => setOpen(false)}
         />
 

@@ -10,7 +10,7 @@ const initialState = {
   ratedUsersList: {},
   loadingFollowId: null,
   submittingRatingId: null,
-  selectedUser: null, // ✅ NEW
+  selectedUser: null,
 };
 
 const socialSlice = createSlice({
@@ -70,12 +70,10 @@ const socialSlice = createSlice({
       }
     },
 
-    // ✅ NEW reducer to store single user
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
     },
 
-    // ✅ NEW reducer to clear selected user
     clearSelectedUser: (state) => {
       state.selectedUser = null;
     },
@@ -93,8 +91,8 @@ export const {
   setFollowingList,
   setRatedUsers,
   updateTailor,
-  setSelectedUser,      // ✅ exported
-  clearSelectedUser,    // ✅ exported
+  setSelectedUser,
+  clearSelectedUser,
 } = socialSlice.actions;
 
 export default socialSlice.reducer;
