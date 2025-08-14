@@ -22,7 +22,7 @@ const SPECIALIZATIONS = [
 const PAGE_SIZE = 3;
 const MAX_DESCRIPTION_WORDS = 100;
 
-const TailorForm = ({ tailorForm, setTailorForm, onSubmit }) => {
+const TailorForm = ({ tailorForm, setTailorForm, onSubmit,onCancel }) => {
   const [visibleOptions, setVisibleOptions] = useState(SPECIALIZATIONS.slice(0, PAGE_SIZE));
   const [page, setPage] = useState(1);
   const [customSpec, setCustomSpec] = useState("");
@@ -131,7 +131,7 @@ const TailorForm = ({ tailorForm, setTailorForm, onSubmit }) => {
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4 m-15">
       <div>
         <label className="block mb-1 font-medium">Experience (years)</label>
         <div className="flex items-center gap-2">
@@ -320,12 +320,20 @@ const TailorForm = ({ tailorForm, setTailorForm, onSubmit }) => {
         </div>
       </div>
 
-      <button
+     <div className="flex justify-between "> <button
         type="submit"
-        className="w-full bg-indigo-500 text-white py-2 px-4 rounded-md"
+        className="w-75 bg-brown-tertiary text-neutral-primary py-2 px-4  mt-5 rounded-md hover-common hover:bg-brown-secondary"
       >
         Submit
       </button>
+      <button
+  type="button"
+  onClick={onCancel}
+  className="w-75 bg-danger-primary text-neutral-primary py-2 px-4  mt-5 rounded-md hover-common hover:bg-danger-secondary"
+>
+  Cancel
+</button></div>
+
     </form>
   );
 };

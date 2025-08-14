@@ -15,6 +15,7 @@ import FollowingList from "../components/FollowingList";
 import { setSelectedUser } from "../redux/socialSlice";
 import { FaPlus } from "react-icons/fa";
 import { GiClothes } from "react-icons/gi";
+import { MdExitToApp } from "react-icons/md";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -96,6 +97,17 @@ const Profile = () => {
       localStorage.setItem("profile", JSON.stringify(profile));
     }
   }, [profile]);
+
+  const handleCancel = () => {
+  setShowTailorForm(false);
+  setTailorForm({
+    experience: 0,
+    fees: 100,
+    specialization: "",
+    description: ""
+  });
+};
+
 
   const handleLogout = () => {
     dispatch(logout());
@@ -180,7 +192,7 @@ const Profile = () => {
   return (
     <>
       <div className="flex items-center  justify-center  w-screen">
-        <div className="w-[800px] p-6 bg-neutral-primary shadow-custom rounded-lg my-[50px]">
+        <div className="w-[800px] p-6 bg-neutral-primary shadow-custom rounded-lg my-[50px] relative pb-10">
           <h1 className="text-4xl font-semibold  mb-12  p-2 border-b-3 border-brown-primary">
             Profile
           </h1>
@@ -197,21 +209,21 @@ const Profile = () => {
               {isEditing ? (
                 <>
                   <input
-                    className="mb-2 border px-2 py-1 w-full rounded"
+                    className="mb-2 border-2 border-brown-primary hover:shadow-custom focus:outline-none focus:ring-0 focus:border-brown-primary transition-all duration-200 ease-in-out  px-2 py-1 w-full rounded text-[17px] bg-yellow-primary text-brown-tertiary "
                     value={editForm.name}
                     onChange={(e) =>
                       setEditForm({ ...editForm, name: e.target.value })
                     }
                   />
                   <input
-                    className="mb-2 border px-2 py-1 w-full rounded"
+                    className="mb-2 border-2 border-brown-primary hover:shadow-custom focus:outline-none focus:ring-0 focus:border-brown-primary transition-all duration-200 ease-in-out  px-2 py-1 w-full rounded text-[17px] bg-yellow-primary text-brown-tertiary "
                     value={editForm.email}
                     onChange={(e) =>
                       setEditForm({ ...editForm, email: e.target.value })
                     }
                   />
-                  <input
-                    className="mb-4 border px-2 py-1 w-full rounded"
+                  <textarea
+                    className="mb-1 border-2 border-brown-primary hover:shadow-custom focus:outline-none focus:ring-0 focus:border-brown-primary transition-all duration-200 ease-in-out  px-2 py-1 w-full rounded text-[17px] bg-yellow-primary text-brown-tertiary "
                     placeholder="Address"
                     value={editForm.address}
                     onChange={(e) =>
@@ -221,7 +233,7 @@ const Profile = () => {
                   {currentRole === "tailor" && (
                     <>
                       <input
-                        className="mb-2 border px-2 py-1 w-full rounded"
+                        className="mb-2 border-2 border-brown-primary hover:shadow-custom focus:outline-none focus:ring-0 focus:border-brown-primary transition-all duration-200 ease-in-out  px-2 py-1 w-full rounded text-[17px] bg-yellow-primary text-brown-tertiary "
                         placeholder="Specialization"
                         value={editForm.specialization}
                         onChange={(e) =>
@@ -232,7 +244,7 @@ const Profile = () => {
                         }
                       />
                       <input
-                        className="mb-2 border px-2 py-1 w-full rounded"
+                        className="mb-2 border-2 border-brown-primary hover:shadow-custom focus:outline-none focus:ring-0 focus:border-brown-primary transition-all duration-200 ease-in-out  px-2 py-1 w-full rounded text-[17px] bg-yellow-primary text-brown-tertiary "
                         placeholder="Fees"
                         value={editForm.fees}
                         onChange={(e) =>
@@ -240,7 +252,7 @@ const Profile = () => {
                         }
                       />
                       <textarea
-                        className="mb-4 border px-2 py-1 w-full rounded"
+                        className="mb-2 border-2 border-brown-primary hover:shadow-custom focus:outline-none focus:ring-0 focus:border-brown-primary transition-all duration-200 ease-in-out  px-2 py-1 w-full rounded text-[17px] bg-yellow-primary text-brown-tertiary "
                         placeholder="Description"
                         value={editForm.description}
                         onChange={(e) =>
@@ -256,13 +268,13 @@ const Profile = () => {
                   <div className="flex gap-2 mb-4">
                     <button
                       onClick={handleEditSubmit}
-                      className="bg-green-500 text-white px-4 py-2 rounded"
+                      className="bg-yellow-tertiary text-white  h-10 w-30 font-semibold  rounded text-[17px] hover-common hover:bg-yellow-secondary hover:text-brown-primary"
                     >
                       Save
                     </button>
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded"
+                      className="bg-danger-primary text-white  h-10 w-30 font-semibold  rounded text-[17px] hover-common hover:bg-danger-secondary "
                     >
                       Cancel
                     </button>
@@ -360,6 +372,7 @@ const Profile = () => {
               tailorForm={tailorForm}
               setTailorForm={setTailorForm}
               onSubmit={handleTailorFormSubmit}
+              onCancel={handleCancel}
             />
           )}
 
@@ -370,7 +383,7 @@ const Profile = () => {
                 <TailorDetails details={profile.tailorDetails} />
               </div>
             )}
-          <div className="flex gap-4 items-center">
+          <div className="flex gap-4 items-center  ">
             <div className="ml-5 mr-10">
               <FollowingList
                 userId={profile._id}
@@ -380,17 +393,17 @@ const Profile = () => {
               />
             </div>
             {currentRole === "customer" && (
-              <div className="border-t-3 border-brown-primary p-5 w-[600px] flex justify-around">
+              <div className="bg-yellow-primary rounded-md shadow-custom p-5 w-[600px] flex justify-around">
                 <Link
                   to="/measurement"
-                  className="h-10 inline-flex items-center p-2  bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary transition-all duration-100 ease-in-out"
+                  className="h-10 inline-flex items-center p-2  bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary hover-common"
                 >
                   <span className="p-1 mr-1">Add Measurement</span>{" "}
                   <FaPlus size={20} />
                 </Link>
                 <Link
                   to="/custom"
-                  className="h-10  inline-flex items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary transition-all duration-100 ease-in-out"
+                  className="h-10  inline-flex items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary hover-common"
                 >
                   <span className="p-1 mr-1">Customize Cloth</span>{" "}
                   <GiClothes size={20} />
@@ -411,7 +424,7 @@ const Profile = () => {
                   </div>
                   <Link
                     to="/addpost"
-                    className="inline-flex items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary transition-all duration-100 ease-in-out"
+                    className="inline-flex items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary hover-common"
                   >
                     <span className="p-1 mr-1">Add Post</span>{" "}
                     <FaPlus size={20} />
@@ -422,9 +435,10 @@ const Profile = () => {
 
           <button
             onClick={handleLogout}
-            className="mt-6 w-full bg-red-500 text-white py-2 px-4 rounded-md"
+            className=" absolute top-0 right-5 mt-6  bg-neutral-primary text-danger-primary hover-common hover:text-danger-secondary py-2 px-2 rounded-sm flex justify-center items-center"
           >
-            Logout
+            <span className="mr-1 font-semibold">Logout</span>
+            <span className="text-[25px] font-bold"><MdExitToApp /></span>
           </button>
         </div>
       </div>

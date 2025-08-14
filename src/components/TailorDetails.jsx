@@ -25,10 +25,10 @@ const TailorDetails = ({ details }) => {
   return (
     <div className="mt-6 p-4 bg-yellow-primary rounded-md">
       <h3 className="text-lg font-semibold">Your Tailor Details</h3>
-      <p className="mt-2">Experience: {experienceInWords}</p>
-      <p className="mt-2">Specialization: {details.specialization?.join(", ") || "N/A"}</p>
-      <p className="mt-2">Fees: ₹{details.fees}</p>
-      <p className="mt-2">Description: {details?.description || "N/A"}</p>
+      <p className="mt-2"><span className="font-semibold mr-1">Experience:</span> {experienceInWords}</p>
+      <p className="mt-2"><span className="font-semibold mr-1">Specialization:</span> {details.specialization?.join(", ") || "N/A"}</p>
+      <p className="mt-2"><span className="font-semibold mr-1">Fees:</span>₹{details.fees}</p>
+      <p className="mt-2"><span className="font-semibold mr-1">Description:</span>{details?.description || "N/A"}</p>
     </div>
   );
 };

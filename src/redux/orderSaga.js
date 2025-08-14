@@ -8,6 +8,8 @@ import {
   fetchOrdersFailure,
   deleteOrderSuccess,
   deleteOrderFailure,
+  fetchTopClothsSuccess,
+  fetchTopClothsFailure,
 } from "./orderSlice";
 import { clearCartRequest } from "./authSlice";
 import { toast } from "react-hot-toast";
@@ -23,7 +25,12 @@ function* placeOrderSaga(action) {
       },
     };
 
-    yield call(axios.post, "http://localhost:5000/orders/place", orderData, config);
+    yield call(
+      axios.post,
+      "http://localhost:5000/orders/place",
+      orderData,
+      config
+    );
 
     yield put(placeOrderSuccess());
     yield put(clearCartRequest(userId));
@@ -46,7 +53,11 @@ function* fetchOrdersSaga(action) {
       },
     };
 
-    const res = yield call(axios.get, "http://localhost:5000/orders/my", config);
+    const res = yield call(
+      axios.get,
+      "http://localhost:5000/orders/my",
+      config
+    );
 
     yield put(fetchOrdersSuccess(res.data || []));
   } catch (err) {
@@ -65,19 +76,40 @@ function* deleteOrderSaga(action) {
       },
     };
 
-    yield call(axios.delete, `http://localhost:5000/orders/delete/${orderId}`, config);
+    yield call(
+      axios.delete,
+      `http://localhost:5000/orders/delete/${orderId}`,
+      config
+    );
     yield put(deleteOrderSuccess(orderId));
     toast.success("Order deleted successfully.");
   } catch (error) {
-    yield put(deleteOrderFailure(error.response?.data?.message || error.message));
+    yield put(
+      deleteOrderFailure(error.response?.data?.message || error.message)
+    );
     toast.error(error.response?.data?.message || "Failed to delete order.");
   }
 }
 
+function* fetchTopClothsSaga() {
+  try {
+    const res = yield call(
+      axios.get,
+      "http://localhost:5000/orders/top-cloths"
+    );
+    yield put(fetchTopClothsSuccess(res.data));
+  } catch (error) {
+    yield put(
+      fetchTopClothsFailure(error.response?.data?.message || error.message)
+    );
+    toast.error(error.response?.data?.message || "Failed to fetch top cloths.");
+  }
+}
 
 // Watchers
 export function* watchOrder() {
   yield takeLatest("order/placeOrderRequest", placeOrderSaga);
   yield takeLatest("order/fetchOrdersRequest", fetchOrdersSaga);
   yield takeLatest("order/deleteOrderRequest", deleteOrderSaga);
+  yield takeLatest("order/fetchTopClothsRequest", fetchTopClothsSaga);
 }

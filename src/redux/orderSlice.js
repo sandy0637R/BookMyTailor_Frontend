@@ -7,6 +7,7 @@ const orderSlice = createSlice({
     loading: false,
     error: null,
     orders: [],
+    topCloths: [],
   },
   reducers: {
     placeOrderRequest: (state) => {
@@ -39,9 +40,24 @@ const orderSlice = createSlice({
     },
     deleteOrderSuccess: (state, action) => {
       state.loading = false;
-      state.orders = state.orders.filter(order => order._id !== action.payload);
+      state.orders = state.orders.filter(
+        (order) => order._id !== action.payload
+      );
     },
     deleteOrderFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    fetchTopClothsRequest: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchTopClothsSuccess: (state, action) => {
+      state.loading = false;
+      state.topCloths = action.payload;
+    },
+    fetchTopClothsFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
@@ -58,6 +74,9 @@ export const {
   deleteOrderRequest,
   deleteOrderSuccess,
   deleteOrderFailure,
+  fetchTopClothsRequest,
+  fetchTopClothsSuccess,
+  fetchTopClothsFailure,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;

@@ -8,6 +8,9 @@
   box-sizing: border-box;
 }
 
+:root{
+  --hello:#cb000a;
+}
 
 
 @theme {
@@ -20,6 +23,10 @@
 --color-brown-tertiary: #2e221f;
 
 --color-neutral-primary: #fffff3;
+
+--color-danger-primary: #fb2c36;
+--color-danger-secondary: #cb000a;
+
 
 
   --font-manrope: "Inter", sans-serif;
@@ -34,6 +41,10 @@
 
 .nav-btn {
   @apply ml-2 mr-2 p-1 pr-3 pl-3 hover:text-yellow-tertiary hover:bg-brown-tertiary hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_#E6B325];
+}
+
+.hover-common{
+  @apply hover:shadow-custom transition-all duration-200 ease-in-out
 }
 
 
