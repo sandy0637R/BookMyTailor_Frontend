@@ -30,41 +30,56 @@ const TailorCard = ({
 
 
   return (
-    <div className="bg-white shadow-md rounded-xl p-5 border border-gray-200">
-      {/* Followers list */}
-      <FollowersList
+    <div className="bg-neutral-primary  rounded-xl  pr-5 pb-5   w-[600px] shadow-common">
+     <div className="flex items-center ">
+       <div className="bg-yellow-tertiary mr-5 px-5 py-5  rounded-tl-xl rounded-br-[100px]">
+        <img
+         src={`http://localhost:5000/${tailor.profileImage}`}
+         alt="Profile"
+         className="w-45 h-45 border-4 border-neutral-primary rounded-full object-cover  shadow-custom  "
+       />
+       </div>
+      <div className="flex">
+       {/* Followers list */}
+      <div className="mr-5"><FollowersList
         tailorId={tailor._id}
         showFollowersId={showFollowersId}
         setShowFollowersId={setShowFollowersId}
         defaultFollowers={followers}
-      />
+      /></div>
 
       {/* Following list */}
-      <FollowingList
+      <div className="mr-5"><FollowingList
         userId={tailor._id}
         showFollowingId={showFollowingId}
         setShowFollowingId={setShowFollowingId}
-      />
+      /></div>
 
       {/* Rating list */}
-      <RatingList
+      <div className=""><RatingList
         tailorId={tailor._id}
         showRatingId={showRatingId}
         setShowRatingId={setShowRatingId}
-      />
+      /></div>
+     </div>
 
-      <img
-        src={`http://localhost:5000/${tailor.profileImage}`}
-        alt="Profile"
-        className="w-24 h-24 rounded-full object-cover mt-3"
-      />
+     </div>
 
-      <p className="mt-2 font-bold">
-        Name: <span className="font-normal">{tailor.name}</span>
+      <div className="pl-5"><div className="mt-7">
+        <p className="mt-2 font-semibold text-[16.5px] text-brown-secondary">
+        Name: <span className="font-normal text-brown-tertiary">{tailor.name}</span>
       </p>
-      <p>Email: {tailor.email}</p>
+      <p className="mt-2 font-semibold text-[16.5px] text-brown-secondary">Email: <span className="font-normal text-brown-tertiary">{tailor.email}</span></p>
+      </div>
 
-      <div className="mt-3 space-x-2">
+      <div className="my-2 "><Rating
+        tailorId={tailor._id}
+        currentUserId={currentUserId}
+        avgRating={avgRating}
+        userRateValue={userRateValue}
+      /></div>
+
+      <div className="mt-6 space-x-2">
         <FollowerButton
           tailorId={tailor._id}
           followers={followers}
@@ -73,18 +88,13 @@ const TailorCard = ({
         />
         <button
           onClick={handleViewProfile}
-          className="bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300"
+          className="bg-brown-secondary text-neutral-primary text-[16px] px-4 py-[6px] rounded hover:bg-brown-primary hover-common"
         >
           View Profile
         </button>
       </div>
 
-      <Rating
-        tailorId={tailor._id}
-        currentUserId={currentUserId}
-        avgRating={avgRating}
-        userRateValue={userRateValue}
-      />
+      </div>
     </div>
   );
 };

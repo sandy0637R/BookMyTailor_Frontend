@@ -16,7 +16,7 @@ const ClothDisplayCard = ({
   const showDetails = expandedId === cloth._id;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300">
+    <div className="bg-neutral-primary rounded-2xl shadow-common overflow-hidden hover-common transition duration-300">
       <img
         src={
           cloth.image?.startsWith("/uploads")
@@ -27,27 +27,27 @@ const ClothDisplayCard = ({
         className="w-full h-64 object-cover"
       />
       <div className="p-4 space-y-2">
-        <h3 className="text-xl font-semibold">{cloth.name}</h3>
+        <h3 className="text-xl font-semibold text-brown-secondary">{cloth.name}</h3>
         {cloth.tailor?.name && (
           <p className="text-sm text-gray-500">
             Manufacturer: {cloth.tailor.name}
           </p>
         )}
-        <p className="text-lg font-bold text-green-600">₹{cloth.price}</p>
+        <p className="text-lg font-bold text-yellow-tertiary">₹{cloth.price}</p>
 
-        <div className="flex justify-between mt-2 flex-wrap gap-2">
+        <div className="flex justify-between mt-2  gap-2">
           {!isInCart &&
             (isInWishlist ? (
               <button
                 onClick={() => onWishlistToggle(cloth._id)}
-                className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-red-600 hover:bg-red-600 hover:text-white transition"
+                className="flex items-center gap-2 cloth-card-btn hover-common text-sm text-neutral-primary bg-danger-primary hover:bg-danger-secondary  transition "
               >
-                <FaTrashAlt /> Remove Wishlist
+                <FaTrashAlt /> Remove
               </button>
             ) : (
               <button
                 onClick={() => onWishlistToggle(cloth._id)}
-                className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-gray-600 hover:text-red-500 hover:border-red-500 transition"
+                className="flex items-center gap-2 cloth-card-btn hover-common bg-brown-secondary hover:bg-brown-primary hover:!text-red-100"
               >
                 <FaHeart /> Wishlist
               </button>
@@ -57,7 +57,7 @@ const ClothDisplayCard = ({
             onClick={() =>
               setExpandedId((prev) => (prev === cloth._id ? null : cloth._id))
             }
-            className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-blue-600 hover:bg-blue-600 hover:text-white transition"
+            className="flex items-center gap-2 cloth-card-btn hover-common bg-brown-primary hover:bg-brown-secondary"
           >
             <FaEye /> {showDetails ? "Hide" : "View"}
           </button>
@@ -66,14 +66,14 @@ const ClothDisplayCard = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleCartToggle(cloth._id, "remove")}
-                className="px-2 py-1 text-lg font-bold border rounded hover:bg-red-100"
+                className="px-2 py-1 text-lg font-bold rounded bg-brown-secondary text-neutral-primary hover:bg-brown-primary hover-common "
               >
                 -
               </button>
-              <span className="text-lg">{quantity}</span>
+              <span className="text-lg text-brown-primary">{quantity}</span>
               <button
                 onClick={() => handleCartToggle(cloth._id, "add")}
-                className="px-2 py-1 text-lg font-bold border rounded hover:bg-green-100"
+                className="px-2 py-1 text-lg font-bol rounded bg-brown-secondary text-neutral-primary hover:bg-brown-primary hover-common "
               >
                 +
               </button>
@@ -81,9 +81,9 @@ const ClothDisplayCard = ({
           ) : (
             <button
               onClick={() => handleCartToggle(cloth._id, "add")}
-              className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-green-600 hover:bg-green-600 hover:text-white transition"
+              className="flex items-center gap-2 cloth-card-btn hover-common bg-brown-secondary hover:bg-brown-primary"
             >
-              <FaCartPlus /> Add to Cart
+              <FaCartPlus /> Cart
             </button>
           )}
         </div>

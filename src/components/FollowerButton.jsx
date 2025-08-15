@@ -22,7 +22,7 @@ const FollowerButton = ({ tailorId, followers, currentUserId, followerName }) =>
     <button
       onClick={toggleFollow}
       disabled={loading}
-      className="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 disabled:opacity-50"
+      className="bg-brown-primary text-neutral-primary text-[16px] px-10 py-[6px] rounded hover:bg-brown-secondary disabled:opacity-50 hover-common"
     >
       {loading ? "Loading..." : isFollowing ? "Unfollow" : "Follow"}
     </button>

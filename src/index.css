@@ -9,7 +9,7 @@
 }
 
 :root{
-  --hello:#cb000a;
+  --color-check: oklch(85.2% 0.199 91.936);
 }
 
 
@@ -17,6 +17,7 @@
 --color-yellow-primary: #fbf1a4;
 --color-yellow-secondary: #F2D974;
 --color-yellow-tertiary: #E6B325;
+--color-yellow-premium: oklch(85.2% 0.199 91.936);
 
 --color-brown-primary: #91684A;
 --color-brown-secondary: #493323;
@@ -33,6 +34,7 @@
 
 
   --shadow-custom: 0px 0px 4px #2e221f ;
+
 }
 
 .drawer-btn {
@@ -47,7 +49,13 @@
   @apply hover:shadow-custom transition-all duration-200 ease-in-out
 }
 
+.shadow-common{
+  @apply  border border-gray-200 shadow-lg
+}
 
+.cloth-card-btn{
+  @apply w-[100px] h-[40px] justify-center text-[15px] rounded text-neutral-primary
+}
 
 @keyframes scrub {
   0% {
@@ -57,5 +65,6 @@
   100% {
     transform: scaleX(1);
     transform-origin: left;
-  }
+  }  
 }
+

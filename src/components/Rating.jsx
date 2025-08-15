@@ -56,8 +56,8 @@ const Rating = ({
   };
 
   return (
-    <div className="mt-3">
-      <strong>Average Rating: </strong>
+    <div className="mt-3 text-brown-secondary">
+      <strong >Average Rating: </strong>
       {!inRatingMode ? (
         <>
           {renderStars(Math.round(avgRating))}
@@ -66,7 +66,7 @@ const Rating = ({
           {/* ✅ Only show if user has NOT rated and it's not their own profile */}
           {!alreadyRated && tailorId !== currentUserId && (
             <button
-              className="ml-3 bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500"
+              className="ml-3 bg-yellow-premium text-white px-2 py-1 rounded hover:bg-yellow-tertiary hover-common"
               onClick={handleRateClick}
             >
               Rate
@@ -79,7 +79,7 @@ const Rating = ({
           <button
             onClick={submitRating}
             disabled={submitting}
-            className="ml-2 bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 disabled:opacity-50"
+            className="ml-2 bg-yellow-premium text-white px-2 py-1 rounded hover:bg-yellow-tertiary hover-common disabled:opacity-50"
           >
             {submitting ? "Submitting..." : "Submit"}
           </button>
@@ -88,7 +88,7 @@ const Rating = ({
               setRatingModeId(null);
               setSelectedRating(0);
             }}
-            className="ml-2 text-sm text-red-500"
+            className="ml-2 text-sm text-danger-primary hover:text-danger-secondary"
           >
             Cancel
           </button>

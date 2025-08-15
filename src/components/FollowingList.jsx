@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ViewProfileButton from "./ViewProfileButton";
-import { setSelectedUser } from "../redux/socialSlice"; 
+import { setSelectedUser } from "../redux/socialSlice";
 
 const FollowingList = ({
   userId,
@@ -37,6 +37,12 @@ const FollowingList = ({
     dispatch(setSelectedUser(null)); // ✅ clear selected user
   };
 
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   const formatFollowers = (num) => {
     if (num >= 1_000_000)
       return (num / 1_000_000).toFixed(num % 1_000_000 === 0 ? 0 : 1) + "m";
@@ -48,16 +54,14 @@ const FollowingList = ({
   return (
     <>
       <div
-        className="flex-col justify-center items-center w-[100px] cursor-pointer "
+        className="flex-col justify-center items-center w-[100px] cursor-pointer"
         onClick={handleViewFollowing}
       >
-        <p className="text-brown-primary flex justify-center font-semibold text-[35px] leading-tight ">
-          {" "}
+        <p className="text-brown-primary flex justify-center font-semibold text-[35px] leading-tight">
           {formatFollowers(followingList.length)}
         </p>
         <p
           className="text-brown-primary cursor-pointer font-semibold flex justify-center text-[20px] leading-tight"
-          onClick={handleViewFollowing}
         >
           Following
         </p>
@@ -68,20 +72,34 @@ const FollowingList = ({
       )}
 
       {showFollowingId === userId && followingList.length > 0 && (
-        <div className="bg-gray-100 p-3 mt-2 rounded">
-          <h4 className="font-bold mb-2">Following List:</h4>
-          {followingList.map((user, i) => (
-            <div
-              key={`${user._id}-${i}`}
-              className="flex items-center justify-between mb-1"
-            >
-              <p>{user.name}</p>
-              <ViewProfileButton userId={user._id} />
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={handleOverlayClick}
+        >
+          <div className="bg-white rounded-lg p-4 w-[400px] h-[400px] shadow-lg flex flex-col">
+            <h4 className="font-bold mb-2">Following List</h4>
+
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-1 border-t border-b py-2">
+              {followingList.map((user, i) => (
+                <div
+                  key={`${user._id}-${i}`}
+                  className="flex items-center justify-between mb-1"
+                >
+                  <p>{user.name}</p>
+                  <ViewProfileButton userId={user._id} />
+                </div>
+              ))}
             </div>
-          ))}
-          <button className="mt-2 text-sm text-red-600" onClick={handleClose}>
-            Close
-          </button>
+
+            {/* Close button */}
+            <button
+              className="mt-3  text-white bg-red-500 px-4 py-[6px] rounded hover:bg-red-600 self-end"
+              onClick={handleClose}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </>

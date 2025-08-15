@@ -59,11 +59,65 @@ const Home = () => {
   }
 
   return (
-    <div className="space-y-16 p-4">
+    <div className="space-y-16 p-4 bg-neutral-primary">
       {/* Top 5 Cloths */}
-     {topCloths.length > 0 && (
-    <section className="flex space-x-4 overflow-x-auto py-2">
-      {topCloths.map((cloth, index) => {
+
+  
+      {/* Featured Tailor Section */}
+      {featuredTailor && (
+        <section className="w-full h-[45vh] bg-neutral-primary rounded-lg shadow-common hover-common flex overflow-hidden relative">
+          <div className="w-1/2 h-full flex justify-center items-center bg-yellow-tertiary rounded-tr-full">
+            <img
+              src={
+                featuredTailor.profileImage
+                  ? `http://localhost:5000/${featuredTailor.profileImage.replaceAll("\\", "/")}`
+                  : "/placeholder.jpg"
+              }
+              alt={featuredTailor.name}
+              className="rounded-full h-60 w-60 border-8 border-yellow-primary"
+              onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
+            />
+          </div>
+          <div className="w-1/2 p-6 flex flex-col justify-center ">
+            <h2 className="text-3xl font-bold text-brown-secondary">{featuredTailor.name}</h2>
+            <p className="mt-2 text-lg text-brown-primary">
+              <span className="font-semibold">Followers:</span> {featuredTailor.tailorDetails?.followers?.length || 0}
+            </p>
+            <p className="text-lg text-brown-primary flex items-center">
+              <span className="font-semibold mr-1">Rating:</span> {ratings[featuredTailor._id] || 0}{" "}
+              <span className="ml-2 flex">
+                {Array.from({ length: 5 }).map((_, i) =>
+                  i < (ratings[featuredTailor._id] || 0) ? (
+                    <FaStar key={`star-${i}`} className="text-yellow-500 mr-1" />
+                  ) : (
+                    <FaRegStar key={`star-${i}`} className="text-gray-300 mr-1" />
+                  )
+                )}
+              </span>
+            </p>
+            <p className="text-lg text-brown-primary">
+              <span className="font-semibold">Experience:</span> {getExperience(featuredTailor.tailorDetails?.createdAt)}
+            </p>
+            <button
+              onClick={() => navigate(`/tailorprofile/${featuredTailor._id}`)}
+              className="mt-4 bg-brown-secondary text-white px-5 py-2 rounded hover:bg-brown-primary hover-common w-xl"
+            >
+              View Profile
+            </button>
+          </div>
+          <div className="h-60 w-60 absolute right-0 rounded-bl-full bg-yellow-tertiary flex  justify-center items-center">
+            <div className="flex flex-col justify-center items-center text-3xl font-bold text-neutral-primary ml-10 mb-10"><span>Top</span>
+            <span>Tailor</span></div>
+          </div>
+        </section>
+      )}
+   {topCloths.length > 0 && (
+    <section className="flex flex-col  h-[35vh] rounded-2xl hover-common justify-center items-center relative overflow-hidden bg-neutral-primary shadow-common">
+      <div className="h-65 w-100 absolute bg-brown-secondary left-0 top-0  rounded-br-full"></div>
+
+      <div className="h-65 w-100 absolute bg-brown-secondary right-0 bottom-0 rounded-tl-full"></div>
+      <div className="text-2xl font-bold text-brown-secondary mb-2  w-full text-center pb-2">Top Clothes</div>
+     <div className="flex space-x-30 overflow-x-auto py-5 px-20 "> {topCloths.map((cloth, index) => {
         const imageUrl =
           cloth.image?.startsWith("http")
             ? cloth.image
@@ -74,7 +128,7 @@ const Home = () => {
         return (
           <div
             key={`${cloth.clothId}-${index}`}
-            className="w-20 h-20 flex-shrink-0 rounded-full border-2 border-gray-300 overflow-hidden cursor-pointer flex items-center justify-center bg-gray-100 text-center p-1"
+            className="w-40 h-40 flex-shrink-0 rounded-full border-4 border-brown-primary overflow-hidden cursor-pointer flex items-center justify-center bg-gray-100 text-center hover-common z-5"
             onClick={() => navigate(`/cloths/${cloth.clothId}`)}
           >
             {hasImage ? (
@@ -93,55 +147,9 @@ const Home = () => {
             )}
           </div>
         );
-      })}
+      })}</div>
     </section>
   )}
-
-      {/* Featured Tailor Section */}
-      {featuredTailor && (
-        <section className="w-full h-[35vh] bg-gray-100 rounded-lg shadow flex overflow-hidden">
-          <div className="w-1/2 h-full">
-            <img
-              src={
-                featuredTailor.profileImage
-                  ? `http://localhost:5000/${featuredTailor.profileImage.replaceAll("\\", "/")}`
-                  : "/placeholder.jpg"
-              }
-              alt={featuredTailor.name}
-              className="w-full h-full object-cover"
-              onError={(e) => (e.currentTarget.src = "/placeholder.jpg")}
-            />
-          </div>
-          <div className="w-1/2 p-6 flex flex-col justify-center">
-            <h2 className="text-3xl font-bold">{featuredTailor.name}</h2>
-            <p className="mt-2 text-lg text-gray-600">
-              Followers: {featuredTailor.tailorDetails?.followers?.length || 0}
-            </p>
-            <p className="text-lg text-gray-600 flex items-center">
-              Rating: {ratings[featuredTailor._id] || 0}{" "}
-              <span className="ml-2 flex">
-                {Array.from({ length: 5 }).map((_, i) =>
-                  i < (ratings[featuredTailor._id] || 0) ? (
-                    <FaStar key={`star-${i}`} className="text-yellow-500 mr-1" />
-                  ) : (
-                    <FaRegStar key={`star-${i}`} className="text-gray-300 mr-1" />
-                  )
-                )}
-              </span>
-            </p>
-            <p className="text-lg text-gray-600">
-              Experience: {getExperience(featuredTailor.tailorDetails?.createdAt)}
-            </p>
-            <button
-              onClick={() => navigate(`/tailorprofile/${featuredTailor._id}`)}
-              className="mt-4 bg-blue-500 text-white px-5 py-2 rounded hover:bg-blue-600 transition"
-            >
-              View Profile
-            </button>
-          </div>
-        </section>
-      )}
-
       {/* Cloths and Tailors */}
       <Cloths />
       <Tailors />
