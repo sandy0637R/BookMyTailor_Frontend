@@ -57,6 +57,17 @@
   @apply w-[100px] h-[40px] justify-center text-[15px] rounded text-neutral-primary
 }
 
+.customize-m-in-main-div{
+  @apply flex flex-col m-3
+}
+
+.customize-m-in-label{
+  @apply   px-1 text-sm font-medium  text-brown-primary 
+}
+
+
+
+
 @keyframes scrub {
   0% {
     transform: scaleX(0);

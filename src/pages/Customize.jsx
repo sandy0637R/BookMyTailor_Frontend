@@ -97,7 +97,7 @@ const Customize = () => {
         budget: "",
         duration: "",
         description: "",
-        quantity: "",
+        quantity: 1,
         image: null,
       });
       setPreview(null);
@@ -236,7 +236,6 @@ const Customize = () => {
     form.gender,
     form.budget,
     form.duration,
-    form.quantity,
     form.image,
   ];
 
@@ -272,8 +271,9 @@ const Customize = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Upload Custom Request</h2>
-      <RequestUploadForm
+
+      <div className="flex justify-center items-center">
+        <RequestUploadForm
         form={form}
         handleInput={handleInput}
         handleFile={handleFile}
@@ -281,6 +281,7 @@ const Customize = () => {
         isSubmitDisabled={isSubmitDisabled}
         handleSubmit={handleSubmit}
       />
+      </div>
 
       <h2 className="text-xl font-bold mt-8 mb-2">My Requests</h2>
       {requests.map((req) => (
