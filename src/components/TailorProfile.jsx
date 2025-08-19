@@ -21,6 +21,10 @@ const TailorProfile = () => {
   const posts = useSelector((state) => state.post.posts);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     dispatch(setSelectedUser(null)); // ✅ clear selected user
     if (tailorId) {
       dispatch({ type: "FETCH_TAILOR", payload: { tailorId } });
@@ -49,12 +53,19 @@ const TailorProfile = () => {
   };
 
   if (!tailor) {
-    return <div className="text-center py-10 text-lg text-gray-600">Loading tailor profile...</div>;
+    return (
+      <div className="text-center py-10 text-lg text-gray-600">
+        Loading tailor profile...
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <button onClick={() => navigate(-1)} className="mb-6 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-6 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+      >
         ← Back to Tailors
       </button>
 
@@ -62,7 +73,11 @@ const TailorProfile = () => {
         <div className="md:flex p-6">
           <div className="md:w-1/4 flex flex-col items-center">
             <img
-              src={tailor.profileImage ? `http://localhost:5000/${tailor.profileImage}` : "/default-profile.png"}
+              src={
+                tailor.profileImage
+                  ? `http://localhost:5000/${tailor.profileImage}`
+                  : "/default-profile.png"
+              }
               alt={tailor.name}
               className="w-48 h-48 rounded-full object-cover border-4 border-white shadow-lg"
             />
@@ -87,15 +102,33 @@ const TailorProfile = () => {
             <p className="text-gray-600 mt-2">{tailor.email}</p>
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><h3 className="font-semibold">Experience</h3><p>{tailor.tailorDetails?.experience || 0}</p></div>
-              <div><h3 className="font-semibold">Specialization</h3><p>{tailor.tailorDetails?.specialization?.join(", ") || "Not specified"}</p></div>
-              <div><h3 className="font-semibold">Service Fees</h3><p>₹{tailor.tailorDetails?.fees || "Not specified"}</p></div>
-              <div><h3 className="font-semibold">Address</h3><p>{tailor.address || "Not specified"}</p></div>
+              <div>
+                <h3 className="font-semibold">Experience</h3>
+                <p>{tailor.tailorDetails?.experience || 0}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Specialization</h3>
+                <p>
+                  {tailor.tailorDetails?.specialization?.join(", ") ||
+                    "Not specified"}
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Service Fees</h3>
+                <p>₹{tailor.tailorDetails?.fees || "Not specified"}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold">Address</h3>
+                <p>{tailor.address || "Not specified"}</p>
+              </div>
             </div>
 
             <div className="mt-6">
               <h3 className="font-semibold">About</h3>
-              <p className="text-gray-700 mt-2">{tailor.tailorDetails?.description || "No description provided."}</p>
+              <p className="text-gray-700 mt-2">
+                {tailor.tailorDetails?.description ||
+                  "No description provided."}
+              </p>
             </div>
 
             <div className="mt-6 flex space-x-6">
@@ -123,7 +156,10 @@ const TailorProfile = () => {
         <div className="px-6 py-4 border-t border-gray-200">
           <h2 className="text-xl font-bold mb-4">Posts</h2>
           {tailor.tailorDetails?.posts?.length > 0 ? (
-            <AllPost posts={tailor.tailorDetails.posts} onRefresh={handleRefresh} />
+            <AllPost
+              posts={tailor.tailorDetails.posts}
+              onRefresh={handleRefresh}
+            />
           ) : (
             <p className="text-gray-500">No posts yet.</p>
           )}

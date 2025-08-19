@@ -11,6 +11,10 @@ const CustomerProfile = () => {
 
   const user = useSelector((state) => state.social.selectedUser);
 
+   useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
+    
   useEffect(() => {
     if (id) {
       dispatch({ type: "FETCH_USER_BY_ID", payload: { userId: id } });
