@@ -25,7 +25,7 @@ const ViewProfileButton = ({ userId, buttonClass = "", children = "View Profile"
   return (
     <button
       onClick={handleClick}
-      className={`bg-gray-200 text-gray-700 px-3 py-1 rounded hover:bg-gray-300 ${buttonClass}`}
+      className={`bg-brown-primary text-neutral-primary px-3 py-1 rounded hover-common ${buttonClass}`}
     >
       {children}
     </button>

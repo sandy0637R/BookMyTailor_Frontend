@@ -178,7 +178,7 @@ const PalletePage = () => {
     <div className="min-h-screen w-full bg-neutral-primary text-brown-primary px-4 py-8">
       <div className="w-full bg-neutral-primary p-8 space-y-6">
         <h2 className="text-2xl font-bold text-brown-secondary text-center">
-          🎨 Advanced Skin Tone Palette Detector
+          🎨 Skin Tone Palette Detector
         </h2>
 
         {/* Upload / Capture */}

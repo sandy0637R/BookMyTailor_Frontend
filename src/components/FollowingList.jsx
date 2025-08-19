@@ -76,15 +76,15 @@ const FollowingList = ({
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           onClick={handleOverlayClick}
         >
-          <div className="bg-white rounded-lg p-4 w-[400px] h-[400px] shadow-lg flex flex-col">
-            <h4 className="font-bold mb-2">Following List</h4>
+          <div className="bg-yellow-primary text-brown-primary rounded-lg p-4 w-[410px] h-[400px] shadow-lg flex flex-col">
+            <h4 className="font-bold mb-2 text-center">Following List</h4>
 
             {/* Scrollable content */}
-            <div className="overflow-y-auto flex-1 border-t border-b py-2">
+            <div className="overflow-y-auto flex-1 border-t-2 border-b-2 py-2">
               {followingList.map((user, i) => (
                 <div
                   key={`${user._id}-${i}`}
-                  className="flex items-center justify-between mb-1"
+                  className="flex items-center justify-between mb-1 py-2 px-2 mx-0.5 bg-yellow-100 rounded-lg hover-common"
                 >
                   <p>{user.name}</p>
                   <ViewProfileButton userId={user._id} />

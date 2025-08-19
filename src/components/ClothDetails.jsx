@@ -62,7 +62,7 @@ const ClothDetails = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={onClose}
     >
       <div
@@ -83,30 +83,36 @@ const ClothDetails = ({
         </div>
 
         {/* Right - Details */}
-        <div className="w-1/2 p-6 flex flex-col justify-between">
+        <div className="w-1/2 p-6 flex flex-col justify-between bg-neutral-primary">
           <div>
-            <h2 className="text-2xl font-bold mb-2">{resolvedCloth.name}</h2>
-            <p className="text-gray-600 mb-1">
-              <strong>Description:</strong> {resolvedCloth.description}
+            <h2 className="text-2xl font-bold mb-2 text-brown-secondary">
+              {resolvedCloth.name}
+            </h2>
+            <p className="text-brown-primary mb-1">
+              <strong className="">Description:</strong>{" "}
+              {resolvedCloth.description}
             </p>
-            <p className="text-gray-600 mb-1">
-              <strong>Type:</strong> {resolvedCloth.type}
+            <p className="text-brown-primary mb-1">
+              <strong className="">Type:</strong> {resolvedCloth.type}
             </p>
             {resolvedCloth.manufacturer && (
-              <p className="text-gray-600 mb-1">
-                <strong>Brand:</strong> {resolvedCloth.manufacturer}
+              <p className="text-brown-primary mb-1">
+                <strong className="">Brand:</strong>{" "}
+                {resolvedCloth.manufacturer}
               </p>
             )}
-            <p className="text-gray-600 mb-1">
-              <strong>Sizes:</strong> {resolvedCloth.size.join(", ")}
+            <p className="text-brown-primary mb-1">
+              <strong className="">Sizes:</strong>{" "}
+              {resolvedCloth.size.join(", ")}
             </p>
-            <p className="text-gray-600 mb-1">
-              <strong>Gender:</strong> {resolvedCloth.gender}
+            <p className="text-brown-primary mb-1">
+              <strong className="">Gender:</strong> {resolvedCloth.gender}
             </p>
             {resolvedCloth.tailor && resolvedCloth.tailor._id && (
               <>
-                <p className="text-gray-600 mb-1">
-                  <strong>Tailor:</strong> {resolvedCloth.tailor.name}
+                <p className="text-brown-primary mb-1">
+                  <strong className="">Tailor:</strong>{" "}
+                  {resolvedCloth.tailor.name}
                 </p>
                 <div className="mt-2">
                   <ViewProfileButton userId={resolvedCloth.tailor._id} />
@@ -114,55 +120,47 @@ const ClothDetails = ({
               </>
             )}
 
-            <p className="text-xl font-bold text-green-600 mt-4">
+            <p className="text-xl font-bold text-yellow-tertiary mt-4">
               ₹{resolvedCloth.price}
             </p>
           </div>
 
           <div className="flex justify-between items-center mt-6 flex-wrap gap-2">
-            <button
-              onClick={onClose}
-              className="flex items-center gap-2 text-sm px-3 py-1 border rounded-xl text-gray-600 hover:text-black hover:border-black"
-            >
-              <FaArrowLeft /> Back
-            </button>
-
-            <button
-              onClick={handleCopyLink}
-              className="flex items-center gap-2 text-sm px-3 py-1 border rounded-xl text-indigo-600 hover:bg-indigo-600 hover:text-white"
-            >
-              <FaLink /> Copy Link
-            </button>
-
             {!isInCart &&
               (isInWishlist ? (
                 <button
                   onClick={handleWishlistToggle}
-                  className="flex items-center gap-2 text-sm px-3 py-1 border rounded-xl text-red-600 hover:bg-red-600 hover:text-white"
+                  className="cloth-detail-btn hover-common hover:bg-danger-secondary bg-danger-primary"
                 >
-                  <FaTrashAlt /> Remove Wishlist
+                  <span className="mr-2">
+                    <FaTrashAlt />
+                  </span>{" "}
+                  Remove Wishlist
                 </button>
               ) : (
                 <button
                   onClick={handleWishlistToggle}
-                  className="flex items-center gap-2 text-sm px-3 py-1 border rounded-xl text-gray-600 hover:text-red-500 hover:border-red-500"
+                  className="cloth-detail-btn hover-common hover:bg-brown-secondary bg-brown-primary"
                 >
-                  <FaHeart /> Wishlist
+                  <span className="mr-2">
+                    <FaHeart />
+                  </span>{" "}
+                  Wishlist
                 </button>
               ))}
 
             {isInCart ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-[100%] justify-center text-brown-primary mb-2">
                 <button
                   onClick={handleRemoveFromCart}
-                  className="px-2 py-1 text-lg font-bold border rounded hover:bg-red-100"
+                  className="px-3 py-1 text-lg font-bold bg-brown-secondary hover:bg-brown-primary text-neutral-primary hover-common rounded-sm"
                 >
                   -
                 </button>
                 <span className="text-lg">{quantity}</span>
                 <button
                   onClick={handleAddToCart}
-                  className="px-2 py-1 text-lg font-bold border rounded hover:bg-green-100"
+                  className="px-3 py-1 text-lg font-bold bg-brown-secondary hover:bg-brown-primary text-neutral-primary hover-common rounded-sm"
                 >
                   +
                 </button>
@@ -170,11 +168,33 @@ const ClothDetails = ({
             ) : (
               <button
                 onClick={handleAddToCart}
-                className="flex items-center gap-2 text-sm px-3 py-1 border rounded-xl text-green-600 hover:bg-green-600 hover:text-white"
+                className="cloth-detail-btn hover-common hover:bg-brown-primary bg-brown-secondary"
               >
-                <FaCartPlus /> Add to Cart
+                <span className="mr-2">
+                  <FaCartPlus />
+                </span>{" "}
+                Add to Cart
               </button>
             )}
+            <button
+              onClick={onClose}
+              className="cloth-detail-btn hover-common hover:bg-brown-primary bg-brown-secondary"
+            >
+              <span className="mr-2">
+                <FaArrowLeft />
+              </span>{" "}
+              Back
+            </button>
+
+            <button
+              onClick={handleCopyLink}
+              className="cloth-detail-btn bg-brown-primary hover:bg-brown-secondary hover-common"
+            >
+              <span className="mr-2">
+                <FaLink />
+              </span>{" "}
+              Copy Link
+            </button>
           </div>
         </div>
       </div>

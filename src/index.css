@@ -54,7 +54,11 @@
 }
 
 .cloth-card-btn{
-  @apply w-[100px] h-[40px] justify-center text-[15px] rounded text-neutral-primary
+  @apply w-[100px] h-[40px] flex justify-center text-[15px] rounded text-neutral-primary
+}
+
+.cloth-detail-btn{
+  @apply w-[49%] flex justify-center items-center h-[40px] rounded-sm text-neutral-primary
 }
 
 .customize-m-in-main-div{

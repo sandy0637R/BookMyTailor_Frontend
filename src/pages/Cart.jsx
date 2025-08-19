@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router";
-
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrash, FaEye } from "react-icons/fa";
 import {
@@ -17,30 +15,31 @@ import ClothDetails from "../components/ClothDetails";
 
 const Cart = () => {
   const dispatch = useDispatch();
-  const userId = useSelector((state) => state.auth.userId);
-
   const cart = useSelector((state) => state.auth.cart);
   const cloths = useSelector((state) => state.auth.cloths);
   const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.auth.profile);
-  const [expandedId, setExpandedId] = useState(null);
-  const [address, setAddress] = useState("");
-  const [isEditingAddress, setIsEditingAddress] = useState(false);
-  const [paymentMode, setPaymentMode] = useState("");
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [showOrderSummary, setShowOrderSummary] = useState(false);
   const navigate = useNavigate();
 
+  const [expandedId, setExpandedId] = useState(null);
+  const [address, setAddress] = useState({ building: "", city: "", pin: "" });
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [paymentMode, setPaymentMode] = useState("");
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
+
   useEffect(() => {
-    if (token) {
-      dispatch(fetchProfileRequest());
-    }
+    if (token) dispatch(fetchProfileRequest());
     dispatch(getClothsRequest());
   }, [dispatch, token]);
 
   useEffect(() => {
     if (profile?.address) {
-      setAddress(profile.address);
+      const parts = profile.address.split(",").map((p) => p.trim());
+      setAddress({
+        building: parts[0] || "",
+        city: parts[1] || "",
+        pin: parts[2] || "",
+      });
       setIsEditingAddress(false);
     }
   }, [profile]);
@@ -62,92 +61,99 @@ const Cart = () => {
   );
 
   const handlePlaceOrder = () => {
-  if (!address || !paymentMode) return;
+    if (!cartItems.length) return; // ✅ only allow if cart has items
+    if (!address.building || !address.city || !address.pin || !paymentMode)
+      return;
 
-  const items = cartItems.map((item) => ({
-    product: item._id,
-    quantity: item.quantity,
-  }));
+    const items = cartItems.map((item) => ({
+      product: item._id,
+      quantity: item.quantity,
+    }));
+    const fullAddress = `${address.building}, ${address.city}, ${address.pin}`;
 
-  const orderData = {
-    items,
-    address,
-    paymentMode,
-    totalAmount: totalPrice,
+    const orderData = {
+      items,
+      address: fullAddress,
+      paymentMode,
+      totalAmount: totalPrice,
+    };
+
+    dispatch(
+      placeOrderRequest({
+        token,
+        orderData,
+        userId: profile._id,
+        navigate,
+      })
+    );
   };
 
-  dispatch(
-    placeOrderRequest({
-      token,
-      orderData,
-      userId: profile._id,
-      navigate,
-    })
-  );
-};
-
- 
-
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <h2 className="text-3xl font-bold text-center mb-8">Your Cart</h2>
-
-      {cartItems.length === 0 || orderPlaced ? (
-        <p className="text-center text-lg text-gray-600">
-          {orderPlaced ? "Your order has been placed!" : "Cart is empty."}
-        </p>
-      ) : (
-        <>
-          {/* Cart Items */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {cartItems.map((item) => (
+    <div className="min-h-screen bg-gray-100 p-4 flex gap-6">
+      {/* Right: Cart Items */}
+      <div className="w-2/3 max-h-screen overflow-y-auto pr-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cartItems.map((item) => {
+            const showDetails = expandedId === item._id;
+            return (
               <div
                 key={item._id}
-                className="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300"
+                className="bg-neutral-primary rounded-2xl shadow-common overflow-hidden hover-common transition duration-300"
               >
                 <img
-                  src={item.image}
+                  src={
+                    item.image?.startsWith("/uploads")
+                      ? `http://localhost:5000${item.image}`
+                      : item.image || "/placeholder.jpg"
+                  }
                   alt={item.name}
                   className="w-full h-64 object-cover"
                 />
                 <div className="p-4 space-y-2">
-                  <h3 className="text-xl font-semibold">{item.name}</h3>
-                  <p className="text-gray-600">
-                    Brand: <span className="text-black">{item.manufacturer}</span>
+                  <h3 className="text-xl font-semibold text-brown-secondary">
+                    {item.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Manufacturer: {item.manufacturer}
                   </p>
-                  <p className="text-lg font-bold text-green-600">₹{item.price}</p>
-                  <div className="flex items-center gap-2">
+                  <p className="text-lg font-bold text-yellow-tertiary">
+                    ₹{item.price}
+                  </p>
+                  <div className="flex justify-between mt-2 gap-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => dispatch(removeFromCart(item._id))}
+                        className="px-2 py-1 text-lg font-bold rounded bg-brown-secondary text-neutral-primary hover:bg-brown-primary hover-common"
+                      >
+                        -
+                      </button>
+                      <span className="text-lg text-brown-primary">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => dispatch(addToCart(item._id))}
+                        className="px-2 py-1 text-lg font-bold rounded bg-brown-secondary text-neutral-primary hover:bg-brown-primary hover-common"
+                      >
+                        +
+                      </button>
+                    </div>
                     <button
                       onClick={() => dispatch(removeFromCart(item._id))}
-                      className="px-2 py-1 text-lg font-bold border rounded hover:bg-red-100"
-                    >
-                      -
-                    </button>
-                    <span className="text-lg">{item.quantity}</span>
-                    <button
-                      onClick={() => dispatch(addToCart(item._id))}
-                      className="px-2 py-1 text-lg font-bold border rounded hover:bg-green-100"
-                    >
-                      +
-                    </button>
-                  </div>
-                  <div className="flex justify-between mt-4 flex-wrap gap-2">
-                    <button
-                      onClick={() => dispatch(removeFromCart(item._id))}
-                      className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-red-600 hover:bg-red-600 hover:text-white transition"
+                      className="flex items-center gap-2 cloth-card-btn hover-common text-sm text-neutral-primary bg-danger-primary hover:bg-danger-secondary transition"
                     >
                       <FaTrash /> Remove
                     </button>
                     <button
-                      onClick={() => setExpandedId(item._id)}
-                      className="flex items-center gap-2 px-3 py-1 border rounded-xl text-sm text-blue-600 hover:bg-blue-600 hover:text-white transition"
+                      onClick={() =>
+                        setExpandedId(showDetails ? null : item._id)
+                      }
+                      className="flex items-center gap-2 cloth-card-btn hover-common bg-brown-primary hover:bg-brown-secondary"
                     >
-                      <FaEye /> View
+                      <FaEye /> {showDetails ? "Hide" : "View"}
                     </button>
                   </div>
                 </div>
-
-                {expandedId === item._id && (
+                {showDetails && (
                   <ClothDetails
                     cloth={item}
                     isInCart={true}
@@ -165,110 +171,155 @@ const Cart = () => {
                   />
                 )}
               </div>
-            ))}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Left: Buy / Order Section */}
+      <div className="w-1/3 flex-shrink-0">
+        {!showOrderSummary && (
+          <div className="sticky top-4">
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded w-full"
+              onClick={() => setShowOrderSummary(true)}
+              disabled={!cartItems.length} // ✅ disable if cart empty
+            >
+              Buy Now
+            </button>
           </div>
+        )}
 
-          {/* Buy Now Button */}
-          {!showOrderSummary && (
-            <div className="mt-10 max-w-2xl mx-auto text-center">
-              <button
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded"
-                onClick={() => setShowOrderSummary(true)}
-              >
-                Buy Now
-              </button>
+        {showOrderSummary && (
+          <div className="sticky top-4 bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-2xl font-semibold mb-4">Order Summary</h3>
+            <ul className="divide-y">
+              {cartItems.map((item) => (
+                <li key={item._id} className="flex justify-between py-2">
+                  <span>
+                    {item.name} x{item.quantity}
+                  </span>
+                  <span>₹{item.price * item.quantity}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="text-right font-bold text-xl mt-4">
+              Total: ₹{totalPrice}
             </div>
-          )}
 
-          {/* Order Summary */}
-          {showOrderSummary && (
-            <div className="mt-10 max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-              <h3 className="text-2xl font-semibold mb-4">Order Summary</h3>
+            {/* Payment Mode */}
+            <div className="mt-6">
+              <label className="block font-medium mb-2">
+                Select Payment Mode:
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="cod"
+                  checked={paymentMode === "cod"}
+                  onChange={() => setPaymentMode("cod")}
+                />
+                Cash on Delivery
+              </label>
+            </div>
 
-              <ul className="divide-y">
-                {cartItems.map((item) => (
-                  <li key={item._id} className="flex justify-between py-2">
-                    <span>
-                      {item.name} x{item.quantity}
-                    </span>
-                    <span>₹{item.price * item.quantity}</span>
-                  </li>
-                ))}
-              </ul>
+            {/* Address Section */}
+            <div className="mt-6">
+              <label className="block font-medium mb-2">
+                Delivery Address:
+              </label>
 
-              <div className="text-right font-bold text-xl mt-4">
-                Total: ₹{totalPrice}
-              </div>
-
-              {/* Payment Mode */}
-              <div className="mt-6">
-                <label className="block font-medium mb-2">
-                  Select Payment Mode:
-                </label>
-                <label className="flex items-center gap-2">
+              {isEditingAddress ? (
+                <>
                   <input
-                    type="radio"
-                    name="payment"
-                    value="cod"
-                    checked={paymentMode === "cod"}
-                    onChange={() => setPaymentMode("cod")}
+                    type="text"
+                    placeholder="Building / Street"
+                    className="w-full border p-2 rounded mb-2"
+                    value={address.building}
+                    onChange={(e) =>
+                      setAddress((prev) => ({
+                        ...prev,
+                        building: e.target.value,
+                      }))
+                    }
                   />
-                  Cash on Delivery
-                </label>
-              </div>
-
-              {/* Address Section */}
-              <div className="mt-6">
-                <label className="block font-medium mb-2">Delivery Address:</label>
-
-                {isEditingAddress ? (
-                  <>
-                    <textarea
-                      className="w-full border p-2 rounded"
-                      rows={3}
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                    />
-                    <button
-                      onClick={() => {
-                        dispatch(updateProfileRequest({ address }));
-                        dispatch(fetchProfileRequest()); // ← ensures Redux stays updated
-                        setIsEditingAddress(false);
-                      }}
-                      className="mt-2 px-4 py-1 border rounded bg-green-600 text-white"
-                    >
-                      Save Address
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex justify-between items-start">
-                    <p>{address || "No address saved."}</p>
-                    <button
-                      onClick={() => setIsEditingAddress(true)}
-                      className="text-blue-600 underline"
-                    >
-                      Change Address
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Place Order */}
-              <button
-                className={`mt-6 w-full py-2 rounded text-white font-bold ${
-                  address && paymentMode
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-gray-400 cursor-not-allowed"
-                }`}
-                disabled={!address || !paymentMode}
-                onClick={handlePlaceOrder}
-              >
-                Place Order
-              </button>
+                  <input
+                    type="text"
+                    placeholder="City"
+                    className="w-full border p-2 rounded mb-2"
+                    value={address.city}
+                    onChange={(e) =>
+                      setAddress((prev) => ({ ...prev, city: e.target.value }))
+                    }
+                  />
+                  <input
+                    type="text"
+                    placeholder="PIN Code"
+                    className="w-full border p-2 rounded mb-2"
+                    value={address.pin}
+                    onChange={(e) =>
+                      setAddress((prev) => ({ ...prev, pin: e.target.value }))
+                    }
+                  />
+                  <button
+                    onClick={() => {
+                      const fullAddress = `${address.building}, ${address.city}, ${address.pin}`;
+                      dispatch(updateProfileRequest({ address: fullAddress }));
+                      dispatch(fetchProfileRequest());
+                      setIsEditingAddress(false);
+                    }}
+                    className="mt-2 px-4 py-1 border rounded bg-green-600 text-white"
+                  >
+                    Save Address
+                  </button>
+                </>
+              ) : (
+                <div className="flex justify-between items-start">
+                  <p>
+                    {address.building} {address.city} {address.pin}
+                    {!address.building &&
+                      !address.city &&
+                      !address.pin &&
+                      "No address saved."}
+                  </p>
+                  <button
+                    onClick={() => setIsEditingAddress(true)}
+                    className="text-blue-600 underline"
+                  >
+                    Change Address
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </>
-      )}
+
+            {/* Place Order */}
+            <button
+              className={`mt-6 w-full py-2 rounded text-white font-bold ${
+                cartItems.length &&
+                address.building &&
+                address.city &&
+                address.pin &&
+                paymentMode
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+              disabled={
+                !(
+                  cartItems.length &&
+                  address.building &&
+                  address.city &&
+                  address.pin &&
+                  paymentMode
+                )
+              }
+              onClick={handlePlaceOrder}
+            >
+              Place Order
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
