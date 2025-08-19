@@ -11,7 +11,7 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-[var(--color-brown-tertiary)] text-[var(--color-neutral-primary)] pt-16 pb-10 mt-20">
+    <footer className="bg-[var(--color-brown-tertiary)] text-[var(--color-neutral-primary)] pt-16 pb-10 ">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* About Section */}

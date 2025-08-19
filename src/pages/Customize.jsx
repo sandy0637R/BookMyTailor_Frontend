@@ -6,6 +6,7 @@ import RequestDisplayCard from "../components/RequestDisplayCard";
 import RequestEditForm from "../components/RequestEditForm";
 import RequestUploadForm from "../components/RequestUploadForm";
 import { setChatUser } from "../redux/chatSlice";
+import CustomizeHistory from "../containers/CustomizeHistory";
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
@@ -28,8 +29,7 @@ const Customize = () => {
 
   const [preview, setPreview] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [showHistory, setShowHistory] = useState(false);
-  const [openCardId, setOpenCardId] = useState(null);
+  const [showRequests, setShowRequests] = useState(false);
 
   const fetchRequests = async () => {
     try {
@@ -265,7 +265,7 @@ const Customize = () => {
 
   return (
     <div className="p-4">
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center my-20">
         <RequestUploadForm
           form={form}
           handleInput={handleInput}
@@ -277,121 +277,61 @@ const Customize = () => {
       </div>
 
       <h2 className="text-xl font-bold mt-8 mb-2 text-center">My Requests</h2>
-      <div className="flex flex-wrap">
-        {requests.map((req) => (
-          <div key={req._id} className="w-fit m-5">
-            {editingId === req._id ? (
-              <RequestEditForm
-                req={req}
-                handleEditChange={handleEditChange}
-                handleEditMeasurementsChange={handleEditMeasurementsChange}
-                handleEditFile={handleEditFile}
-                handleEditSubmit={handleEditSubmit}
-                setEditingId={setEditingId}
-              />
-            ) : (
-              <RequestDisplayCard
-                req={req}
-                handleDelete={() => handleDelete(req._id)}
-                setEditingId={setEditingId}
-                handleConfirm={handleConfirm}
-                setChatUser={(user) => dispatch(setChatUser(user))}
-              />
-            )}
-          </div>
-        ))}
+
+      {/* Toggle Button */}
+      <div className="flex justify-center mb-4">
+        <button
+          onClick={() => setShowRequests((prev) => !prev)}
+          className="mb-4 bg-brown-tertiary text-yellow-primary px-4 py-2 rounded text-sm w-full hover:bg-brown-secondary hover-common"
+        >
+          {showRequests ? "Hide Requests" : "Show Requests"}
+        </button>
       </div>
 
-      {history.length > 0 && (
-        <>
-          <h2 className="text-xl font-bold mt-8 mb-2 text-center text-brown-secondary">Order History</h2>
-          <button
-            onClick={() => setShowHistory((prev) => !prev)}
-            className="mb-4 bg-brown-tertiary text-yellow-primary px-4 py-2 rounded   text-sm w-full hover:bg-brown-secondary hover-common"
-          >
-            {showHistory ? "Hide History" : "Show History"}
-          </button>
+      {/* Requests Section */}
+      {showRequests && (
+        <div className="flex flex-wrap">
+          {requests.map((req) => (
+            <div key={req._id} className="w-fit m-5">
+              {editingId === req._id ? (
+                // Modal Wrapper
+                <div className="fixed inset-0 flex items-center justify-center  bg-black/50 z-50">
+                  {/* Background Click Closes Modal */}
+                  <div
+                    className="absolute inset-0"
+                    onClick={() => setEditingId(null)}
+                  ></div>
 
-          {showHistory && (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm mb-4">
-                <thead className="bg-brown-tertiary">
-                  <tr>
-                    <th className="p-2  rounded-tl-lg border-r-2 border-b-2 border-brown-primary  text-yellow-primary">
-                      Tailor Name
-                    </th>
-                    <th className="p-2 border-r-2 border-b-2 border-brown-primary  text-yellow-primary">
-                      Status
-                    </th>
-                    <th className="p-2 border-r-2 border-b-2 border-brown-primary text-yellow-primary">
-                      Delivered On
-                    </th>
-                    <th className="p-2 rounded-tr-lg  border-b-2 border-brown-primary text-yellow-primary">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((req) => (
-                    <React.Fragment key={req._id}>
-                      <tr>
-                        <td className="p-2 bg-yellow-primary border-b-2 border-yellow-secondary text-center">
-                          {typeof req.tailorId === "object"
-                            ? req.tailorId.name
-                            : tailors.find((t) => t._id === req.tailorId)
-                                ?.name || "N/A"}
-                        </td>
-                        <td className="p-2 bg-yellow-primary border-b-2 border-yellow-secondary text-center">
-                          {req.status}
-                        </td>
-                        <td className="p-2 bg-yellow-primary border-b-2 border-yellow-secondary text-center">
-                          {req.deliveredAt
-                            ? new Date(req.deliveredAt).toLocaleDateString()
-                            : "Pending"}
-                        </td>
-                        <td className="p-2 bg-yellow-primary border-b-2 border-yellow-secondary text-center">
-                          <button
-                            onClick={() =>
-                              setOpenCardId(
-                                openCardId === req._id ? null : req._id
-                              )
-                            }
-                            className="text-yellow-primary bg-brown-tertiary py-1 px-5 rounded-sm hover:bg-yellow-primary  hover:text-brown-tertiary shadow-[inset_0_0_15px_5px_rgba(100,100,100,0.3)] transition-all ease-in-out duration-200"
-                          >
-                            {openCardId === req._id
-                              ? "Hide Request"
-                              : "View Request"}
-                          </button>
-                        </td>
-                      </tr>
-                      {openCardId === req._id && (
-                        <tr>
-                          <td
-                            colSpan="4"
-                            className="p-2 border-b-2 border-yellow-secondary bg-yellow-primary"
-                          >
-                            <div className="p-2">
-                              <RequestDisplayCard
-                                req={req}
-                                setChatUser={(user) =>
-                                  dispatch(setChatUser(user))
-                                }
-                                handleDelete={() => {}}
-                                setEditingId={() => {}}
-                                handleConfirm={() => {}}
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
+                  {/* Modal Content */}
+                  <div
+                    className="relative bg-neutral-primary p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto z-10"
+                    onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+                  >
+                    <RequestEditForm
+                      req={req}
+                      handleEditChange={handleEditChange}
+                      handleEditMeasurementsChange={handleEditMeasurementsChange}
+                      handleEditFile={handleEditFile}
+                      handleEditSubmit={handleEditSubmit}
+                      setEditingId={setEditingId}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <RequestDisplayCard
+                  req={req}
+                  handleDelete={() => handleDelete(req._id)}
+                  setEditingId={setEditingId}
+                  handleConfirm={handleConfirm}
+                  setChatUser={(user) => dispatch(setChatUser(user))}
+                />
+              )}
             </div>
-          )}
-        </>
+          ))}
+        </div>
       )}
+
+      <CustomizeHistory history={history} />
     </div>
   );
 };

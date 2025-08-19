@@ -24,7 +24,6 @@ import ClothHandeling from "./pages/ClothHandeling";
 import RoleRoute from "./utils/RoleRoute";
 import Admin from "./pages/Admin";
 import MyOrders from "./pages/MyOrder";
-import Footer from "./components/Footer";
 
 const App = () => {
   return (
@@ -50,7 +49,7 @@ const App = () => {
               <Profile />
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/measurement"
           element={
@@ -58,7 +57,7 @@ const App = () => {
               <Measurement />
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/chat"
           element={
@@ -66,7 +65,7 @@ const App = () => {
               <ChatPage />
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/chat/:userId"
           element={
@@ -74,7 +73,7 @@ const App = () => {
               <ChatPage />
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/cart"
           element={
@@ -82,7 +81,7 @@ const App = () => {
               <Cart />
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/wishlist"
           element={
@@ -90,7 +89,7 @@ const App = () => {
               <Wishlist />
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/addpost"
           element={
@@ -100,7 +99,7 @@ const App = () => {
               </RoleRoute>
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/cloth"
           element={
@@ -110,7 +109,7 @@ const App = () => {
               </RoleRoute>
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/custom"
           element={
@@ -120,7 +119,7 @@ const App = () => {
               </RoleRoute>
             </PrivateRoute>
           }
-          />
+        />
         <Route
           path="/tailorcustom"
           element={
@@ -130,9 +129,8 @@ const App = () => {
               </RoleRoute>
             </PrivateRoute>
           }
-          />
+        />
       </Routes>
-<Footer/>
     </div>
   );
 };

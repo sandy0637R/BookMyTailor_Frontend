@@ -80,10 +80,11 @@ const RequestUploadForm = ({
       }
 
       const minBudget = tailorFee + durationFee;
-      const currentBudget = Number(form.budget) || 0;
 
-      const finalBudget = currentBudget < minBudget ? minBudget : currentBudget;
-      handleInput({ target: { name: "budget", value: finalBudget } });
+      // if user budget is less than minBudget, fix it
+      if (!form.budget || form.budget < minBudget) {
+        handleInput({ target: { name: "budget", value: minBudget } });
+      }
     };
 
     calculateBudget();
@@ -148,21 +149,26 @@ const RequestUploadForm = ({
         Upload Custom Request
       </h2>
       <div className="flex text-neutral-primary border-3 border-brown-primary mx-7 p-2 rounded-sm bg-brown-secondary justify-between items-center px-5">
-      {/* Upload Image */}
-      <input
-        type="file"
-        id="image"
-        accept="image/*"
-        onChange={handleFile}
-        className="w-full"
-      />
-      <label htmlFor="image"><MdOutlinePhotoSizeSelectActual /></label></div>
+        {/* Upload Image */}
+        <input
+          type="file"
+          id="image"
+          accept="image/*"
+          onChange={handleFile}
+          className="w-full"
+        />
+        <label htmlFor="image">
+          <MdOutlinePhotoSizeSelectActual />
+        </label>
+      </div>
       {preview && (
-        <div className="ml-8"><img
-          src={preview}
-          alt="Preview"
-          className="w-60 h-60 object-cover border-4 border-brown-primary rounded m-1  "
-        /></div>
+        <div className="ml-8">
+          <img
+            src={preview}
+            alt="Preview"
+            className="w-60 h-60 object-cover border-4 border-brown-primary rounded m-1  "
+          />
+        </div>
       )}
       {/* Tailor Selection */}
       <div className="mx-7">
@@ -293,37 +299,78 @@ const RequestUploadForm = ({
         )}
       </div>
 
-     <div className="flex ml-7">
-       {/* Duration */}
-      <input
-        type="date"
-        name="duration"
-        onChange={handleInput}
-        value={form.duration}
-        min={getMinDate()}
-        required
-        className="border-3 border-brown-secondary px-3 py-2 rounded bg-yellow-primary text-brown-tertiary mr-15"
-      />
-      {/* Budget */}
-      <div className="flex items-center border-3 border-brown-primary rounded px-2 bg-neutral-primary">
-        <span className="text-brown-primary mr-2">Rs</span>
+      <div className="flex ml-7">
+        {/* Duration */}
         <input
-          name="budget"
-          type="number"
-          step="100"
-          min={form.budget}
-          placeholder="Budget"
-          onChange={(e) => {
-            const value = Number(e.target.value);
-            if (value >= form.budget && value % 100 === 0) {
-              handleInput(e);
-            }
-          }}
-          value={form.budget}
-          className="w-full py-1 outline-none bg-neutral-primary text-brown-primary"
+          type="date"
+          name="duration"
+          onChange={handleInput}
+          value={form.duration}
+          min={getMinDate()}
+          required
+          className="border-3 border-brown-secondary px-3 py-2 rounded bg-yellow-primary text-brown-tertiary mr-15"
         />
+        {/* Budget */}
+        <div className="flex items-center border-3 border-brown-primary rounded px-2 bg-neutral-primary">
+          <span className="text-brown-primary mr-2">Rs</span>
+          <input
+            name="budget"
+            type="number"
+            step="100"
+            min={
+              tailors.find((x) => x._id === selectedTailorId)?.tailorDetails
+                ?.fees +
+                (form.duration
+                  ? Math.ceil(
+                      (new Date(form.duration) - new Date()) /
+                        (1000 * 60 * 60 * 24)
+                    ) < 4
+                    ? 1000
+                    : Math.ceil(
+                        (new Date(form.duration) - new Date()) /
+                          (1000 * 60 * 60 * 24)
+                      ) <= 9
+                    ? (10 -
+                        Math.ceil(
+                          (new Date(form.duration) - new Date()) /
+                            (1000 * 60 * 60 * 24)
+                        )) *
+                        100 +
+                      500
+                    : 500
+                  : 0) || 0
+            }
+            placeholder="Budget"
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              // allow increments/decrements but not below minBudget
+              let minBudget =
+                tailors.find((x) => x._id === selectedTailorId)?.tailorDetails
+                  ?.fees || 0;
+              if (form.duration) {
+                const today = new Date();
+                const selected = new Date(form.duration);
+                const diffDays = Math.ceil(
+                  (selected - today) / (1000 * 60 * 60 * 24)
+                );
+                if (diffDays < 4) {
+                  minBudget += 1000;
+                } else if (diffDays >= 4 && diffDays <= 9) {
+                  minBudget += (10 - diffDays) * 100 + 500;
+                } else if (diffDays > 10) {
+                  minBudget += 500;
+                }
+              }
+
+              if (value >= minBudget && value % 100 === 0) {
+                handleInput(e);
+              }
+            }}
+            value={form.budget}
+            className="w-full py-1 outline-none bg-neutral-primary text-brown-primary"
+          />
+        </div>
       </div>
-     </div>
 
       {/* Description */}
       <textarea
@@ -333,58 +380,60 @@ const RequestUploadForm = ({
         value={form.description}
         className="border-3 border-brown-primary px-3 py-2 mx-7 rounded bg-neutral-primary   text-brown-primary hover-common hover:bg-yellow-primary focus:outline-none"
       />
-      
 
       <div className="flex flex-wrap mx-7  items-baseline-last">
         {/* Saved Measurement Dropdown */}
-      <div className="mr-20">
-        <label className="font-semibold text-brown-secondary">
-          Use Saved Measurement
-        </label>
+        <div className="mr-20">
+          <label className="font-semibold text-brown-secondary">
+            Use Saved Measurement
+          </label>
+          <select
+            className=" px-3 py-2 h-[40px] rounded w-full mt-1 border-3 border-brown-primary text-neutral-primary bg-brown-secondary hover-common hover:bg-brown-primary"
+            value={selectedMeasurementName}
+            onChange={(e) => {
+              if (e.target.value === "__go_to_measurement") {
+                navigate("/measurement");
+                return;
+              }
+              setSelectedMeasurementName(e.target.value);
+            }}
+          >
+            <option value="">Select Measurement</option>
+            {measurements.length === 0 ? (
+              <option value="__go_to_measurement">+ Create Measurement</option>
+            ) : (
+              measurements.map((m) => (
+                <option key={m._id} value={m.name}>
+                  {m.name} ({m.gender})
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
+        {/* Gender */}
         <select
-          className=" px-3 py-2 h-[40px] rounded w-full mt-1 border-3 border-brown-primary text-neutral-primary bg-brown-secondary hover-common hover:bg-brown-primary"
-          value={selectedMeasurementName}
-          onChange={(e) => {
-            if (e.target.value === "__go_to_measurement") {
-              navigate("/measurement");
-              return;
-            }
-            setSelectedMeasurementName(e.target.value);
-          }}
+          name="gender"
+          onChange={handleInput}
+          value={form.gender}
+          className="border-3 border-brown-secondary px-3 py-2 h-[40px] rounded text-neutral-primary bg-brown-primary mr-20"
         >
-          <option value="">Select Measurement</option>
-          {measurements.length === 0 ? (
-            <option value="__go_to_measurement">+ Create Measurement</option>
-          ) : (
-            measurements.map((m) => (
-              <option key={m._id} value={m.name}>
-                {m.name} ({m.gender})
-              </option>
-            ))
-          )}
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
         </select>
-      </div>
 
-      {/* Gender */}
-      <select
-        name="gender"
-        onChange={handleInput}
-        value={form.gender}
-        className="border-3 border-brown-secondary px-3 py-2 h-[40px] rounded text-neutral-primary bg-brown-primary mr-20"
-      >
-        <option value="">Select Gender</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-      </select>
-
-      {/* Quantity (Fixed at 1) */}
-      <div><input
-        name="quantity"
-        type="number"
-        value={1}
-        disabled
-        className=" rounded  text-brown-primary h-[40px] w-6 text-xl font-bold"
-      /> <span className="font-semibold ml-1">:Qty</span></div>
+        {/* Quantity (Fixed at 1) */}
+        <div>
+          <input
+            name="quantity"
+            type="number"
+            value={1}
+            disabled
+            className=" rounded  text-brown-primary h-[40px] w-6 text-xl font-bold"
+          />{" "}
+          <span className="font-semibold ml-1">:Qty</span>
+        </div>
       </div>
 
       {/* Male/Female measurements */}

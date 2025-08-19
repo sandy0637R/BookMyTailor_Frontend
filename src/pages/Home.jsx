@@ -6,7 +6,7 @@ import { getClothsRequest } from "../redux/authSlice";
 import { fetchTopClothsRequest } from "../redux/orderSlice";
 import { useNavigate } from "react-router-dom";
 import { FaStar, FaRegStar } from "react-icons/fa";
-
+import Footer from "../components/Footer";
 const Home = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -59,13 +59,13 @@ const Home = () => {
   }
 
   return (
-    <div className="space-y-16 p-4 bg-neutral-primary">
+    <><div className="space-y-16  bg-neutral-primary p-4">
       {/* Top 5 Cloths */}
 
   
       {/* Featured Tailor Section */}
       {featuredTailor && (
-        <section className="w-full h-[45vh] bg-neutral-primary rounded-lg shadow-common hover-common flex overflow-hidden relative">
+        <section className="w-full h-[45vh] bg-neutral-primary rounded-lg shadow-common hover-common flex overflow-hidden relative ">
           <div className="w-1/2 h-full flex justify-center items-center bg-yellow-tertiary rounded-tr-full">
             <img
               src={
@@ -153,7 +153,11 @@ const Home = () => {
       {/* Cloths and Tailors */}
       <Cloths />
       <Tailors />
+
+      
     </div>
+    <div>{/* Footer */}
+      <Footer/></div></>
   );
 };
 
