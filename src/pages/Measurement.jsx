@@ -81,7 +81,9 @@ const Measurement = () => {
     e.preventDefault();
 
     if (measurements.length >= 5) {
-      toast.error("Maximum 5 measurements allowed. Please delete one to add new.");
+      toast.error(
+        "Maximum 5 measurements allowed. Please delete one to add new."
+      );
       return;
     }
 
@@ -98,7 +100,9 @@ const Measurement = () => {
       (field) => !formData.measurements[field]
     );
     if (missingFields.length > 0) {
-      toast.error(`Please fill all required fields: ${missingFields.join(", ")}`);
+      toast.error(
+        `Please fill all required fields: ${missingFields.join(", ")}`
+      );
       return;
     }
 
@@ -125,92 +129,198 @@ const Measurement = () => {
   }, [dispatch, token]);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Add Measurement</h2>
-      <form onSubmit={handleSubmit} style={{ marginBottom: "30px" }}>
-        <input
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-        <select name="gender" value={formData.gender} onChange={handleChange}>
-          <option>Male</option>
-          <option>Female</option>
-        </select>
+    <div className="bg-neutral-primary min-h-screen py-8 px-4">
+      {/* Page Heading */}
+      <div className="max-w-4xl mx-auto text-center mb-8">
+        <h1 className="text-4xl font-bold text-brown-primary">
+          Measurement Management
+        </h1>
+        <p className="text-brown-secondary mt-2">
+          Add and manage your custom measurements
+        </p>
+      </div>
 
-        {getFields(formData.gender).map((key) => (
-          <input
-            key={key}
-            type="number"
-            name={key}
-            placeholder={key}
-            value={formData.measurements[key] || ""}
-            onChange={handleChange}
-          />
-        ))}
-
-        <button type="submit">Save</button>
-      </form>
-
-      <h3>Your Measurements</h3>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-        {measurements.map((m) => (
-          <div
-            key={m._id}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "10px",
-              padding: "15px",
-              width: "300px",
-              background: "#f9f9f9",
-            }}
-          >
-            {editId === m._id ? (
-              <>
-                <input
-                  name="name"
-                  value={editData.name}
-                  onChange={(e) => handleChange(e, true)}
-                />
-                <select
-                  name="gender"
-                  value={editData.gender}
-                  onChange={(e) => handleChange(e, true)}
-                >
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-                {getFields(editData.gender).map((key) => (
-                  <input
-                    key={key}
-                    type="number"
-                    name={key}
-                    placeholder={key}
-                    value={editData.measurements[key] || ""}
-                    onChange={(e) => handleChange(e, true)}
-                  />
-                ))}
-                <button onClick={() => handleUpdate(m._id)}>Update</button>
-                <button onClick={() => setEditId(null)}>Cancel</button>
-              </>
-            ) : (
-              <>
-                <h4>{m.name} ({m.gender})</h4>
-                <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-                  {Object.entries(m.measurements).map(([key, value]) =>
-                    value != null ? (
-                      <li key={key}><strong>{key}</strong>: {value}</li>
-                    ) : null
-                  )}
-                </ul>
-                <button onClick={() => handleEdit(m)}>Edit</button>
-                <button onClick={() => handleDelete(m._id)}>Delete</button>
-              </>
-            )}
+      {/* Add Measurement Form */}
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-lg mb-12">
+        <h2 className="text-2xl font-semibold text-brown-primary mb-4">
+          Add New Measurement
+        </h2>
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          {/* Name */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-brown-primary">
+              Name
+            </label>
+            <input
+              name="name"
+              placeholder="Name"
+              value={formData.name}
+              onChange={handleChange}
+              className="p-3 rounded-lg border border-yellow-tertiary shadow-sm focus:outline-yellow-secondary"
+              required
+            />
           </div>
-        ))}
+
+          {/* Gender */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-brown-primary">
+              Gender
+            </label>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="p-3 rounded-lg border border-yellow-tertiary shadow-sm focus:outline-yellow-secondary"
+            >
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+          </div>
+
+          {/* Measurement Fields */}
+          {getFields(formData.gender).map((key) => (
+            <div key={key} className="flex flex-col relative">
+              <label className="mb-1 font-semibold text-brown-primary">
+                {key}
+              </label>
+              <input
+                type="number"
+                name={key}
+                placeholder={key}
+                value={formData.measurements[key] || ""}
+                onChange={handleChange}
+                className="p-3 pr-12 rounded-lg border border-yellow-tertiary shadow-sm focus:outline-yellow-secondary"
+              />
+              <span className="absolute right-3 top-13 -translate-y-1/2 text-brown-primary font-semibold">
+                cm
+              </span>
+            </div>
+          ))}
+
+          {/* Submit Button */}
+          <div className="col-span-full flex justify-end mt-2">
+            <button
+              type="submit"
+              className="bg-yellow-tertiary text-brown-tertiary px-6 py-2 rounded-lg font-semibold hover:bg-yellow-secondary transition-colors duration-200"
+            >
+              Save Measurement
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Measurements List */}
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-brown-primary mb-6 text-center">
+          Your Measurements
+        </h2>
+        {measurements.length === 0 ? (
+          <p className="text-center text-brown-secondary">
+            No measurements added yet.
+          </p>
+        ) : (
+          <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6">
+            {measurements.map((m) => (
+              <div
+                key={m._id}
+                className="bg-white rounded-2xl shadow-lg p-6 relative"
+              >
+                {editId === m._id ? (
+                  <>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-semibold text-brown-primary">
+                          Name
+                        </label>
+                        <input
+                          name="name"
+                          value={editData.name}
+                          onChange={(e) => handleChange(e, true)}
+                          className="p-2 rounded-lg border border-yellow-tertiary shadow-sm focus:outline-yellow-secondary"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-semibold text-brown-primary">
+                          Gender
+                        </label>
+                        <select
+                          name="gender"
+                          value={editData.gender}
+                          onChange={(e) => handleChange(e, true)}
+                          className="p-2 rounded-lg border border-yellow-tertiary shadow-sm focus:outline-yellow-secondary"
+                        >
+                          <option>Male</option>
+                          <option>Female</option>
+                        </select>
+                      </div>
+                      {getFields(editData.gender).map((key) => (
+                        <div key={key} className="flex flex-col">
+                          <label className="mb-1 font-semibold text-brown-primary">
+                            {key}
+                          </label>
+                          <input
+                            type="number"
+                            name={key}
+                            value={editData.measurements[key] || ""}
+                            onChange={(e) => handleChange(e, true)}
+                            className="p-2 rounded-lg border border-yellow-tertiary shadow-sm focus:outline-yellow-secondary"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-3 mt-3">
+                      <button
+                        onClick={() => handleUpdate(m._id)}
+                        className="bg-yellow-tertiary text-brown-tertiary px-4 py-2 rounded-lg font-semibold hover:bg-yellow-secondary transition-colors duration-200"
+                      >
+                        Update
+                      </button>
+                      <button
+                        onClick={() => setEditId(null)}
+                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-400 transition-colors duration-200"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h4 className="text-brown-primary font-semibold text-lg mb-2">
+                      {m.name} ({m.gender})
+                    </h4>
+                    <ul className="list-none p-0">
+                      {Object.entries(m.measurements).map(([key, value]) =>
+                        value != null ? (
+                          <li key={key} className="mt-1">
+                            <strong>{key}:</strong> {value}{" "}
+                            <span className="ml-1">cm</span>
+                          </li>
+                        ) : null
+                      )}
+                    </ul>
+                    <div className="flex gap-3 mt-3">
+                      <button
+                        onClick={() => handleEdit(m)}
+                        className="bg-yellow-tertiary text-brown-tertiary px-4 py-2 rounded-lg font-semibold hover:bg-yellow-secondary transition-colors duration-200"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(m._id)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-200"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

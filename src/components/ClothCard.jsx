@@ -2,7 +2,7 @@ import React from "react";
 
 const ClothCard = ({ cloth, onEdit, onDelete }) => {
   return (
-    <div className="bg-white rounded shadow-md p-4">
+    <div className="bg-neutral-primary rounded-2xl shadow-lg p-5 hover:shadow-2xl transition-shadow duration-300">
       <img
         src={
           cloth.image?.startsWith("/uploads")
@@ -10,25 +10,28 @@ const ClothCard = ({ cloth, onEdit, onDelete }) => {
             : "/placeholder.jpg"
         }
         alt={cloth.name}
-        className="w-full h-40 object-cover rounded"
+        className="w-full h-44 object-cover rounded-xl mb-3"
       />
-      <h2 className="text-lg font-bold mt-2">{cloth.name}</h2>
-      <p>Manufacturer: {cloth.tailor?.name || "Unknown"}</p> {/* 👈 NEW LINE */}
-      <p>Type: {cloth.type}</p>
-      <p>Price: ₹{cloth.price}</p>
-      <p>Size: {cloth.size?.join(", ")}</p>
-      <p>Gender: {cloth.gender}</p>
-      <p className="text-sm text-gray-600">{cloth.description}</p>
-      <div className="mt-4 flex gap-2">
+      <h2 className="text-xl font-bold mb-1 text-brown-primary">{cloth.name}</h2>
+      <p className="text-brown-secondary text-sm mb-1">
+        Manufacturer: {cloth.tailor?.name || "Unknown"}
+      </p>
+      <p className="text-brown-secondary text-sm mb-1">Type: {cloth.type}</p>
+      <p className="text-brown-secondary text-sm mb-1">Price: ₹{cloth.price}</p>
+      <p className="text-brown-secondary text-sm mb-1">Size: {cloth.size?.join(", ")}</p>
+      <p className="text-brown-secondary text-sm mb-2">Gender: {cloth.gender}</p>
+      <p className="text-brown-tertiary text-sm mb-4 line-clamp-3">{cloth.description}</p>
+
+      <div className="flex gap-3">
         <button
           onClick={() => onEdit(cloth)}
-          className="bg-yellow-500 text-white px-3 py-1 rounded"
+          className="bg-yellow-tertiary text-brown-tertiary px-4 py-2 rounded-lg font-semibold hover:bg-yellow-secondary transition-colors duration-200"
         >
           Edit
         </button>
         <button
           onClick={() => onDelete(cloth._id)}
-          className="bg-red-500 text-white px-3 py-1 rounded"
+          className="bg-danger-primary text-neutral-primary px-4 py-2 rounded-lg font-semibold hover:bg-danger-secondary transition-colors duration-200"
         >
           Delete
         </button>
