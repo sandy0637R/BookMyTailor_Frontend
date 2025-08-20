@@ -60,9 +60,7 @@ const FollowingList = ({
         <p className="text-brown-primary flex justify-center font-semibold text-[35px] leading-tight">
           {formatFollowers(followingList.length)}
         </p>
-        <p
-          className="text-brown-primary cursor-pointer font-semibold flex justify-center text-[20px] leading-tight"
-        >
+        <p className="text-brown-primary cursor-pointer font-semibold flex justify-center text-[20px] leading-tight">
           Following
         </p>
       </div>

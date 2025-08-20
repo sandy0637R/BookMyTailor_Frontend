@@ -3,7 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import ViewProfileButton from "./ViewProfileButton";
 import { setSelectedUser } from "../redux/socialSlice";
 
-const RatingList = ({ tailorId, showRatingId, setShowRatingId, defaultRatings = [] }) => {
+const RatingList = ({
+  tailorId,
+  showRatingId,
+  setShowRatingId,
+  defaultRatings = [],
+}) => {
   const dispatch = useDispatch();
   const ratingList = useSelector((state) => state.social.ratedUsersList);
 
@@ -54,9 +59,7 @@ const RatingList = ({ tailorId, showRatingId, setShowRatingId, defaultRatings = 
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           onClick={handleOverlayClick}
         >
-          <div
-            className="bg-yellow-primary text-brown-primary rounded-lg p-4 w-[410px] h-[400px] shadow-lg flex flex-col"
-          >
+          <div className="bg-yellow-primary text-brown-primary rounded-lg p-4 w-[410px] h-[400px] shadow-lg flex flex-col">
             <h4 className="font-bold mb-2 text-center">Rated By Users</h4>
 
             {/* Scrollable content */}

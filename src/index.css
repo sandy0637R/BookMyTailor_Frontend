@@ -69,6 +69,9 @@
   @apply   px-1 text-sm font-medium  text-brown-primary 
 }
 
+.post-sort-main{
+  @apply p-2 rounded border-2 border-brown-secondary flex justify-self-end items-center hover:bg-brown-secondary
+}
 
 
 

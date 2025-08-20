@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux"; 
+import { useDispatch, useSelector } from "react-redux";
 import { fetchOrdersRequest, deleteOrderRequest } from "../redux/orderSlice";
 import { useEffect, useState } from "react";
 import { FaEye, FaSearch } from "react-icons/fa";
@@ -38,7 +38,9 @@ const MyOrders = () => {
   };
 
   const handleDelete = (orderId) => {
-    const confirmed = window.confirm("Are you sure you want to delete this order?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this order?"
+    );
     if (!confirmed) return;
     dispatch(deleteOrderRequest({ token, orderId }));
   };
@@ -83,31 +85,49 @@ const MyOrders = () => {
               className="bg-neutral-primary border border-brown-secondary p-6 rounded-2xl w-full sm:w-[350px] shadow-lg hover:shadow-xl transition duration-300"
             >
               <p className="mb-1">
-                <span className="font-semibold text-brown-primary">Order ID:</span> {order._id}
+                <span className="font-semibold text-brown-primary">
+                  Order ID:
+                </span>{" "}
+                {order._id}
               </p>
               <p className="mb-1">
-                <span className="font-semibold text-brown-primary">Total:</span> ₹{order.totalAmount}
+                <span className="font-semibold text-brown-primary">Total:</span>{" "}
+                ₹{order.totalAmount}
               </p>
-             <p className="mb-1">
-  <span className="font-semibold text-brown-primary">Address:</span>
-  <div className="max-h-16 overflow-y-auto mt-1 p-1 border border-brown-secondary rounded bg-yellow-primary text-brown-primary">
-    {order.address}
-  </div>
-</p>
+              <p className="mb-1">
+                <span className="font-semibold text-brown-primary">
+                  Address:
+                </span>
+                <div className="max-h-16 overflow-y-auto mt-1 p-1 border border-brown-secondary rounded bg-yellow-primary text-brown-primary">
+                  {order.address}
+                </div>
+              </p>
 
               <p className="mb-1">
-                <span className="font-semibold text-brown-primary">Payment:</span> {order.paymentMode}
+                <span className="font-semibold text-brown-primary">
+                  Payment:
+                </span>{" "}
+                {order.paymentMode}
               </p>
               <p className="mb-1">
-                <span className="font-semibold text-brown-primary">Status:</span> {order.deliveryStatus || "N/A"}
+                <span className="font-semibold text-brown-primary">
+                  Status:
+                </span>{" "}
+                {order.deliveryStatus || "N/A"}
               </p>
               <p className="mb-2">
-                <span className="font-semibold text-brown-primary">Created At:</span> {formatDate(order.createdAt)}
+                <span className="font-semibold text-brown-primary">
+                  Created At:
+                </span>{" "}
+                {formatDate(order.createdAt)}
               </p>
               <p className="font-semibold text-brown-primary mb-1">Items:</p>
               <ul className="list-disc list-inside space-y-1 h-[100px] border-2 border-brown-primary rounded-xl p-4 overflow-y-auto">
                 {order.items.map((item, index) => (
-                  <li key={index} className="flex items-center gap-2 text-brown-primary text-sm">
+                  <li
+                    key={index}
+                    className="flex items-center gap-2 text-brown-primary text-sm"
+                  >
                     {item.product?.name || "Unknown"} x {item.quantity}
                     {item.product?._id && (
                       <button
@@ -152,7 +172,9 @@ const MyOrders = () => {
           </h3>
           {historyOrders.length === 0 ? (
             <div className="flex flex-col items-center gap-4">
-              <p className="text-brown-primary text-lg font-medium">No order history available.</p>
+              <p className="text-brown-primary text-lg font-medium">
+                No order history available.
+              </p>
               <Link
                 to="/"
                 className="flex items-center gap-2 bg-yellow-tertiary hover:bg-yellow-primary text-brown-secondary font-bold py-3 px-6 rounded transition"
@@ -175,11 +197,18 @@ const MyOrders = () => {
                 </thead>
                 <tbody className="text-brown-primary text-sm">
                   {historyOrders.map((order) => (
-                    <tr key={order._id} className="text-center hover:bg-yellow-tertiary transition">
+                    <tr
+                      key={order._id}
+                      className="text-center hover:bg-yellow-tertiary transition"
+                    >
                       <td className="px-4 py-3 border">{order._id}</td>
                       <td className="px-4 py-3 border">₹{order.totalAmount}</td>
-                      <td className="px-4 py-3 border">{order.deliveryStatus}</td>
-                      <td className="px-4 py-3 border">{formatDate(order.createdAt)}</td>
+                      <td className="px-4 py-3 border">
+                        {order.deliveryStatus}
+                      </td>
+                      <td className="px-4 py-3 border">
+                        {formatDate(order.createdAt)}
+                      </td>
                       <td className="px-4 py-3 border">
                         {order.deliveryStatus.toLowerCase() === "delivered"
                           ? formatDate(order.deliveredAt)
@@ -189,12 +218,15 @@ const MyOrders = () => {
                         <ul className="list-disc list-inside space-y-1">
                           {order.items.map((item, index) => (
                             <li key={index} className="flex items-center gap-2">
-                              {item.product?.name || "Unknown"} x {item.quantity}
+                              {item.product?.name || "Unknown"} x{" "}
+                              {item.quantity}
                               {item.product?._id && (
                                 <button
                                   className="text-yellow-tertiary hover:text-yellow-primary"
                                   title="View Product"
-                                  onClick={() => handleViewProduct(item.product._id)}
+                                  onClick={() =>
+                                    handleViewProduct(item.product._id)
+                                  }
                                 >
                                   <FaEye />
                                 </button>
