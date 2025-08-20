@@ -28,7 +28,6 @@ const TailorPost = () => {
 
     let filtered = [...posts];
 
-    // search (username OR hashtags OR caption)
     if (search.trim()) {
       const lowerSearch = search.toLowerCase();
 
@@ -45,7 +44,6 @@ const TailorPost = () => {
       });
     }
 
-    // sort
     if (sort === "likes") {
       filtered.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
     } else if (sort === "comments") {
@@ -56,7 +54,6 @@ const TailorPost = () => {
       filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // latest first
     }
 
-    // refresh shuffle (only runs when refreshKey changes)
     if (refreshKey > 0) {
       filtered = filtered.sort(() => Math.random() - 0.5);
     }

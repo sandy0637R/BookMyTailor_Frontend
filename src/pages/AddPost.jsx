@@ -31,14 +31,26 @@ const AddPost = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 mt-15">
-      <h2 className="text-3xl font-bold text-center mb-6">Add Post</h2>
+  <div className="flex h-screen bg-neutral-primary">
 
-      {/* Add Post Form */}
+  {/* Add Post Form (Left Panel) */}
+  <div className="w-3/5 h-full overflow-y-auto flex flex-col items-center p-8 bg-[url('/assets/Creative.png')] bg-cover bg-center">
+    <h2 className="text-3xl font-bold text-yellow-primary mb-8 mt-8 text-center">
+      Add Post
+    </h2>
+
+    <div className="w-4/5">
       <AddPostForm fetchPosts={fetchPosts} token={token} />
+    </div>
+  </div>
 
-      {/* Posts List */}
-      <h2 className="text-3xl font-bold mb-6">All Posts</h2>
+  {/* Posts List (Right Panel) */}
+  <div className="w-2/5 h-full overflow-y-auto p-8 border-l border-yellow-secondary">
+    <h2 className="text-3xl font-bold text-brown-tertiary mb-8 text-center">
+      All Posts
+    </h2>
+
+    <div className="w-full">
       <PostList
         posts={posts}
         fetchPosts={fetchPosts}
@@ -56,6 +68,10 @@ const AddPost = () => {
         setEditProductLink={setEditProductLink}
       />
     </div>
+  </div>
+
+</div>
+
   );
 };
 
