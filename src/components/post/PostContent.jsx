@@ -1,20 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
-import ViewProfileButton from "../ViewProfileButton";
-import { useNavigate } from "react-router-dom";
+
 
 const PostContent = ({ post }) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expandedCaption, setExpandedCaption] = useState(false);
+  const [expandedHashtags, setExpandedHashtags] = useState(false);
   const captionRef = useRef(null);
-  const navigate = useNavigate();
+  
 
   const shortCaption = post.caption ? post.caption.slice(0, 20) : "";
-  const hasMore = post.caption && post.caption.length > 20;
+  const hasMoreCaption = post.caption && post.caption.length > 20;
+
+  const hashtagsText = post.hashtags?.join(" ") || "";
+  const shortHashtags = hashtagsText.slice(0, 20);
+  const hasMoreHashtags = hashtagsText.length > 20;
 
   // ✅ Collapse when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (captionRef.current && !captionRef.current.contains(e.target)) {
-        setExpanded(false);
+        setExpandedCaption(false);
+        setExpandedHashtags(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -23,49 +28,73 @@ const PostContent = ({ post }) => {
 
   return (
     <div ref={captionRef}>
-      <p className="text break-words whitespace-pre-wrap">
-  <span className="">Caption:</span>{" "}
-  {expanded ? (
-    <>
-      {post.caption}{" "}
-      {hasMore && (
-        <span
-          onClick={() => setExpanded(false)}
-          className="text-blue-500 cursor-pointer"
-        >
-          ...less
-        </span>
-      )}
-    </>
-  ) : (
-    <>
-      {shortCaption}
-      {hasMore && (
-        <span
-          onClick={() => setExpanded(true)}
-          className="text-blue-500 cursor-pointer"
-        >
-          ...more
-        </span>
-      )}
-    </>
-  )}
-</p>
 
-
-      <p className="text-sm text-gray-600 mb-1">
-        <span className="font-medium">Hashtags:</span>{" "}
-        {post.hashtags?.join(" ")}
-      </p>
-      <p className="text-sm text-gray-600 mb-1">
-        <span className="font-medium">Posted by:</span>{" "}
+      <p className="text-lg text-brown-secondary mb-1 font-medium">
+        <span className="font-semibold text-brown-tertiary">Posted by:</span>{" "}
         {post.postedBy?.name || "Unknown"}
       </p>
-      {post.postedBy?.userId && (
-        <ViewProfileButton userId={post.postedBy.userId} />
-      )}
-      <p className="text-sm text-gray-500 mb-4">
-        <span className="font-medium">Posted on:</span>{" "}
+      
+
+        <p className="text-[15px] text-brown-secondary break-words whitespace-pre-wrap mb-1">
+          <span className="font-medium text-brown-tertiary">Caption:</span>{" "}
+          {expandedCaption ? (
+            <>
+              {post.caption}{" "}
+              {hasMoreCaption && (
+                <span
+                  onClick={() => setExpandedCaption(false)}
+                  className="text-yellow-tertiary cursor-pointer ml-1"
+                >
+                  ..less
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              {shortCaption}
+              {hasMoreCaption && (
+                <span
+                  onClick={() => setExpandedCaption(true)}
+                  className="text-yellow-tertiary cursor-pointer ml-1"
+                >
+                  ..more
+                </span>
+              )}
+            </>
+          )}
+        </p>
+      <p className="text-sm text-brown-primary mb-1">
+        <span className="font-medium text-brown-secondary">Hashtags:</span>{" "}
+        <span className="break-words whitespace-pre-wrap">
+          {expandedHashtags ? (
+            <>
+              {hashtagsText}{" "}
+              {hasMoreHashtags && (
+                <span
+                  onClick={() => setExpandedHashtags(false)}
+                  className="text-yellow-tertiary cursor-pointer ml-1"
+                >
+                  ..less
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              {shortHashtags}
+              {hasMoreHashtags && (
+                <span
+                  onClick={() => setExpandedHashtags(true)}
+                  className="text-yellow-tertiary cursor-pointer ml-1"
+                >
+                  ..more
+                </span>
+              )}
+            </>
+          )}
+        </span>
+      </p>
+      <p className="text-sm text-brown-secondary">
+        <span className="font-medium text-brown-tertiary">Posted on:</span>{" "}
         {new Date(post.createdAt).toLocaleDateString()}{" "}
         {new Date(post.createdAt).toLocaleTimeString([], {
           hour: "2-digit",

@@ -1,5 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { BiSolidLike } from "react-icons/bi";
+
 
 const Like = ({ post }) => {
   const dispatch = useDispatch();
@@ -13,9 +15,9 @@ const Like = ({ post }) => {
   return (
     <button
       onClick={handleLike}
-      className="px-4 py-2 rounded-md font-medium bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+      className="flex justify-center items-center h-[40px] px-4 bg-yellow-primary text-lg text-yellow-tertiary rounded hover:bg-yellow-100 transition-all duration-200"
     >
-      Like {post.likes?.length || 0}
+      <span className="mr-2"><BiSolidLike/></span> {post.likes?.length || 0}
     </button>
   );
 };

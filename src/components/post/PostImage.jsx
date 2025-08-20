@@ -2,7 +2,7 @@ import React from "react";
 
 const PostImage = ({ post }) => {
   return (
-    <div className="w-full h-[400px] flex justify-center items-center bg-yellow-primary shadow-inner rounded-md mb-4 overflow-hidden">
+    <div className="w-full h-[400px] flex justify-center items-center bg-yellow-100 shadow-inner rounded-md mb-4 overflow-hidden">
       {post.images &&
         post.images.map((img, i) => (
           <img

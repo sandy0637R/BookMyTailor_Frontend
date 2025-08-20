@@ -123,7 +123,7 @@ const TailorPost = () => {
       </div>
 
       {/* Middle Content */}
-      <div className="col-span-6 col-start-4 px-6 py-8 overflow-y-auto">
+      <div className="col-span-6 col-start-4 px-6 py-8 overflow-y-auto bg-yellow-primary">
         <h2 className="text-3xl font-bold text-center mb-6">Posts</h2>
         <AllPost posts={filteredPosts} />
       </div>

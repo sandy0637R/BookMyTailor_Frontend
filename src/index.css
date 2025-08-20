@@ -9,7 +9,7 @@
 }
 
 :root{
-  --color-check: oklch(85.2% 0.199 91.936);
+  --color-check: #573c28;
 }
 
 
@@ -20,7 +20,7 @@
 --color-yellow-premium: oklch(85.2% 0.199 91.936);
 
 --color-brown-primary: #91684A;
---color-brown-secondary: #493323;
+--color-brown-secondary: #573c28;
 --color-brown-tertiary: #2e221f;
 
 --color-neutral-primary: #fffff3;
