@@ -9,27 +9,35 @@ const ChatPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { userId } = useParams();
-  const initialized = useRef(false); // ✅ Track if user was set from URL
+  const initialized = useRef(false); // Track if user was set from URL
 
   const profile = useSelector((state) => state.auth.profile);
   const chatUser = useSelector((state) => state.chat.chatUser);
   const chatUsers = useSelector((state) => state.chat.chatUsers);
   const loading = useSelector((state) => state.chat.loading);
 
+  // ✅ Fetch chat users once
   useEffect(() => {
+    console.log("[ChatPage] Fetching chat users...");
     dispatch(fetchChatUsersRequest());
   }, [dispatch]);
 
   // ✅ Set chat user from URL only once
   useEffect(() => {
     if (!initialized.current && userId && chatUsers.length > 0) {
+      console.log("[ChatPage] URL userId detected:", userId);
+
       const selected = chatUsers.find((item) => item.user._id === userId);
+
       if (selected) {
+        console.log("[ChatPage] Setting chat user:", selected.user);
         dispatch(setChatUser(selected.user));
         initialized.current = true;
 
         // ✅ Clean the URL after setting chat user
         navigate("/chat", { replace: true });
+      } else {
+        console.warn("[ChatPage] No chat user found for userId:", userId);
       }
     }
   }, [userId, chatUsers, dispatch, navigate]);

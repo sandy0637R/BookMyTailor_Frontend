@@ -1,96 +1,115 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  fetchChatRequest,
-  markMessagesReadRequest,
-} from '../redux/chatSlice';
+import React, { useEffect, useState, useRef } from "react";
+import { io } from "socket.io-client";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchChatRequest, markMessagesReadRequest } from "../redux/chatSlice";
 
 const ChatBox = ({ currentUser, selectedUser }) => {
   const dispatch = useDispatch();
   const { messages, loading, error } = useSelector((state) => state.chat);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [socket, setSocket] = useState(null);
   const [socketConnected, setSocketConnected] = useState(false);
   const messagesEndRef = useRef(null);
-  const [firstUnreadId, setFirstUnreadId] = useState(null); // ✅ changed from ref to state
+  const [firstUnreadId, setFirstUnreadId] = useState(null);
 
+  // 📩 Fetch messages when chat changes
   useEffect(() => {
     if (!currentUser?._id || !selectedUser?._id) return;
 
-    dispatch(fetchChatRequest({ userId1: currentUser._id, userId2: selectedUser._id }));
-  }, [dispatch, currentUser?._id, selectedUser?._id]);
+    // ✅ Use chatId if available (from ChatList), fallback to userIds
+    dispatch(
+      fetchChatRequest(
+        selectedUser.chatId
+          ? { chatId: selectedUser.chatId }
+          : { userId1: currentUser._id, userId2: selectedUser._id }
+      )
+    );
+  }, [dispatch, currentUser?._id, selectedUser?._id, selectedUser?.chatId]);
 
+  // 🔌 Socket connection (init once per currentUser)
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token || !currentUser?._id || !selectedUser?._id) return;
+    if (!currentUser?._id) return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-    const newSocket = io('http://localhost:5000', {
-      auth: {
-        token,
-        userId: currentUser._id,
-      },
-      transports: ['websocket'],
+    const newSocket = io("http://localhost:5000", {
+      auth: { token, userId: currentUser._id },
+      transports: ["websocket"],
     });
 
-    newSocket.on('connect', () => setSocketConnected(true));
-    newSocket.on('disconnect', () => setSocketConnected(false));
-    newSocket.on('connect_error', () => console.error('Connection error'));
+    newSocket.on("connect", () => setSocketConnected(true));
+    newSocket.on("disconnect", () => setSocketConnected(false));
+    newSocket.on("connect_error", (err) => console.error("⚠️ Socket error:", err));
 
-    newSocket.on('newMessage', () => {
-      dispatch(fetchChatRequest({ userId1: currentUser._id, userId2: selectedUser._id }));
+    // 📥 Listen for new messages (only refresh if for this chat)
+    newSocket.on("newMessage", (msg) => {
+      const inThisChat =
+        (msg.sender === selectedUser?._id && msg.receiver === currentUser._id) ||
+        (msg.sender === currentUser._id && msg.receiver === selectedUser?._id);
+
+      if (inThisChat) {
+        dispatch(
+          fetchChatRequest(
+            selectedUser.chatId
+              ? { chatId: selectedUser.chatId }
+              : { userId1: currentUser._id, userId2: selectedUser._id }
+          )
+        );
+      }
     });
 
     setSocket(newSocket);
     return () => newSocket.disconnect();
-  }, [currentUser?._id, selectedUser?._id, dispatch]);
+  }, [currentUser?._id, selectedUser?._id, selectedUser?.chatId, dispatch]);
 
-  useEffect(() => {
-    if (socket && messages.length === 0 && currentUser?._id && selectedUser?._id) {
-      socket.emit('startConversation', {
-        senderId: currentUser._id,
-        receiverId: selectedUser._id,
-      });
-    }
-  }, [socket, messages.length, currentUser?._id, selectedUser?._id]);
-
+  // 👁️ Mark unread messages as read
   useEffect(() => {
     if (messages.length > 0) {
       const unreadMessages = messages.filter((msg) => {
-        const receiverId = typeof msg.receiver === 'string' ? msg.receiver : msg.receiver?._id;
+        const receiverId =
+          typeof msg.receiver === "string" ? msg.receiver : msg.receiver?._id;
         return !msg.read && receiverId === currentUser._id;
       });
 
       if (unreadMessages.length > 0) {
-        setFirstUnreadId(unreadMessages[0]._id); // ✅ store before marking read
-
-        setTimeout(() => {
-          const unreadIds = unreadMessages.map((msg) => msg._id);
-          dispatch(markMessagesReadRequest(unreadIds));
-        }, 100);
+        setFirstUnreadId(unreadMessages[0]._id);
+        dispatch(markMessagesReadRequest(unreadMessages.map((m) => m._id)));
       } else {
         setFirstUnreadId(null);
       }
     }
   }, [messages, currentUser._id, dispatch]);
 
+  // 🔽 Auto scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // ✉️ Send message
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
 
-    const payload = {
+    const tempMessage = {
+      _id: Date.now().toString(),
+      sender: { _id: currentUser._id, name: currentUser.name },
+      receiver: { _id: selectedUser._id, name: selectedUser.name },
+      message: newMessage,
+      timestamp: new Date().toISOString(),
+      read: false,
+      temp: true,
+    };
+
+    // ✅ Optimistic UI update
+    dispatch({ type: "chat/addLocalMessage", payload: tempMessage });
+
+    socket.emit("sendMessage", {
       sender: currentUser._id,
       receiver: selectedUser._id,
       message: newMessage,
-    };
+    });
 
-    socket.emit('sendMessage', payload);
-    dispatch(fetchChatRequest({ userId1: currentUser._id, userId2: selectedUser._id }));
-    setNewMessage('');
+    setNewMessage("");
   };
 
   if (!currentUser || !selectedUser) {
@@ -110,7 +129,7 @@ const ChatBox = ({ currentUser, selectedUser }) => {
           Chat with {selectedUser.name}
         </h3>
         <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {socketConnected ? '🟢 Online' : '🟠 Connecting...'}
+          {socketConnected ? "🟢 Online" : "🟠 Connecting..."}
         </div>
       </div>
 
@@ -134,28 +153,29 @@ const ChatBox = ({ currentUser, selectedUser }) => {
                   ── New Messages ──
                 </div>
               )}
-
               <div
                 className={`flex max-w-xs break-words p-3 rounded-lg ${
                   msg.sender?._id === currentUser._id
-                    ? 'self-end bg-blue-500 text-white ml-auto'
-                    : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 mr-auto'
+                    ? "self-end bg-blue-500 text-white ml-auto"
+                    : "self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 mr-auto"
                 }`}
               >
                 <div>
                   <div className="text-xs font-semibold opacity-80">
-                    {msg.sender?._id === currentUser._id ? 'You' : msg.sender?.name || 'Unknown'}
+                    {msg.sender?._id === currentUser._id
+                      ? "You"
+                      : msg.sender?.name || "Unknown"}
                   </div>
                   <div className="mt-1 text-sm">{msg.message}</div>
                   <div className="text-xs opacity-70 mt-1 flex items-center gap-1">
                     {msg.timestamp
                       ? new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })
-                      : 'Just now'}
+                      : "Just now"}
                     {msg.sender?._id === currentUser._id && (
-                      <span>{msg.read ? '✔✔' : '✔'}</span>
+                      <span>{msg.read ? "✔✔" : "✔"}</span>
                     )}
                   </div>
                 </div>
