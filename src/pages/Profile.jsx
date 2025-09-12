@@ -109,8 +109,9 @@ const Profile = () => {
 };
 
 
-const handleLogout = () => {
-  if (window.confirm("Are you sure you want to logout?")) {
+const handleLogout = async() => {
+    const result = await window.confirm("Are you sure you want to logout?");
+  if (result) {
     setTimeout(() => {
       dispatch(logout());
       toast.success("Logged out successfully!");
@@ -432,6 +433,13 @@ const handleLogout = () => {
                     className="inline-flex items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary hover-common"
                   >
                     <span className="p-1 mr-1">Add Post</span>{" "}
+                    <FaPlus size={20} />
+                  </Link>
+                  <Link
+                    to="/cloth"
+                    className="inline-flex ml-15 items-center p-2 bg-brown-primary text-neutral-primary rounded-md hover:bg-yellow-tertiary hover-common"
+                  >
+                    <span className="p-1 mr-1">Add Cloth</span>{" "}
                     <FaPlus size={20} />
                   </Link>
                 </div>

@@ -8,10 +8,23 @@ export default function Drawer() {
   const [open, setOpen] = useState(false);
   const drawerRef = useRef();
   const location = useLocation();
- const { isLoggedIn, role, roles} = useSelector((state) => state.auth);
+  const { isLoggedIn } = useSelector((state) => state.auth);
 
+  //currentRole reactive to localStorage
+  const [currentRole, setCurrentRole] = useState(localStorage.getItem("role") || "customer");
 
-  const currentRole = role || (Array.isArray(roles) ? roles[0] : "customer");
+  useEffect(() => {
+    // Poll localStorage every 100ms to detect changes in the same tab
+    const interval = setInterval(() => {
+      const storedRole = localStorage.getItem("role") || "customer";
+      if (storedRole !== currentRole) {
+        setCurrentRole(storedRole);
+        setOpen(false); // Close drawer when role changes
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [currentRole]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -19,9 +32,7 @@ export default function Drawer() {
         setOpen(false);
       }
     };
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    if (open) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
@@ -36,16 +47,15 @@ export default function Drawer() {
     { to: "/tailorcustom", label: "Customer Requests" },
   ];
 
-  const customerLinks = [{ to: "/custom", label: "Customize" }];
+  const customerLinks = [
+    { to: "/custom", label: "Customize" },
+    { to: "/measurement", label: "Measurements" },
+  ];
 
-  // ✅ Hide Drawer completely for admin
- if (currentRole === "admin") {
-  return null;
-}
+  if (currentRole === "admin") return null;
 
   return (
     <div className="relative" ref={drawerRef}>
-      {/* ===== Hamburger Button ===== */}
       <button
         onClick={() => setOpen(true)}
         className={`fixed top-2.5 left-2 bg-brown-tertiary text-neutral-primary w-8 h-8 transition-transform duration-300 flex 
@@ -56,22 +66,18 @@ export default function Drawer() {
         <FiMenu size={24} />
       </button>
 
-      {/* ===== Drawer Panel ===== */}
       <div
         className={`fixed top-0 left-0 h-screen bg-brown-tertiary text-neutral-primary transform transition-transform duration-300 ease-in-out 
                     ${open ? "translate-x-0" : "-translate-x-full"} w-[280px] p-4 z-40`}
       >
-        {/* ===== Close Icon ===== */}
         <IoMdArrowDropright
           className="absolute right-2 top-2 text-neutral-primary text-3xl cursor-pointer rotate-180 rounded-sm hover:text-yellow-tertiary 
                      hover:scale-110 hover:border-t-2 hover:bg-brown-tertiary hover:border-yellow-tertiary"
           onClick={() => setOpen(false)}
         />
 
-        {/* ===== Menu Title ===== */}
         <h2 className="text-xl font-bold mb-4">Menu</h2>
 
-        {/* ===== Menu Items ===== */}
         <ul className="space-y-2">
           <Link to="/">
             <li className={getLinkClass("/")}>Home</li>
@@ -96,14 +102,12 @@ export default function Drawer() {
               <Link to="/pallete">
                 <li className={getLinkClass("/pallete")}>Color Tone</li>
               </Link>
-
               <Link to="/chat">
                 <li className={getLinkClass("/chat")}>Messages</li>
               </Link>
-
               <Link to="/tailors">
-            <li className={getLinkClass("/tailors")}>Posts</li>
-          </Link>
+                <li className={getLinkClass("/tailors")}>Posts</li>
+              </Link>
 
               {(currentRole === "tailor" ? tailorLinks : customerLinks).map(
                 (link) => (
@@ -117,8 +121,6 @@ export default function Drawer() {
               </Link>
             </>
           )}
-
-          
         </ul>
       </div>
     </div>

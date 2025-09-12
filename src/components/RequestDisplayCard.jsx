@@ -34,36 +34,43 @@ const RequestDisplayCard = ({
     return found?.name || "Tailor";
   };
 
-  const handleSendMessage = () => {
-    const confirmStart = window.confirm(
+  const handleSendMessage = async () => {
+  const confirmStart = await new Promise((resolve) => {
+    resolve(window.confirm(
       "Do you want to start a conversation with this tailor?"
-    );
-    if (!confirmStart) return;
+    ));
+  });
 
-    const receiverId = req.tailorId;
-    if (!profile?._id || !receiverId) {
-      alert("Missing profile or user ID");
-      return;
-    }
+  if (!confirmStart) return;
 
-    dispatch(
-      startChatWithUserRequest({
-        senderId: profile._id,
-        receiverId,
-      })
-    );
+  if (!profile?._id || !req.tailorId) {
+    await new Promise((resolve) => {
+      resolve(window.alert("Missing profile or user ID"));
+    });
+    return;
+  }
 
-    dispatch(
-      setChatUser({
-        _id: receiverId,
-        name: tailorName(),
-      })
-    );
+  const receiverId = req.tailorId;
 
-    setTimeout(() => {
-      navigate(`/chat/${receiverId}`);
-    }, 300);
-  };
+  dispatch(
+    startChatWithUserRequest({
+      senderId: profile._id,
+      receiverId,
+    })
+  );
+
+  dispatch(
+    setChatUser({
+      _id: receiverId,
+      name: tailorName(),
+    })
+  );
+
+  setTimeout(() => {
+    navigate(`/chat/${receiverId}`);
+  }, 300);
+};
+
 
   const renderTrackingStatus = (status) => {
     const steps = [
@@ -249,10 +256,10 @@ const RequestDisplayCard = ({
         )}
 
         {(() => {
-          console.log("Request status:", req?.status); // 👈 log status every render
+          
 
-          if (req?.status && req.status.toLowerCase().includes("deliver")) {
-            console.log("Matched status for confirm button:", req.status); // 👈 log when matched
+          if (req?.status && req.status.toLowerCase().includes("deliverd")) {
+            
             return (
               <button
                 onClick={() => handleConfirm(req?._id)}

@@ -47,18 +47,28 @@ const PostList = ({
     setEditProductLink("");
   };
 
-  const deletePost = async (postId) => {
-    if (!window.confirm("Delete this post?")) return;
-    try {
-      await axios.delete(`http://localhost:5000/users/post/${postId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+const deletePost = async (postId) => {
+  const confirmed = await new Promise((resolve) => {
+    resolve(window.confirm("Delete this post?"));
+  });
+  if (!confirmed) return;
+
+  try {
+    await axios.delete(`http://localhost:5000/users/post/${postId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await new Promise((resolve) => {
       alert("Post deleted");
-      fetchPosts();
-    } catch {
+      resolve();
+    });
+    fetchPosts();
+  } catch {
+    await new Promise((resolve) => {
       alert("Delete failed");
-    }
-  };
+      resolve();
+    });
+  }
+};
 
   if (posts.length === 0) {
     return <p className="text-center text-brown-tertiary">No posts yet.</p>;

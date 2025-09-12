@@ -27,13 +27,10 @@ const AddPostForm = ({ fetchPosts, token }) => {
       alert("Please upload a image.");
       return;
     }
-    if (
-      productLink &&
-      !productLink.startsWith("http://localhost:5173/cloths/")
-    ) {
-      alert("If entered, product link must be a valid Book My Tailor link.");
-      return;
-    }
+   if (productLink && !productLink.startsWith("http://localhost:5173/cloths/")) {
+    await alert("Product link must be a valid Book My Tailor link.");
+    return;
+  }
 
     try {
       const formattedHashtags = hashtags

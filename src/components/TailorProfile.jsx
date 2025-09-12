@@ -61,111 +61,120 @@ const TailorProfile = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-      >
-        ← Back to Tailors
-      </button>
+  <div className="container mx-auto px-4 py-8">
+  <button
+    onClick={() => navigate(-1)}
+    className="mb-6 px-4 py-2 bg-brown-secondary text-neutral-primary rounded-lg hover:bg-brown-primary transition"
+  >
+    ← Back to Tailors
+  </button>
 
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="md:flex p-6">
-          <div className="md:w-1/4 flex flex-col items-center">
-            <img
-              src={
-                tailor.profileImage
-                  ? `http://localhost:5000/${tailor.profileImage}`
-                  : "/default-profile.png"
-              }
-              alt={tailor.name}
-              className="w-48 h-48 rounded-full object-cover border-4 border-white shadow-lg"
-            />
-            <div className="mt-4 space-y-4">
-              <FollowerButton
-                tailorId={tailor._id}
-                followers={tailor.tailorDetails?.followers || []}
-                currentUserId={currentUserId}
-                followerName={followerName}
-              />
-              <Rating
-                tailorId={tailor._id}
-                currentUserId={currentUserId}
-                avgRating={avgRating}
-                userRateValue={userRateValue}
-              />
-            </div>
+  <div className="bg-neutral-primary rounded-xl shadow-md overflow-hidden">
+    <div className="md:flex p-6">
+      {/* Profile Picture & Actions */}
+      <div className="md:w-1/4 flex flex-col items-center">
+        <img
+          src={
+            tailor.profileImage
+              ? `http://localhost:5000/${tailor.profileImage}`
+              : "/default-profile.png"
+          }
+          alt={tailor.name}
+          className="w-48 h-48 rounded-full object-cover border-4 border-neutral-primary shadow-lg"
+        />
+        <div className="mt-4 space-y-4">
+         <div className="ml-19 mt-2"> <FollowerButton
+            tailorId={tailor._id}
+            followers={tailor.tailorDetails?.followers || []}
+            currentUserId={currentUserId}
+            followerName={followerName}
+          /></div>
+          <Rating
+            tailorId={tailor._id}
+            currentUserId={currentUserId}
+            avgRating={avgRating}
+            userRateValue={userRateValue}
+          />
+        </div>
+        
+      </div>
+
+      {/* Profile Details */}
+      <div className="md:w-3/4 md:pl-8 mt-6 md:mt-0">
+      <div className="flex">
+         <div> <h1 className="text-3xl font-bold text-brown-primary">{tailor.name}</h1>
+        <p className="text-brown-tertiary mt-2">{tailor.email}</p>
+        <div className="mt-6 flex space-x-6">
+          <FollowersList
+            tailorId={tailor._id}
+            showFollowersId={showFollowersId}
+            setShowFollowersId={setShowFollowersId}
+            defaultFollowers={tailor.tailorDetails?.followers || []}
+          />
+          <FollowingList
+            userId={tailor._id}
+            showFollowingId={showFollowingId}
+            setShowFollowingId={setShowFollowingId}
+            defaultFollowing={tailor.tailorDetails?.following || []}
+          />
+          <RatingList
+            tailorId={tailor._id}
+            showRatingId={showRatingId}
+            setShowRatingId={setShowRatingId}
+          />
+        </div></div>
+        <div className="ml-8">
+  <h3 className="font-semibold text-brown-primary">About</h3>
+  <div className="h-35 w-120 overflow-auto p-2 text-sm  rounded bg-yellow-primary">
+    <p className="text-brown-tertiary">
+      {tailor.tailorDetails?.description || "No description provided."}
+    </p>
+  </div>
+</div>
+
+      </div>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-brown-primary">
+          
+          <div>
+            <h3 className="font-semibold">Experience</h3>
+            <p>{tailor.tailorDetails?.experience || 0} years</p>
           </div>
-
-          <div className="md:w-3/4 md:pl-8 mt-6 md:mt-0">
-            <h1 className="text-3xl font-bold text-gray-800">{tailor.name}</h1>
-            <p className="text-gray-600 mt-2">{tailor.email}</p>
-
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-semibold">Experience</h3>
-                <p>{tailor.tailorDetails?.experience || 0}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Specialization</h3>
-                <p>
-                  {tailor.tailorDetails?.specialization?.join(", ") ||
-                    "Not specified"}
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Service Fees</h3>
-                <p>₹{tailor.tailorDetails?.fees || "Not specified"}</p>
-              </div>
-              <div>
-                <h3 className="font-semibold">Address</h3>
-                <p>{tailor.address || "Not specified"}</p>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <h3 className="font-semibold">About</h3>
-              <p className="text-gray-700 mt-2">
-                {tailor.tailorDetails?.description ||
-                  "No description provided."}
-              </p>
-            </div>
-
-            <div className="mt-6 flex space-x-6">
-              <FollowersList
-                tailorId={tailor._id}
-                showFollowersId={showFollowersId}
-                setShowFollowersId={setShowFollowersId}
-                defaultFollowers={tailor.tailorDetails?.followers || []}
-              />
-              <FollowingList
-                userId={tailor._id}
-                showFollowingId={showFollowingId}
-                setShowFollowingId={setShowFollowingId}
-                defaultFollowing={tailor.tailorDetails?.following || []}
-              />
-              <RatingList
-                tailorId={tailor._id}
-                showRatingId={showRatingId}
-                setShowRatingId={setShowRatingId}
-              />
-            </div>
+          <div>
+            <h3 className="font-semibold">Specialization</h3>
+            <p>
+              {tailor.tailorDetails?.specialization?.join(", ") || "Not specified"}
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Service Fees</h3>
+            <p>₹{tailor.tailorDetails?.fees || "Not specified"}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Address</h3>
+            <p>{tailor.address || "Not specified"}</p>
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-gray-200">
-          <h2 className="text-xl font-bold mb-4">Posts</h2>
-          {tailor.tailorDetails?.posts?.length > 0 ? (
-            <AllPost
-              posts={tailor.tailorDetails.posts}
-              onRefresh={handleRefresh}
-            />
-          ) : (
-            <p className="text-gray-500">No posts yet.</p>
-          )}
-        </div>
       </div>
     </div>
+
+    {/* Posts Section */}
+    <div className="px-6 py-4 border-t border-brown-secondary">
+      <h2 className="text-xl font-bold mb-4 text-brown-primary">Posts</h2>
+
+      {tailor.tailorDetails?.posts?.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AllPost posts={tailor.tailorDetails.posts} onRefresh={handleRefresh} />
+        </div>
+      ) : (
+        <p className="text-brown-tertiary text-center py-10">
+          No posts yet. Create your first post to showcase your work!
+        </p>
+      )}
+    </div>
+  </div>
+</div>
+
   );
 };
 

@@ -33,16 +33,19 @@ const CustomOrder = () => {
     }
   }, [roles, dispatch]);
 
-  const handleAccept = (requestId, customerId) => {
-    const confirmAccept = window.confirm(
+  const handleAccept = async (requestId, customerId) => {
+    const confirmAccept = await window.confirm(
       "Are you sure you want to accept this request?"
     );
     if (!confirmAccept) return;
     dispatch({ type: "ACCEPT_REQUEST", payload: { requestId, customerId } });
   };
 
-  const handleStatusUpdate = (requestId, customerId, newStatus) => {
-    if (!window.confirm(`Mark this request as '${newStatus}'?`)) return;
+  const handleStatusUpdate = async (requestId, customerId, newStatus) => {
+    const confirmUpdate = await window.confirm(
+      `Mark this request as '${newStatus}'?`
+    );
+    if (!confirmUpdate) return;
     dispatch({
       type: "UPDATE_REQUEST_STATUS",
       payload: { requestId, customerId, newStatus },
@@ -50,10 +53,9 @@ const CustomOrder = () => {
   };
 
   const handleStartChat = async (receiverId) => {
-    const confirmStart = window.confirm(
+    const confirmStart = await window.confirm(
       "Do you want to start a conversation with this user?"
     );
-
     if (!confirmStart) return;
 
     dispatch(

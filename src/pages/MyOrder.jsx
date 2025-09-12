@@ -37,13 +37,14 @@ const MyOrders = () => {
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   };
 
-  const handleDelete = (orderId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this order?"
-    );
-    if (!confirmed) return;
-    dispatch(deleteOrderRequest({ token, orderId }));
-  };
+  const handleDelete = async (orderId) => {
+  const confirmed = await window.confirm(
+    "Are you sure you want to delete this order?"
+  );
+  if (!confirmed) return;
+  dispatch(deleteOrderRequest({ token, orderId }));
+};
+
 
   const handleViewProduct = (productId) => {
     setSelectedClothId(productId);

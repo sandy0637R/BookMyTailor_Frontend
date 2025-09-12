@@ -1,14 +1,21 @@
 import { useDispatch, useSelector } from "react-redux";
 
-const FollowerButton = ({ tailorId, followers, currentUserId, followerName }) => {
+const FollowerButton = ({
+  tailorId,
+  followers,
+  currentUserId,
+  followerName,
+}) => {
   const dispatch = useDispatch();
   const loadingFollowId = useSelector((state) => state.social.loadingFollowId);
-  const isFollowing = followers?.some(f => f._id.toString() === currentUserId?.toString());
+  const isFollowing = followers?.some(
+    (f) => f._id.toString() === currentUserId?.toString()
+  );
   const loading = loadingFollowId === tailorId;
 
-  const toggleFollow = () => {
+  const toggleFollow = async () => {
     if (!currentUserId || !followerName) {
-      alert("User info missing. Please log in again.");
+      await alert("User info missing. Please log in again.");
       return;
     }
 

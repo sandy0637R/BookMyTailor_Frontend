@@ -16,14 +16,19 @@ const Rating = ({
   const inRatingMode = ratingModeId === tailorId;
   const submitting = submittingRatingId === tailorId;
 
-  const handleRateClick = () => {
+  const handleRateClick = async () => {
+  const proceed = await new Promise((resolve) => {
     if (tailorId === currentUserId) {
-      alert("You cannot rate yourself.");
-      return;
+      resolve(window.alert("You cannot rate yourself."));
+    } else {
+      resolve(true);
     }
-    setRatingModeId(tailorId);
-    setSelectedRating(0);
-  };
+  });
+  if (!proceed) return;
+
+  setRatingModeId(tailorId);
+  setSelectedRating(0);
+};
 
   const renderStars = (rating, clickable = false, onClickStar) => {
     const stars = [];
@@ -45,16 +50,20 @@ const Rating = ({
     return stars;
   };
 
-  const submitRating = () => {
+  const submitRating = async () => {
+  const proceed = await new Promise((resolve) => {
     if (!selectedRating || selectedRating === 0) {
-      alert("Please select a rating");
-      return;
+      resolve(window.alert("Please select a rating"));
+    } else {
+      resolve(true);
     }
-    dispatch({ type: "SUBMIT_RATING", payload: { tailorId, rating: selectedRating } });
-    setRatingModeId(null);
-    setSelectedRating(0);
-  };
+  });
+  if (!proceed) return;
 
+  dispatch({ type: "SUBMIT_RATING", payload: { tailorId, rating: selectedRating } });
+  setRatingModeId(null);
+  setSelectedRating(0);
+};
   return (
     <div className="mt-3 text-brown-secondary">
       <strong >Average Rating: </strong>

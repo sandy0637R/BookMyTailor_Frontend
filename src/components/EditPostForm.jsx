@@ -110,7 +110,7 @@ const EditPostForm = ({
               editProductLink &&
               !editProductLink.startsWith("http://localhost:5173/cloths/")
             ) {
-              alert(
+              await alert(
                 "If entered, product link must be a valid Book My Tailor link."
               );
               return;
@@ -132,17 +132,18 @@ const EditPostForm = ({
                   },
                 }
               );
-              alert("Post updated");
+              await alert("Post updated");
               cancelEdit();
               fetchPosts();
             } catch {
-              alert("Update failed");
+              await alert("Update failed");
             }
           }}
           className="bg-yellow-tertiary text-neutral-primary px-4 py-2 rounded-md shadow-md hover:bg-yellow-premium"
         >
           Save
         </button>
+
         <button
           onClick={cancelEdit}
           className="bg-brown-primary text-neutral-primary px-4 py-2 rounded-md shadow-md hover:bg-brown-secondary"

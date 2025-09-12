@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchMeasurementsRequest } from "../redux/measurementSlice";
 import { MdOutlinePhotoSizeSelectActual } from "react-icons/md";
-
+import { toast } from 'react-hot-toast';
 const RequestUploadForm = ({
   form,
   handleInput,
@@ -69,7 +69,7 @@ const RequestUploadForm = ({
 
   const submitForm = () => {
     const diffHours = (new Date(form.duration) - new Date()) / 36e5;
-    if (diffHours < 72) return alert("Duration must be at least 3 days (72 hours) from now.");
+   if (diffHours < 72) return toast.error("Duration must be at least 3 days (72 hours) from now.");
     handleSubmit({
       ...form,
       quantity: 1,

@@ -28,62 +28,57 @@ const Admin = () => {
     dispatch(fetchOrdersRequest());
   }, [dispatch]);
 
-  const handleBlock = (id, isBlocked) => {
-    const confirmMsg = isBlocked
-      ? "Are you sure you want to unblock this user?"
-      : "Are you sure you want to block this user?";
-    if (!window.confirm(confirmMsg)) return;
+const handleBlock = async (id, isBlocked) => {
+  const confirmMsg = isBlocked
+    ? "Are you sure you want to unblock this user?"
+    : "Are you sure you want to block this user?";
+  const confirmed = await window.confirm(confirmMsg);
+  if (!confirmed) return;
 
-    dispatch(blockUnblockUserRequest({ id, isBlocked }));
-  };
+  dispatch(blockUnblockUserRequest({ id, isBlocked }));
+};
 
-  const handleDeleteCloth = (clothId) => {
-    if (!window.confirm("Are you sure you want to delete this cloth?")) return;
-    dispatch(deleteClothRequest({ clothId }));
-  };
+const handleDeleteCloth = async (clothId) => {
+  const confirmed = await window.confirm("Are you sure you want to delete this cloth?");
+  if (!confirmed) return;
 
-  const handleEditCloth = (cloth) => {
-    setEditClothId(cloth._id);
-    setEditForm({ name: cloth.name, price: cloth.price });
-  };
+  dispatch(deleteClothRequest({ clothId }));
+};
 
-  const handleSaveEdit = (clothId) => {
-    if (!window.confirm("Do you want to save the changes?")) return;
-    dispatch(editClothRequest({ clothId, name: editForm.name, price: editForm.price }));
-    setEditClothId(null);
-  };
+const handleSaveEdit = async (clothId) => {
+  const confirmed = await window.confirm("Do you want to save the changes?");
+  if (!confirmed) return;
 
-  const tailorUsers = users.filter((u) => u.roles.includes("tailor"));
-  const customerUsers = users.filter(
-    (u) => JSON.stringify(u.roles) === JSON.stringify(["customer"])
-  );
+  dispatch(editClothRequest({ clothId, name: editForm.name, price: editForm.price }));
+  setEditClothId(null);
+};
 
-  const handleUpdateStatus = (order) => {
-    const currentIndex = DELIVERY_STATUSES.indexOf(order.deliveryStatus);
-    const nextStatus = DELIVERY_STATUSES[currentIndex + 1];
+const handleUpdateStatus = async (order) => {
+  const currentIndex = DELIVERY_STATUSES.indexOf(order.deliveryStatus);
+  const nextStatus = DELIVERY_STATUSES[currentIndex + 1];
 
-    if (!nextStatus) {
-      toast("Order is already delivered");
-      return;
-    }
+  if (!nextStatus) {
+    toast("Order is already delivered");
+    return;
+  }
 
-    const confirmUpdate = window.confirm(`Change status to "${nextStatus}"?`);
-    if (!confirmUpdate) return;
+  const confirmed = await window.confirm(`Change status to "${nextStatus}"?`);
+  if (!confirmed) return;
 
-    dispatch(updateOrderStatusRequest({ orderId: order._id, status: nextStatus }));
-  };
+  dispatch(updateOrderStatusRequest({ orderId: order._id, status: nextStatus }));
+};
 
-  const handleCancelOrder = (order) => {
-    if (order.deliveryStatus === "Delivered") {
-      toast.error("Cannot cancel a delivered order");
-      return;
-    }
+const handleCancelOrder = async (order) => {
+  if (order.deliveryStatus === "Delivered") {
+    toast.error("Cannot cancel a delivered order");
+    return;
+  }
 
-    const confirmCancel = window.confirm("Are you sure you want to cancel this order?");
-    if (!confirmCancel) return;
+  const confirmed = await window.confirm("Are you sure you want to cancel this order?");
+  if (!confirmed) return;
 
-    dispatch(updateOrderStatusRequest({ orderId: order._id, status: "Cancelled" }));
-  };
+  dispatch(updateOrderStatusRequest({ orderId: order._id, status: "Cancelled" }));
+};
 
   return (
     <div className="p-6 space-y-12 bg-gray-50 min-h-screen">

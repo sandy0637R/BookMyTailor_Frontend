@@ -24,6 +24,7 @@ import ClothHandeling from "./pages/ClothHandeling";
 import RoleRoute from "./utils/RoleRoute";
 import Admin from "./pages/Admin";
 import MyOrders from "./pages/MyOrder";
+import { ModalProvider } from "./components/ModalProvider";
 
 const App = () => {
   return (
@@ -153,6 +154,8 @@ const App = () => {
 
 export default () => (
   <CookiesProvider>
-    <App />
+    <ModalProvider>
+      <App />
+    </ModalProvider>
   </CookiesProvider>
 );

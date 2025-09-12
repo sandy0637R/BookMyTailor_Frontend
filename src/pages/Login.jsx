@@ -16,38 +16,27 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const loginData = {
-      email,
-      password,
-      ...(isAdminLogin && { role: "admin" }),
-    };
-
+    const loginData = { email, password, ...(isAdminLogin && { role: "admin" }) };
     dispatch(loginRequest(loginData));
   };
 
-  // Handle notifications in useEffect
   useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-    if (roleError) {
-      toast.error(roleError);
-    }
+    if (error) toast.error(error);
+    if (roleError) toast.error(roleError);
   }, [error, roleError]);
+
   useEffect(() => {
-    if (isLoggedIn) {
-      navigate(isAdminLogin ? "/admin" : "/");
-    }
+    if (isLoggedIn) navigate(isAdminLogin ? "/admin" : "/");
   }, [isLoggedIn, isAdminLogin, navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen  relative overflow-hidden bg-[url('/assets/Creative.png')] bg-center">
+
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-80"
+        className="relative bg-neutral-primary p-10 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.2)] w-96 flex flex-col items-center space-y-6 transition-transform duration-500 hover:scale-105"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <h2 className="text-3xl font-extrabold text-brown-primary mb-6 tracking-wide"><span className="text-yellow-tertiary">Book</span>MyTailor</h2>
 
         <input
           type="email"
@@ -55,7 +44,7 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-4 rounded-xl border-2 border-brown-secondary focus:outline-none focus:ring-2 focus:ring-yellow-tertiary transition placeholder:text-brown-tertiary"
         />
         <input
           type="password"
@@ -63,29 +52,32 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-4 rounded-xl border-2 border-brown-secondary focus:outline-none focus:ring-2 focus:ring-yellow-tertiary transition placeholder:text-brown-tertiary"
         />
 
-        <div className="mb-4">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={isAdminLogin}
-              onChange={(e) => setIsAdminLogin(e.target.checked)}
-              className="accent-blue-500"
-            />
-            <span>Login as Admin</span>
-          </label>
-        </div>
-        <Link to="/register">
-          <li className="text-red-600">Register</li>
-        </Link>
+        <label className="flex items-center gap-2 w-full justify-start text-brown-primary">
+          <input
+            type="checkbox"
+            checked={isAdminLogin}
+            onChange={(e) => setIsAdminLogin(e.target.checked)}
+            className="accent-yellow-tertiary"
+          />
+          Login as Admin
+        </label>
+
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+          className="w-full bg-yellow-tertiary text-brown-tertiary font-bold py-3 rounded-xl shadow-lg hover:bg-yellow-primary hover:shadow-2xl transition-all duration-300"
         >
           Login
         </button>
+
+        <p className="text-brown-primary text-sm mt-2">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-yellow-tertiary hover:text-yellow-primary font-semibold">
+            Register
+          </Link>
+        </p>
       </form>
     </div>
   );
