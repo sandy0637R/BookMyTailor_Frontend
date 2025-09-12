@@ -8,8 +8,10 @@ export default function Drawer() {
   const [open, setOpen] = useState(false);
   const drawerRef = useRef();
   const location = useLocation();
-  const { isLoggedIn } = useSelector((state) => state.auth);
-  const currentRole = localStorage.getItem("role") || "customer";
+ const { isLoggedIn, role, roles} = useSelector((state) => state.auth);
+
+
+  const currentRole = role || (Array.isArray(roles) ? roles[0] : "customer");
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -29,12 +31,17 @@ export default function Drawer() {
       : "drawer-btn";
 
   const tailorLinks = [
-    { to: "/addpost", label: "Posts" },
-    { to: "/tailorcustom", label: "Customer Requests" },
+    { to: "/addpost", label: "Add Posts" },
     { to: "/cloth", label: "Cloth" },
+    { to: "/tailorcustom", label: "Customer Requests" },
   ];
 
   const customerLinks = [{ to: "/custom", label: "Customize" }];
+
+  // ✅ Hide Drawer completely for admin
+ if (currentRole === "admin") {
+  return null;
+}
 
   return (
     <div className="relative" ref={drawerRef}>
@@ -52,9 +59,7 @@ export default function Drawer() {
       {/* ===== Drawer Panel ===== */}
       <div
         className={`fixed top-0 left-0 h-screen bg-brown-tertiary text-neutral-primary transform transition-transform duration-300 ease-in-out 
-                    ${
-                      open ? "translate-x-0" : "-translate-x-full"
-                    } w-[280px] p-4 z-40`}
+                    ${open ? "translate-x-0" : "-translate-x-full"} w-[280px] p-4 z-40`}
       >
         {/* ===== Close Icon ===== */}
         <IoMdArrowDropright
@@ -91,9 +96,14 @@ export default function Drawer() {
               <Link to="/pallete">
                 <li className={getLinkClass("/pallete")}>Color Tone</li>
               </Link>
+
               <Link to="/chat">
                 <li className={getLinkClass("/chat")}>Messages</li>
               </Link>
+
+              <Link to="/tailors">
+            <li className={getLinkClass("/tailors")}>Posts</li>
+          </Link>
 
               {(currentRole === "tailor" ? tailorLinks : customerLinks).map(
                 (link) => (
@@ -102,12 +112,13 @@ export default function Drawer() {
                   </Link>
                 )
               )}
+              <Link to="/orders">
+                <li className={getLinkClass("/orders")}>MyOrders</li>
+              </Link>
             </>
           )}
 
-          <Link to="/tailors">
-            <li className={getLinkClass("/tailors")}>Tailors</li>
-          </Link>
+          
         </ul>
       </div>
     </div>

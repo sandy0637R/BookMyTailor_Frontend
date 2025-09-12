@@ -109,12 +109,17 @@ const Profile = () => {
 };
 
 
-  const handleLogout = () => {
-    dispatch(logout());
-    toast.success("Logged out successfully!");
-    localStorage.clear();
-    navigate("/login");
-  };
+const handleLogout = () => {
+  if (window.confirm("Are you sure you want to logout?")) {
+    setTimeout(() => {
+      dispatch(logout());
+      toast.success("Logged out successfully!");
+      localStorage.clear();
+      navigate("/login");
+    }, 500); 
+  }
+};
+
 
   const handleRoleChange = (e) => {
     const selected = e.target.value;

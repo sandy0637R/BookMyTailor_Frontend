@@ -62,7 +62,7 @@ const TailorPost = () => {
   }, [posts, search, sort, refreshKey]);
 
   return (
-    <div className="grid grid-cols-12 min-h-screen bg-[var(--color-neutral-primary)]">
+    <div className="grid grid-cols-12 min-h-screen bg-[var(--color-brown-tertiary)]">
       {/* Left Sidebar */}
       <div className="col-span-3 bg-[url('/assets/Creative.png')] bg-cover bg-center text-white p-4 fixed top-0 left-0 h-screen w-1/4">
         <div className="bg-brown-tertiary p-5 mt-13 rounded-lg">

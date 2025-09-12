@@ -94,14 +94,14 @@ const MyOrders = () => {
                 <span className="font-semibold text-brown-primary">Total:</span>{" "}
                 ₹{order.totalAmount}
               </p>
-              <p className="mb-1">
+              <div className="mb-1">
                 <span className="font-semibold text-brown-primary">
                   Address:
                 </span>
                 <div className="max-h-16 overflow-y-auto mt-1 p-1 border border-brown-secondary rounded bg-yellow-primary text-brown-primary">
                   {order.address}
                 </div>
-              </p>
+              </div>
 
               <p className="mb-1">
                 <span className="font-semibold text-brown-primary">

@@ -6,11 +6,13 @@ import PostComment from "./PostComment";
 import ViewProfileButton from "../ViewProfileButton";
 import { FaUser } from "react-icons/fa";
 import { FaBoxOpen } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
 const PostCard = ({ post }) => {
 
   const [commentTexts, setCommentTexts] = useState({});
   const [selectedCommentId, setSelectedCommentId] = useState(null);
+  const navigate = useNavigate();
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6 mb-6 border border-gray-200">

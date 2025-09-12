@@ -39,12 +39,15 @@ const ChatBox = ({ currentUser, selectedUser }) => {
 
     newSocket.on("connect", () => setSocketConnected(true));
     newSocket.on("disconnect", () => setSocketConnected(false));
-    newSocket.on("connect_error", (err) => console.error("⚠️ Socket error:", err));
+    newSocket.on("connect_error", (err) =>
+      console.error("⚠️ Socket error:", err)
+    );
 
     // 📥 Listen for new messages (only refresh if for this chat)
     newSocket.on("newMessage", (msg) => {
       const inThisChat =
-        (msg.sender === selectedUser?._id && msg.receiver === currentUser._id) ||
+        (msg.sender === selectedUser?._id &&
+          msg.receiver === currentUser._id) ||
         (msg.sender === currentUser._id && msg.receiver === selectedUser?._id);
 
       if (inThisChat) {
@@ -122,25 +125,38 @@ const ChatBox = ({ currentUser, selectedUser }) => {
   }
 
   return (
-    <div className="flex flex-col h-[700px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col h-[686px] bg-brown-tertiary ">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+      <div className="p-4 border-b border-brown-secondary bg-brown-tertiary">
+        <h3 className="text-lg font-semibold text-neutral-primary">
           Chat with {selectedUser.name}
         </h3>
-        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {socketConnected ? "🟢 Online" : "🟠 Connecting..."}
+        <div className="flex items-center gap-2 mt-1 text-sm font-medium">
+          <span
+            className={`w-3 h-3 rounded-full ${
+              socketConnected ? "bg-green-500" : "bg-orange-400 animate-pulse"
+            }`}
+          ></span>
+          <span
+            className={`${
+              socketConnected ? "text-green-600" : "text-orange-500"
+            }`}
+          >
+            {socketConnected ? "Online" : "Connecting..."}
+          </span>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[url('/assets/Creative-dark.jpg')] bg-cover bg-center">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : error ? (
-          <div className="text-center py-8 text-red-500 dark:text-red-400">{error}</div>
+          <div className="text-center py-8 text-red-500 dark:text-red-400">
+            {error}
+          </div>
         ) : messages.length === 0 ? (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No messages yet. Start the conversation!
@@ -156,8 +172,8 @@ const ChatBox = ({ currentUser, selectedUser }) => {
               <div
                 className={`flex max-w-xs break-words p-3 rounded-lg ${
                   msg.sender?._id === currentUser._id
-                    ? "self-end bg-blue-500 text-white ml-auto"
-                    : "self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 mr-auto"
+                    ? "self-end bg-yellow-primary text-brown-tertiary ml-auto"
+                    : "self-start bg-brown-primary text-neutral-primary  mr-auto"
                 }`}
               >
                 <div>
@@ -189,19 +205,23 @@ const ChatBox = ({ currentUser, selectedUser }) => {
       {/* Input */}
       <form
         onSubmit={handleSendMessage}
-        className="p-3 border-t border-gray-200 dark:border-gray-700 flex bg-white dark:bg-gray-800"
+        className="flex items-center p-3 bg-brown-tertiary border-t border-brown-secondary shadow-sm"
       >
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type your message..."
-          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
+          className="flex-1 px-3 py-2 bg-neutral-900 text-neutral-primary rounded-l-sm focus:outline-none focus:ring-1 focus:ring-brown-primary placeholder-brown-secondary transition-colors"
         />
         <button
           type="submit"
           disabled={!newMessage.trim() || !socketConnected}
-          className="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          className={`px-4 py-2 rounded-r-sm font-medium  transition-colors shadow-sm ${
+            newMessage.trim() && socketConnected
+              ? "bg-yellow-primary hover-common hover:bg-yellow-secondary text-brown-tertiary"
+              : "bg-gray-500 cursor-not-allowed text-neutral-primary"
+          }`}
         >
           Send
         </button>

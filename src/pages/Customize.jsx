@@ -10,7 +10,7 @@ import CustomizeHistory from "../containers/CustomizeHistory";
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
-  const role = useSelector((state) => state.auth.role);
+  
 
   const tailors = useSelector((state) => state.social.tailors || []);
   const dispatch = useDispatch();
@@ -254,14 +254,6 @@ const Customize = () => {
   );
 
   const isSubmitDisabled = requiredFields.includes("") || !isMeasurementFilled;
-
-  if (role !== "customer") {
-    return (
-      <div className="p-4 text-red-600">
-        You are not authorized to view this page.
-      </div>
-    );
-  }
 
   return (
     <div className="p-4">

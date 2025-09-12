@@ -38,8 +38,6 @@ const App = () => {
         <Route path="/tailorprofile/:id" element={<TailorProfile />} />
         <Route path="/customerprofile/:id" element={<CustomerProfile />} />
         <Route path="/cloths/:clothId" element={<ClothPage />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/orders" element={<MyOrders />} />
         <Route path="/pallete" element={<PalletePage />} />
 
         <Route
@@ -47,6 +45,14 @@ const App = () => {
           element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <PrivateRoute>
+              <MyOrders />
             </PrivateRoute>
           }
         />
@@ -106,6 +112,16 @@ const App = () => {
             <PrivateRoute>
               <RoleRoute allowedRoles={["tailor"]}>
                 <ClothHandeling />
+              </RoleRoute>
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <RoleRoute allowedRoles={["admin"]}>
+                <Admin />
               </RoleRoute>
             </PrivateRoute>
           }

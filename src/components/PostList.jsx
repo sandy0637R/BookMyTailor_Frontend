@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EditPostForm from "./EditPostForm";
 import axios from "axios";
 
@@ -20,7 +20,10 @@ const PostList = ({
 }) => {
   const [expandedCaptions, setExpandedCaptions] = useState({});
   const [expandedHashtags, setExpandedHashtags] = useState({});
-  console.log(posts);
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const toggleCaption = (id) =>
     setExpandedCaptions((prev) => ({ ...prev, [id]: !prev[id] }));

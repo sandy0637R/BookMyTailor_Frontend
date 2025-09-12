@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { loginRequest } from '../redux/authSlice';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginRequest } from "../redux/authSlice";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isAdminLogin, setIsAdminLogin] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const Login = () => {
     const loginData = {
       email,
       password,
-      ...(isAdminLogin && { role: 'admin' })
+      ...(isAdminLogin && { role: "admin" }),
     };
 
     dispatch(loginRequest(loginData));
@@ -35,16 +35,18 @@ const Login = () => {
       toast.error(roleError);
     }
   }, [error, roleError]);
-
   useEffect(() => {
     if (isLoggedIn) {
-      navigate('/');
+      navigate(isAdminLogin ? "/admin" : "/");
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, isAdminLogin, navigate]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-80">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded shadow-md w-80"
+      >
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
         <input
@@ -75,9 +77,9 @@ const Login = () => {
             <span>Login as Admin</span>
           </label>
         </div>
-       <Link to="/register">
-                   <li className="text-red-600">Register</li>
-                 </Link>
+        <Link to="/register">
+          <li className="text-red-600">Register</li>
+        </Link>
         <button
           type="submit"
           className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"

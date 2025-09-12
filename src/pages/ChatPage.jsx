@@ -18,7 +18,6 @@ const ChatPage = () => {
 
   // ✅ Fetch chat users once
   useEffect(() => {
-    console.log("[ChatPage] Fetching chat users...");
     dispatch(fetchChatUsersRequest());
   }, [dispatch]);
 
@@ -45,7 +44,7 @@ const ChatPage = () => {
   return (
     <div className="flex h-full">
       {/* Left: Chat List */}
-      <div className="w-1/3 border-r overflow-y-auto">
+      <div className="w-1/3 border-r border-brown-secondary overflow-y-auto">
         <ChatList currentUser={profile} />
       </div>
 
@@ -54,9 +53,18 @@ const ChatPage = () => {
         {chatUser ? (
           <ChatBox currentUser={profile} selectedUser={chatUser} />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-lg">
-            {loading ? "Loading..." : "Select a user to start chatting"}
-          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-[url('/assets/Creative-dark.jpg')] bg-center">
+  {loading ? (
+    <span className="text-gray-400 text-base animate-pulse">
+      Loading chats...
+    </span>
+  ) : (
+    <span className="text-neutral-primary text-lg font-light tracking-wide">
+      Select a user to <span className="text-yellow-primary font-medium">start chatting</span>
+    </span>
+  )}
+</div>
+
         )}
       </div>
     </div>

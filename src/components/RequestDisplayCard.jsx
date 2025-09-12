@@ -118,32 +118,23 @@ const RequestDisplayCard = ({
 
   return (
     <div className="bg-neutral-primary p-4 md:p-5 rounded-xl shadow-common space-y-3 max-w-md mx-auto">
-    <div className="flex justify-center items-center">
-      {/* Image */}
-     {req?.image && (
-       <img
-         src={
-           typeof req.image === "string"
-             ? `http://localhost:5000/uploads/customRequests/${req.image}`
-             : URL.createObjectURL(req.image)
-         }
-         alt="Dress"
-         className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-lg border-3 border-brown-primary mr-30 "
-       />
-     )}
+      <div className="flex justify-center items-center">
+        {/* Image */}
+        {req?.image && (
+          <img
+            src={
+              typeof req.image === "string"
+                ? `http://localhost:5000/uploads/customRequests/${req.image}`
+                : URL.createObjectURL(req.image)
+            }
+            alt="Dress"
+            className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-lg border-3 border-brown-primary mr-30 "
+          />
+        )}
 
-     {/* Tracking */}
-     {renderTrackingStatus(req?.status)}
-
-     {/* Courier Info */}
-     {(req?.status === "Shipped" || req?.status === "Delivered") && (
-       <div className="text-xs text-brown-secondary mt-1">
-         <b>Tracking ID:</b> {req?.trackingId || "N/A"} <br />
-         <b>Courier:</b> {req?.courier || "N/A"}
-       </div>
-     )}
-
-    </div>
+        {/* Tracking */}
+        {renderTrackingStatus(req?.status)}
+      </div>
 
       {/* Basic Info in compact layout */}
       <div className="flex flex-wrap justify-between text-sm text-brown-tertiary gap-1 md:gap-3">
@@ -214,26 +205,27 @@ const RequestDisplayCard = ({
             ].map((m, i) => <div key={i}>• {m}</div>)}
         </div>
       </div>
-        {/* Tailor Info */}
-        {tailorId && (
-          <div className="flex items-center gap-3">
-            <img
-              src={
-                tailor?.profileImage
-                  ? `http://localhost:5000/${tailor.profileImage}`
-                  : "/default-profile.png"
-              }
-              alt="avatar"
-              className="w-10 h-10 rounded-full object-cover border-2 border-brown-secondary"
-            />
-            <div className="flex flex-col">
-              <span className="text-brown-primary font-semibold text-sm md:text-base">
-                {tailorName()}
-              </span>
-              <ViewProfileButton userId={tailorId} buttonClass="text-xs md:text-sm" />
-            </div>
+
+      {/* Tailor Info */}
+      {tailorId && (
+        <div className="flex items-center gap-3">
+          <img
+            src={
+              tailor?.profileImage
+                ? `http://localhost:5000/${tailor.profileImage}`
+                : "/default-profile.png"
+            }
+            alt="avatar"
+            className="w-10 h-10 rounded-full object-cover border-2 border-brown-secondary"
+          />
+          <div className="flex flex-col">
+            <span className="text-brown-primary font-semibold text-sm md:text-base">
+              {tailorName()}
+            </span>
+            <ViewProfileButton userId={tailorId} buttonClass="text-xs md:text-sm" />
           </div>
-        )}
+        </div>
+      )}
 
       {/* Buttons */}
       <div className="flex flex-wrap justify-end gap-2 mt-2">
@@ -242,13 +234,13 @@ const RequestDisplayCard = ({
             <button
               onClick={() => handleDelete(req?._id)}
               className="px-2 py-1 rounded border border-danger-primary text-danger-primary hover:bg-danger-primary hover:text-neutral-primary transition text-xs md:text-sm"
-              >
+            >
               Delete
             </button>
             {req?.status === "Uploaded" && (
               <button
-              onClick={() => setEditingId(req?._id)}
-              className="px-2 py-1 rounded border border-yellow-tertiary text-yellow-tertiary hover:bg-yellow-tertiary hover:text-neutral-primary transition text-xs md:text-sm"
+                onClick={() => setEditingId(req?._id)}
+                className="px-2 py-1 rounded border border-yellow-tertiary text-yellow-tertiary hover:bg-yellow-tertiary hover:text-neutral-primary transition text-xs md:text-sm"
               >
                 Edit
               </button>
@@ -256,19 +248,27 @@ const RequestDisplayCard = ({
           </>
         )}
 
-        {req?.status === "Delivered" && (
-          <button
-          onClick={() => handleConfirm(req?._id)}
-          className="px-2 py-1 rounded border border-yellow-primary text-yellow-primary hover:bg-yellow-primary hover:text-brown-tertiary transition text-xs md:text-sm"
-          >
-            Confirm
-          </button>
-        )}
+        {(() => {
+          console.log("Request status:", req?.status); // 👈 log status every render
+
+          if (req?.status && req.status.toLowerCase().includes("deliver")) {
+            console.log("Matched status for confirm button:", req.status); // 👈 log when matched
+            return (
+              <button
+                onClick={() => handleConfirm(req?._id)}
+                className="px-2 py-1 rounded border border-brown-tertiary text-brown-tertiary bg-yellow-primary w-[40%] hover:bg-neutral-primary hover-common hover:text-brown-tertiary transition text-xs md:text-sm"
+              >
+                Confirm
+              </button>
+            );
+          }
+          return null;
+        })()}
 
         {req?.tailorId && req?.status !== "Uploaded" && (
           <button
-          onClick={handleSendMessage}
-          className="px-2 py-1 rounded bg-brown-primary text-neutral-primary hover:bg-brown-secondary transition text-xs md:text-sm"
+            onClick={handleSendMessage}
+            className="px-2 py-1 rounded bg-brown-primary text-neutral-primary hover:bg-brown-secondary transition text-xs md:text-sm"
           >
             Message
           </button>

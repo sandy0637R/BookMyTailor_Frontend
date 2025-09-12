@@ -51,7 +51,7 @@ function* fetchUsersSaga() {
 function* fetchClothsSaga() {
   try {
     const token = yield select((state) => state.auth.token);
-    const { data } = yield call(axios.get, `${BASE_URL}/cloths/allcloths`, {
+    const { data } = yield call(axios.get, `${BASE_URL}/admin/cloths/allcloths`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     yield put(fetchClothsSuccess(data));
@@ -85,7 +85,7 @@ function* deleteClothSaga(action) {
     const token = yield select((state) => state.auth.token);
     const { clothId } = action.payload;
 
-    yield call(axios.delete, `${BASE_URL}/cloths/${clothId}`, {
+    yield call(axios.delete, `${BASE_URL}/admin/cloths/${clothId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -103,7 +103,7 @@ function* editClothSaga(action) {
 
     yield call(
       axios.put,
-      `${BASE_URL}/cloths/${clothId}`,
+      `${BASE_URL}/admin/cloths/${clothId}`,
       { name, price },
       {
         headers: { Authorization: `Bearer ${token}` },
