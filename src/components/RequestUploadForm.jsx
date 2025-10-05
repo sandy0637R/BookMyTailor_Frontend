@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchMeasurementsRequest } from "../redux/measurementSlice";
 import { MdOutlinePhotoSizeSelectActual } from "react-icons/md";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 const RequestUploadForm = ({
   form,
   handleInput,
@@ -12,7 +12,8 @@ const RequestUploadForm = ({
   isSubmitDisabled,
   handleSubmit,
 }) => {
-  const dispatch = useDispatch(), navigate = useNavigate();
+  const dispatch = useDispatch(),
+    navigate = useNavigate();
   const { tailors } = useSelector((s) => s.social);
   const { profile, token } = useSelector((s) => s.auth);
   const { measurements } = useSelector((s) => s.measurement);
@@ -40,9 +41,10 @@ const RequestUploadForm = ({
     if (!m) return;
     const e = (n, v) => ({ target: { name: n, value: v } });
     handleInput(e("gender", m.gender));
-    Object.entries(m.measurements || {}).forEach(([k, v]) =>
-      handleInput(e(`measurements.${k}`, v))
-    );
+    Object.entries(m.measurements || {}).forEach(([k, v]) => {
+      const key = k.replace(/([A-Z])/g, (m) => m.toLowerCase());
+      handleInput(e(`measurements.${key}`, v));
+    });
   }, [selectedMeasurementName]);
 
   useEffect(() => {
@@ -69,7 +71,10 @@ const RequestUploadForm = ({
 
   const submitForm = () => {
     const diffHours = (new Date(form.duration) - new Date()) / 36e5;
-   if (diffHours < 72) return toast.error("Duration must be at least 3 days (72 hours) from now.");
+    if (diffHours < 72)
+      return toast.error(
+        "Duration must be at least 3 days (72 hours) from now."
+      );
     handleSubmit({
       ...form,
       quantity: 1,
@@ -81,7 +86,9 @@ const RequestUploadForm = ({
   const filteredTailors = tailors.filter(
     (t) =>
       t._id !== profile._id &&
-      [t.name, t.email].some((f) => f.toLowerCase().includes(search.toLowerCase()))
+      [t.name, t.email].some((f) =>
+        f.toLowerCase().includes(search.toLowerCase())
+      )
   );
 
   const InputWithUnit = ({ name, placeholder, value, unit }) => (
@@ -104,13 +111,17 @@ const RequestUploadForm = ({
         <span
           key={i}
           className={`text-xs ${
-            i <= Math.round(rating || 0) ? "text-yellow-tertiary" : "text-brown-secondary"
+            i <= Math.round(rating || 0)
+              ? "text-yellow-tertiary"
+              : "text-brown-secondary"
           }`}
         >
           ★
         </span>
       ))}
-      <span className="text-xs text-brown-tertiary">{(rating || 0).toFixed(1)}</span>
+      <span className="text-xs text-brown-tertiary">
+        {(rating || 0).toFixed(1)}
+      </span>
     </>
   );
 
@@ -146,18 +157,32 @@ const RequestUploadForm = ({
 
       {/* Upload Image */}
       <div className="flex text-neutral-primary border-3 border-brown-primary mx-7 p-2 rounded-sm bg-brown-secondary justify-between items-center px-5">
-        <input type="file" id="image" accept="image/*" onChange={handleFile} className="w-full" />
-        <label htmlFor="image"><MdOutlinePhotoSizeSelectActual /></label>
+        <input
+          type="file"
+          id="image"
+          accept="image/*"
+          onChange={handleFile}
+          className="w-full"
+        />
+        <label htmlFor="image">
+          <MdOutlinePhotoSizeSelectActual />
+        </label>
       </div>
       {preview && (
         <div className="ml-8">
-          <img src={preview} alt="Preview" className="w-60 h-60 object-cover border-4 border-brown-primary rounded m-1" />
+          <img
+            src={preview}
+            alt="Preview"
+            className="w-60 h-60 object-cover border-4 border-brown-primary rounded m-1"
+          />
         </div>
       )}
 
       {/* Tailor Selection */}
       <div className="mx-7">
-        <label className="font-semibold text-brown-secondary">Select Tailor (Optional)</label>
+        <label className="font-semibold text-brown-secondary">
+          Select Tailor (Optional)
+        </label>
         {selectedTailorId ? (
           (() => {
             const t = tailors.find((x) => x._id === selectedTailorId);
@@ -165,14 +190,28 @@ const RequestUploadForm = ({
             return (
               <div className="flex items-center justify-between border border-brown-primary rounded p-3 bg-yellow-primary mt-2">
                 <div className="flex items-center gap-3">
-                  <img src={`http://localhost:5000/${t.profileImage}`} alt="avatar" className="w-12 h-12 rounded-full object-cover border border-brown-tertiary" />
+                  <img
+                    src={`http://localhost:5000/${t.profileImage}`}
+                    alt="avatar"
+                    className="w-12 h-12 rounded-full object-cover border border-brown-tertiary"
+                  />
                   <div>
                     <p className="font-medium text-brown-tertiary">{t.name}</p>
                     <p className="text-sm text-brown-secondary">{t.email}</p>
-                    <div className="flex items-center gap-1 text-yellow-tertiary"><Stars rating={t.tailorDetails?.averageRating} /></div>
+                    <div className="flex items-center gap-1 text-yellow-tertiary">
+                      <Stars rating={t.tailorDetails?.averageRating} />
+                    </div>
                   </div>
                 </div>
-                <button onClick={() => { setSelectedTailorId(""); setSearch(""); }} className="text-danger-primary font-semibold text-sm">❌ Remove</button>
+                <button
+                  onClick={() => {
+                    setSelectedTailorId("");
+                    setSearch("");
+                  }}
+                  className="text-danger-primary font-semibold text-sm"
+                >
+                  ❌ Remove
+                </button>
               </div>
             );
           })()
@@ -182,7 +221,10 @@ const RequestUploadForm = ({
               type="text"
               placeholder="Search by name or email"
               value={search}
-              onChange={(e) => { setSearch(e.target.value); !e.target.value && setSelectedTailorId(""); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                !e.target.value && setSelectedTailorId("");
+              }}
               className="border-3 border-brown-primary px-3 py-2 rounded w-full mt-1 bg-neutral-primary text-brown-primary focus:outline-none"
             />
             {search.trim() && (
@@ -191,21 +233,36 @@ const RequestUploadForm = ({
                   filteredTailors.map((t) => (
                     <div
                       key={t._id}
-                      onClick={() => { setSelectedTailorId(t._id); setSearch(`${t.name} (${t.email})`); }}
+                      onClick={() => {
+                        setSelectedTailorId(t._id);
+                        setSearch(`${t.name} (${t.email})`);
+                      }}
                       className="flex items-center justify-between px-3 py-2 hover:bg-yellow-secondary cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
-                        <img src={`http://localhost:5000/${t.profileImage}`} alt="avatar" className="w-8 h-8 rounded-full object-cover border border-brown-primary" />
+                        <img
+                          src={`http://localhost:5000/${t.profileImage}`}
+                          alt="avatar"
+                          className="w-8 h-8 rounded-full object-cover border border-brown-primary"
+                        />
                         <div>
-                          <p className="text-sm font-medium text-brown-tertiary">{t.name}</p>
-                          <p className="text-xs text-brown-secondary">{t.email}</p>
+                          <p className="text-sm font-medium text-brown-tertiary">
+                            {t.name}
+                          </p>
+                          <p className="text-xs text-brown-secondary">
+                            {t.email}
+                          </p>
                         </div>
                       </div>
-                      <span className="flex items-center gap-1"><Stars rating={t.tailorDetails?.averageRating} /></span>
+                      <span className="flex items-center gap-1">
+                        <Stars rating={t.tailorDetails?.averageRating} />
+                      </span>
                     </div>
                   ))
                 ) : (
-                  <p className="p-2 text-sm text-brown-secondary">No tailor found</p>
+                  <p className="p-2 text-sm text-brown-secondary">
+                    No tailor found
+                  </p>
                 )}
               </div>
             )}
@@ -215,17 +272,34 @@ const RequestUploadForm = ({
 
       {/* Duration & Budget */}
       <div className="flex ml-7">
-        <input type="date" name="duration" onChange={handleInput} value={form.duration} min={getMinDate()} required className="border-3 border-brown-secondary px-3 py-2 rounded bg-yellow-primary text-brown-tertiary mr-15" />
+        <input
+          type="date"
+          name="duration"
+          onChange={handleInput}
+          value={form.duration}
+          min={getMinDate()}
+          required
+          className="border-3 border-brown-secondary px-3 py-2 rounded bg-yellow-primary text-brown-tertiary mr-15"
+        />
         <div className="flex items-center border-3 border-brown-primary rounded px-2 bg-neutral-primary">
           <span className="text-brown-primary mr-2">Rs</span>
           <input
             name="budget"
             type="number"
             step="100"
-            min={calcMinBudget(form.duration, tailors.find((x) => x._id === selectedTailorId)?.tailorDetails?.fees || 0)}
+            min={calcMinBudget(
+              form.duration,
+              tailors.find((x) => x._id === selectedTailorId)?.tailorDetails
+                ?.fees || 0
+            )}
             placeholder="Budget"
             onChange={(e) => {
-              const v = +e.target.value, min = calcMinBudget(form.duration, tailors.find((x) => x._id === selectedTailorId)?.tailorDetails?.fees || 0);
+              const v = +e.target.value,
+                min = calcMinBudget(
+                  form.duration,
+                  tailors.find((x) => x._id === selectedTailorId)?.tailorDetails
+                    ?.fees || 0
+                );
               if (v >= min && v % 100 === 0) handleInput(e);
             }}
             value={form.budget}
@@ -246,15 +320,25 @@ const RequestUploadForm = ({
       {/* Saved Measurement, Gender, Qty */}
       <div className="flex flex-wrap mx-7 items-baseline-last">
         <div className="mr-20">
-          <label className="font-semibold text-brown-secondary">Use Saved Measurement</label>
+          <label className="font-semibold text-brown-secondary">
+            Use Saved Measurement
+          </label>
           <select
             className="px-3 py-2 h-[40px] rounded w-full mt-1 border-3 border-brown-primary text-neutral-primary bg-brown-secondary hover-common hover:bg-brown-primary"
             value={selectedMeasurementName}
-            onChange={(e) => e.target.value === "__go_to_measurement" ? navigate("/measurement") : setSelectedMeasurementName(e.target.value)}
+            onChange={(e) =>
+              e.target.value === "__go_to_measurement"
+                ? navigate("/measurement")
+                : setSelectedMeasurementName(e.target.value)
+            }
           >
             <option value="">Select Measurement</option>
             {measurements.length ? (
-              measurements.map((m) => <option key={m._id} value={m.name}>{m.name} ({m.gender})</option>)
+              measurements.map((m) => (
+                <option key={m._id} value={m.name}>
+                  {m.name} ({m.gender})
+                </option>
+              ))
             ) : (
               <option value="__go_to_measurement">+ Create Measurement</option>
             )}
@@ -271,7 +355,12 @@ const RequestUploadForm = ({
           <option value="Female">Female</option>
         </select>
         <div>
-          <input type="number" value={1} disabled className="rounded text-brown-primary h-[40px] w-6 text-xl font-bold" />
+          <input
+            type="number"
+            value={1}
+            disabled
+            className="rounded text-brown-primary h-[40px] w-6 text-xl font-bold"
+          />
           <span className="font-semibold ml-1">:Qty</span>
         </div>
       </div>
@@ -279,12 +368,21 @@ const RequestUploadForm = ({
       {/* Measurements Section */}
       {form.gender && (
         <div className="flex flex-col justify-center items-center mt-5">
-          <h1 className="text-2xl text-brown-secondary font-bold">Measurements</h1>
+          <h1 className="text-2xl text-brown-secondary font-bold">
+            Measurements
+          </h1>
           <div className="flex flex-wrap w-full px-5">
             {measurementFields[form.gender].map((f) => (
               <div key={f.id} className="customize-m-in-main-div">
-                <label htmlFor={f.id} className="customize-m-in-label">{f.label}:</label>
-                <InputWithUnit name={`measurements.${f.id}`} placeholder={f.label} value={form.measurements?.[f.id]} unit="cm" />
+                <label htmlFor={f.id} className="customize-m-in-label">
+                  {f.label}:
+                </label>
+                <InputWithUnit
+                  name={`measurements.${f.id}`}
+                  placeholder={f.label}
+                  value={form.measurements?.[f.id]}
+                  unit="cm"
+                />
               </div>
             ))}
           </div>
@@ -292,7 +390,11 @@ const RequestUploadForm = ({
       )}
 
       {/* Submit */}
-      <button onClick={submitForm} disabled={isSubmitDisabled || !preview} className="bg-brown-primary text-neutral-primary px-4 py-2 rounded hover:bg-brown-secondary transition disabled:opacity-50 mx-7 mb-15 mt-5">
+      <button
+        onClick={submitForm}
+        disabled={isSubmitDisabled || !preview}
+        className="bg-brown-primary text-neutral-primary px-4 py-2 rounded hover:bg-brown-secondary transition disabled:opacity-50 mx-7 mb-15 mt-5"
+      >
         Submit
       </button>
     </div>

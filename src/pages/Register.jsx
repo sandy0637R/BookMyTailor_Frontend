@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const Register = () => {
         className="relative bg-neutral-primary p-10 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.2)] w-96 flex flex-col items-center space-y-6 transition-transform duration-500 hover:scale-105"
       >
         <h2 className="text-3xl font-extrabold text-brown-primary mb-6 tracking-wide">
-          <span className="text-yellow-tertiary">Book</span>MyTailor
+          <span className="text-yellow-tertiary">Stich</span>Mate
         </h2>
 
         <input
@@ -119,6 +120,13 @@ const Register = () => {
         >
           Register
         </button>
+
+        <p className="text-brown-primary text-sm mt-2">
+          Do you have an account?{" "}
+          <Link to="/login" className="text-yellow-tertiary hover:text-yellow-primary font-semibold">
+            Login
+          </Link>
+        </p>
       </form>
     </div>
   );

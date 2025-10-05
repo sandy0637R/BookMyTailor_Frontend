@@ -1,4 +1,4 @@
-// src/components/ToastContainer.js
+
 import { Toaster } from 'react-hot-toast';
 
 const ToastContainer = () => {

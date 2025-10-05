@@ -36,7 +36,7 @@ const Login = () => {
         onSubmit={handleSubmit}
         className="relative bg-neutral-primary p-10 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.2)] w-96 flex flex-col items-center space-y-6 transition-transform duration-500 hover:scale-105"
       >
-        <h2 className="text-3xl font-extrabold text-brown-primary mb-6 tracking-wide"><span className="text-yellow-tertiary">Book</span>MyTailor</h2>
+        <h2 className="text-3xl font-extrabold text-brown-primary mb-6 tracking-wide"><span className="text-yellow-tertiary">Stich</span>Mate</h2>
 
         <input
           type="email"

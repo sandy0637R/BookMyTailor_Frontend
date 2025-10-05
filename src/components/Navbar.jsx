@@ -38,7 +38,7 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           <Drawer />
           <div className="font-bold">
-            <span className="text-yellow-tertiary ml-8">Book</span>MyTailor
+            <span className="text-yellow-tertiary ml-8">Stich</span>Mate
           </div>
         </div>
 

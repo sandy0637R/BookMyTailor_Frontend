@@ -16,10 +16,22 @@ const Admin = () => {
   const dispatch = useDispatch();
   const { stats, users, cloths, orders } = useSelector((state) => state.admin);
 
+  // Separate tailor and customer users
+  const tailorUsers = users?.filter((u) => u.roles?.includes("tailor")) || [];
+  const customerUsers =
+    users?.filter(
+      (u) => u.roles?.includes("customer") && !u.roles?.includes("tailor")
+    ) || [];
+
   const [editClothId, setEditClothId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", price: "" });
 
-  const DELIVERY_STATUSES = ["Pending", "Shipped", "Out for Delivery", "Delivered"];
+  const DELIVERY_STATUSES = [
+    "Pending",
+    "Shipped",
+    "Out for Delivery",
+    "Delivered",
+  ];
 
   useEffect(() => {
     dispatch(fetchStatsRequest());
@@ -28,57 +40,67 @@ const Admin = () => {
     dispatch(fetchOrdersRequest());
   }, [dispatch]);
 
-const handleBlock = async (id, isBlocked) => {
-  const confirmMsg = isBlocked
-    ? "Are you sure you want to unblock this user?"
-    : "Are you sure you want to block this user?";
-  const confirmed = await window.confirm(confirmMsg);
-  if (!confirmed) return;
+  const handleBlock = async (id, isBlocked) => {
+    const confirmMsg = isBlocked
+      ? "Are you sure you want to unblock this user?"
+      : "Are you sure you want to block this user?";
+    const confirmed = await window.confirm(confirmMsg);
+    if (!confirmed) return;
 
-  dispatch(blockUnblockUserRequest({ id, isBlocked }));
-};
+    dispatch(blockUnblockUserRequest({ id, isBlocked }));
+  };
 
-const handleDeleteCloth = async (clothId) => {
-  const confirmed = await window.confirm("Are you sure you want to delete this cloth?");
-  if (!confirmed) return;
+  const handleDeleteCloth = async (clothId) => {
+    const confirmed = await window.confirm(
+      "Are you sure you want to delete this cloth?"
+    );
+    if (!confirmed) return;
 
-  dispatch(deleteClothRequest({ clothId }));
-};
+    dispatch(deleteClothRequest({ clothId }));
+  };
 
-const handleSaveEdit = async (clothId) => {
-  const confirmed = await window.confirm("Do you want to save the changes?");
-  if (!confirmed) return;
+  const handleSaveEdit = async (clothId) => {
+    const confirmed = await window.confirm("Do you want to save the changes?");
+    if (!confirmed) return;
 
-  dispatch(editClothRequest({ clothId, name: editForm.name, price: editForm.price }));
-  setEditClothId(null);
-};
+    dispatch(
+      editClothRequest({ clothId, name: editForm.name, price: editForm.price })
+    );
+    setEditClothId(null);
+  };
 
-const handleUpdateStatus = async (order) => {
-  const currentIndex = DELIVERY_STATUSES.indexOf(order.deliveryStatus);
-  const nextStatus = DELIVERY_STATUSES[currentIndex + 1];
+  const handleUpdateStatus = async (order) => {
+    const currentIndex = DELIVERY_STATUSES.indexOf(order.deliveryStatus);
+    const nextStatus = DELIVERY_STATUSES[currentIndex + 1];
 
-  if (!nextStatus) {
-    toast("Order is already delivered");
-    return;
-  }
+    if (!nextStatus) {
+      toast("Order is already delivered");
+      return;
+    }
 
-  const confirmed = await window.confirm(`Change status to "${nextStatus}"?`);
-  if (!confirmed) return;
+    const confirmed = await window.confirm(`Change status to "${nextStatus}"?`);
+    if (!confirmed) return;
 
-  dispatch(updateOrderStatusRequest({ orderId: order._id, status: nextStatus }));
-};
+    dispatch(
+      updateOrderStatusRequest({ orderId: order._id, status: nextStatus })
+    );
+  };
 
-const handleCancelOrder = async (order) => {
-  if (order.deliveryStatus === "Delivered") {
-    toast.error("Cannot cancel a delivered order");
-    return;
-  }
+  const handleCancelOrder = async (order) => {
+    if (order.deliveryStatus === "Delivered") {
+      toast.error("Cannot cancel a delivered order");
+      return;
+    }
 
-  const confirmed = await window.confirm("Are you sure you want to cancel this order?");
-  if (!confirmed) return;
+    const confirmed = await window.confirm(
+      "Are you sure you want to cancel this order?"
+    );
+    if (!confirmed) return;
 
-  dispatch(updateOrderStatusRequest({ orderId: order._id, status: "Cancelled" }));
-};
+    dispatch(
+      updateOrderStatusRequest({ orderId: order._id, status: "Cancelled" })
+    );
+  };
 
   return (
     <div className="p-6 space-y-12 bg-gray-50 min-h-screen">
@@ -94,11 +116,15 @@ const handleCancelOrder = async (order) => {
         </div>
         <div className="bg-white p-6 rounded-xl shadow-md text-center text-lg font-semibold border-l-4 border-purple-600">
           Customer Users
-          <div className="mt-2 text-2xl text-purple-600">{stats.onlyCustomers}</div>
+          <div className="mt-2 text-2xl text-purple-600">
+            {stats.onlyCustomers}
+          </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-md text-center text-lg font-semibold border-l-4 border-yellow-500">
           Total Cloths
-          <div className="mt-2 text-2xl text-yellow-500">{stats.totalCloths}</div>
+          <div className="mt-2 text-2xl text-yellow-500">
+            {stats.totalCloths}
+          </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-md text-center text-lg font-semibold border-l-4 border-red-500">
           Total Posts
@@ -127,11 +153,17 @@ const handleCancelOrder = async (order) => {
             {tailorUsers.map((u) => (
               <tr key={u._id} className="hover:bg-gray-50 transition">
                 <td className="p-3">{u.name}</td>
-                <td className="p-3">{new Date(u.tailorDetails?.createdAt).toLocaleDateString()}</td>
-                <td className="p-3">{u.tailorDetails?.followers?.length || 0}</td>
+                <td className="p-3">
+                  {new Date(u.tailorDetails?.createdAt).toLocaleDateString()}
+                </td>
+                <td className="p-3">
+                  {u.tailorDetails?.followers?.length || 0}
+                </td>
                 <td className="p-3">{u.tailorDetails?.averageRating || 0}</td>
                 <td className="p-3">{u.customDressRequests?.length || 0}</td>
-                <td className="p-3">{u.tailorDetails?.acceptedRequests?.length || 0}</td>
+                <td className="p-3">
+                  {u.tailorDetails?.acceptedRequests?.length || 0}
+                </td>
                 <td className="p-3">{u.following?.length || 0}</td>
                 <td className="p-3">{u.tailorDetails?.posts?.length || 0}</td>
                 <td className="p-3">
@@ -170,7 +202,9 @@ const handleCancelOrder = async (order) => {
               <tr key={u._id} className="hover:bg-gray-50 transition">
                 <td className="p-3">{u.name}</td>
                 <td className="p-3">
-                  {new Date(parseInt(u._id.substring(0, 8), 16) * 1000).toLocaleDateString()}
+                  {new Date(
+                    parseInt(u._id.substring(0, 8), 16) * 1000
+                  ).toLocaleDateString()}
                 </td>
                 <td className="p-3">{u.following?.length || 0}</td>
                 <td className="p-3">{u.customDressRequests?.length || 0}</td>
@@ -213,7 +247,9 @@ const handleCancelOrder = async (order) => {
                   {editClothId === c._id ? (
                     <input
                       value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, name: e.target.value })
+                      }
                       className="border px-2 py-1 rounded w-full"
                     />
                   ) : (
@@ -227,14 +263,18 @@ const handleCancelOrder = async (order) => {
                     <input
                       type="number"
                       value={editForm.price}
-                      onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, price: e.target.value })
+                      }
                       className="border px-2 py-1 rounded w-full"
                     />
                   ) : (
                     `₹${c.price}`
                   )}
                 </td>
-                <td className="p-3">{new Date(c.createdAt).toLocaleDateString()}</td>
+                <td className="p-3">
+                  {new Date(c.createdAt).toLocaleDateString()}
+                </td>
                 <td className="p-3 flex space-x-2">
                   {editClothId === c._id ? (
                     <button
@@ -267,75 +307,88 @@ const handleCancelOrder = async (order) => {
       {/* Orders */}
       <h2 className="text-2xl font-bold text-gray-700 mt-8">Orders</h2>
       <div className="overflow-x-auto rounded-xl shadow-lg bg-white border border-gray-200">
-  <table className="min-w-full table-auto border-collapse divide-y divide-gray-200">
-    <thead className="bg-gray-50 text-gray-600 uppercase text-sm font-semibold tracking-wide">
-      <tr>
-        <th className="p-4 text-left">User</th>
-        <th className="p-4 text-left">Items</th>
-        <th className="p-4 text-left">Total Amount</th>
-        <th className="p-4 text-left">Payment Mode</th>
-        <th className="p-4 text-left">Address</th>
-        <th className="p-4 text-left">Date</th>
-        <th className="p-4 text-left">Delivery Status</th>
-        <th className="p-4 text-left">Actions</th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-gray-100 text-gray-700 text-sm">
-      {orders
-        .filter(
-          (order) =>
-            order.deliveryStatus !== "Delivered" &&
-            order.deliveryStatus !== "Cancelled"
-        )
-        .map((order) => (
-          <tr
-            key={order._id + order.deliveryStatus}
-            className="hover:bg-gray-50 transition-colors duration-200"
-          >
-            <td className="p-4 font-medium">{order.user?.name || "Unknown"}</td>
-            <td className="p-4 space-y-1">
-              {order.items.map((item) => (
-                <div key={item.product?._id}>
-                  {item.product?.name} × {item.quantity}
-                </div>
+        <table className="min-w-full table-auto border-collapse divide-y divide-gray-200">
+          <thead className="bg-gray-50 text-gray-600 uppercase text-sm font-semibold tracking-wide">
+            <tr>
+              <th className="p-4 text-left">User</th>
+              <th className="p-4 text-left">Items</th>
+              <th className="p-4 text-left">Total Amount</th>
+              <th className="p-4 text-left">Payment Mode</th>
+              <th className="p-4 text-left">Address</th>
+              <th className="p-4 text-left">Date</th>
+              <th className="p-4 text-left">Delivery Status</th>
+              <th className="p-4 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 text-gray-700 text-sm">
+            {orders
+              .filter(
+                (order) =>
+                  order.deliveryStatus !== "Delivered" &&
+                  order.deliveryStatus !== "Cancelled"
+              )
+              .map((order) => (
+                <tr
+                  key={order._id + order.deliveryStatus}
+                  className="hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <td className="p-4 font-medium">
+                    {order.user?.name || "Unknown"}
+                  </td>
+                  <td className="p-4 space-y-1">
+                    {order.items.map((item) => (
+                      <div key={item.product?._id}>
+                        {item.product?.name} × {item.quantity}
+                      </div>
+                    ))}
+                  </td>
+                  <td className="p-4 font-semibold text-gray-800">
+                    ₹{order.totalAmount}
+                  </td>
+                  <td className="p-4">{order.paymentMode}</td>
+                  <td className="p-4">{order.address}</td>
+                  <td className="p-4">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="p-4 font-semibold text-blue-600">
+                    {order.deliveryStatus || "Pending"}
+                  </td>
+                  <td className="p-4 flex flex-col items-center space-y-2">
+                    <button
+                      onClick={() => handleUpdateStatus(order)}
+                      disabled={["Delivered", "Cancelled"].includes(
+                        order.deliveryStatus
+                      )}
+                      className={`w-full text-center px-4 py-2 rounded-lg font-semibold text-white ${
+                        ["Delivered", "Cancelled"].includes(
+                          order.deliveryStatus
+                        )
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                      }`}
+                    >
+                      {(() => {
+                        const index = DELIVERY_STATUSES.indexOf(
+                          order.deliveryStatus
+                        );
+                        return DELIVERY_STATUSES[index + 1] || "Completed";
+                      })()}
+                    </button>
+                    {order.deliveryStatus !== "Delivered" &&
+                      order.deliveryStatus !== "Cancelled" && (
+                        <button
+                          onClick={() => handleCancelOrder(order)}
+                          className="w-full text-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                  </td>
+                </tr>
               ))}
-            </td>
-            <td className="p-4 font-semibold text-gray-800">₹{order.totalAmount}</td>
-            <td className="p-4">{order.paymentMode}</td>
-            <td className="p-4">{order.address}</td>
-            <td className="p-4">{new Date(order.createdAt).toLocaleDateString()}</td>
-            <td className="p-4 font-semibold text-blue-600">{order.deliveryStatus || "Pending"}</td>
-            <td className="p-4 flex flex-col items-center space-y-2">
-              <button
-                onClick={() => handleUpdateStatus(order)}
-                disabled={["Delivered", "Cancelled"].includes(order.deliveryStatus)}
-                className={`w-full text-center px-4 py-2 rounded-lg font-semibold text-white ${
-                  ["Delivered", "Cancelled"].includes(order.deliveryStatus)
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
-                }`}
-              >
-                {(() => {
-                  const index = DELIVERY_STATUSES.indexOf(order.deliveryStatus);
-                  return DELIVERY_STATUSES[index + 1] || "Completed";
-                })()}
-              </button>
-              {order.deliveryStatus !== "Delivered" &&
-                order.deliveryStatus !== "Cancelled" && (
-                  <button
-                    onClick={() => handleCancelOrder(order)}
-                    className="w-full text-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200"
-                  >
-                    Cancel
-                  </button>
-                )}
-            </td>
-          </tr>
-        ))}
-    </tbody>
-  </table>
-</div>
-
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

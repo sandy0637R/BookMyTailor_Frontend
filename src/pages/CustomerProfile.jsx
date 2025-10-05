@@ -1,31 +1,37 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import FollowingList from "../components/FollowingList";
-import { clearSelectedUser } from "../redux/socialSlice"; // ✅ Import clear action
+import { setSelectedUser } from "../redux/socialSlice";
 
 const CustomerProfile = () => {
-  const { id } = useParams();
+  const { id: customerId } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // ✅ clear previous user & fetch fresh one
+  useEffect(() => {
+    dispatch(setSelectedUser(null));
+    if (customerId) {
+      dispatch({ type: "FETCH_USER_BY_ID", payload: { userId: customerId } });
+    }
+  }, [customerId, dispatch]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const user = useSelector((state) => state.social.selectedUser);
 
-   useEffect(() => {
-      window.scrollTo(0, 0);
-    }, []);
-    
-  useEffect(() => {
-    if (id) {
-      dispatch({ type: "FETCH_USER_BY_ID", payload: { userId: id } });
-    }
+  const [showFollowingId, setShowFollowingId] = useState(null);
 
-    return () => {
-      dispatch(clearSelectedUser()); // ✅ Clear user on unmount or ID change
-    };
-  }, [id, dispatch]);
-
-  if (!user) return <div className="text-center py-10 text-gray-600">Loading...</div>;
+  if (!user) {
+    return (
+      <div className="text-center py-10 text-lg text-gray-600">
+        Loading customer profile...
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -39,24 +45,31 @@ const CustomerProfile = () => {
       <div className="bg-white shadow-lg rounded-xl p-6">
         <div className="flex items-center space-x-6">
           <img
-            src={user.profileImage ? `http://localhost:5000/${user.profileImage}` : "/default-profile.png"}
+            src={
+              user.profileImage
+                ? `http://localhost:5000/${user.profileImage}`
+                : "/default-profile.png"
+            }
             alt={user.name}
             className="w-28 h-28 rounded-full object-cover border"
           />
-          <div>
+          <div className="flex justify-center items-center ">
+            <div className="m-10">
             <h2 className="text-2xl font-bold">{user.name}</h2>
             <p className="text-gray-600">{user.email}</p>
-            <p className="text-gray-600">{user.address}</p>
+            <p className="text-gray-600">{user.address || "N/A"}</p>
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="m-10">
           <FollowingList
             userId={user._id}
-            showFollowingId={user._id}
-            setShowFollowingId={() => {}}
+            showFollowingId={showFollowingId}
+            setShowFollowingId={setShowFollowingId}
+            defaultFollowing={user.following || []}
           />
         </div>
+          </div>
       </div>
     </div>
   );
