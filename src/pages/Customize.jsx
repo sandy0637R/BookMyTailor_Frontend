@@ -10,8 +10,6 @@ import CustomizeHistory from "../containers/CustomizeHistory";
 
 const Customize = () => {
   const token = useSelector((state) => state.auth.token);
-  
-
   const tailors = useSelector((state) => state.social.tailors || []);
   const dispatch = useDispatch();
 
@@ -202,7 +200,9 @@ const Customize = () => {
       req.measurements,
     ].every(Boolean);
 
-    const measurementsFilled = required.every((key) => req.measurements?.[key]);
+    const measurementsFilled = required.every(
+      (key) => req.measurements?.[key] !== undefined && req.measurements[key] !== ""
+    );
 
     if (!filled || !measurementsFilled) {
       toast.error("All required fields must be filled");
@@ -231,8 +231,6 @@ const Customize = () => {
     }
   };
 
-  const requiredFields = [form.gender, form.budget, form.duration, form.image];
-
   const requiredMeasurements =
     form.gender === "Male"
       ? [
@@ -250,10 +248,11 @@ const Customize = () => {
       : ["bust", "topLength", "waist", "hip", "inseam", "rise", "thigh"];
 
   const isMeasurementFilled = requiredMeasurements.every(
-    (key) => form.measurements[key]
+    (key) => form.measurements[key] !== undefined && form.measurements[key] !== ""
   );
 
-  const isSubmitDisabled = requiredFields.includes("") || !isMeasurementFilled;
+  const requiredFields = [form.gender, form.budget, form.duration, form.image];
+  const isSubmitDisabled = requiredFields.some((f) => !f) || !isMeasurementFilled;
 
   return (
     <div className="p-4">
@@ -270,7 +269,6 @@ const Customize = () => {
 
       <h2 className="text-xl font-bold mt-8 mb-2 text-center">My Requests</h2>
 
-      {/* Toggle Button */}
       <div className="flex justify-center mb-4">
         <button
           onClick={() => setShowRequests((prev) => !prev)}
@@ -280,24 +278,20 @@ const Customize = () => {
         </button>
       </div>
 
-      {/* Requests Section */}
       {showRequests && (
         <div className="flex flex-wrap">
           {requests.map((req) => (
             <div key={req._id} className="w-fit m-5">
               {editingId === req._id ? (
-                // Modal Wrapper
                 <div className="fixed inset-0 flex items-center justify-center  bg-black/50 z-50">
-                  {/* Background Click Closes Modal */}
                   <div
                     className="absolute inset-0"
                     onClick={() => setEditingId(null)}
                   ></div>
 
-                  {/* Modal Content */}
                   <div
                     className="relative bg-neutral-primary p-6 rounded-lg shadow-lg max-h-[90vh] overflow-y-auto z-10"
-                    onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <RequestEditForm
                       req={req}

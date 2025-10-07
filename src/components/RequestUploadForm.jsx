@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchMeasurementsRequest } from "../redux/measurementSlice";
 import { MdOutlinePhotoSizeSelectActual } from "react-icons/md";
 import { toast } from "react-hot-toast";
+
 const RequestUploadForm = ({
   form,
   handleInput,
@@ -149,6 +150,32 @@ const RequestUploadForm = ({
     ].map((l) => ({ id: l.replace(/\s+/g, "").toLowerCase(), label: l })),
   };
 
+  // updated disable logic
+  const requiredMeasurements =
+    form.gender === "Male"
+      ? [
+          "chest",
+          "shoulderwidth",
+          "sleevelength",
+          "shirtlength",
+          "neck",
+          "waist",
+          "hip",
+          "inseam",
+          "rise",
+          "thigh",
+        ]
+      : ["bust", "toplength", "waist", "hip", "inseam", "rise", "thigh"];
+  const isMeasurementFilled = requiredMeasurements.every(
+    (key) =>
+      form.measurements[key] !== undefined && form.measurements[key] !== ""
+  );
+  const isButtonDisabled =
+    !form.gender ||
+    !form.budget ||
+    !form.duration ||
+    !form.image ||
+    !isMeasurementFilled;
   return (
     <div className="grid grid-cols-1 gap-3 bg-neutral-primary p-4 rounded-lg w-[80%] space-y-4 shadow-common hover-common">
       <h2 className="text-xl font-bold mb-4 text-center text-brown-primary my-8">
@@ -392,7 +419,7 @@ const RequestUploadForm = ({
       {/* Submit */}
       <button
         onClick={submitForm}
-        disabled={isSubmitDisabled || !preview}
+        disabled={isButtonDisabled}
         className="bg-brown-primary text-neutral-primary px-4 py-2 rounded hover:bg-brown-secondary transition disabled:opacity-50 mx-7 mb-15 mt-5"
       >
         Submit
