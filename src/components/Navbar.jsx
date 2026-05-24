@@ -37,9 +37,9 @@ const Navbar = () => {
         {/* Left Side */}
         <div className="flex items-center gap-3">
           <Drawer />
-          <div className="font-bold">
+         <Link to="/"> <div className="font-bold">
             <span className="text-yellow-tertiary ml-8">Stich</span>Mate
-          </div>
+          </div></Link>
         </div>
 
         {/* Right Side */}
@@ -68,9 +68,9 @@ const Navbar = () => {
               <Link to="/">
                 <li className={activelink("/")}>Home</li>
               </Link>
-              <li className="nav-btn">Help</li>
+              {/* <li className="nav-btn">Help</li>
               <li className="nav-btn">About Us</li>
-              <li className="nav-btn">Services</li>
+              <li className="nav-btn">Services</li> */}
 
               {/* Wishlist */}
               <Link to="/wishlist">
