@@ -20,7 +20,7 @@ const ClothDisplayCard = ({
       <img
         src={
           cloth.image?.startsWith("/uploads")
-            ? `http://localhost:5000${cloth.image}`
+            ? `https://bookmytailor-backend.onrender.com${cloth.image}`
             : cloth.image || "/placeholder.jpg"
         }
         alt={cloth.name}

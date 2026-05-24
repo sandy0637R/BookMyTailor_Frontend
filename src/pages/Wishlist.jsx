@@ -73,7 +73,7 @@ const Wishlist = () => {
                 <img
                   src={
                     item.image?.startsWith("/uploads")
-                      ? `http://localhost:5000${item.image}`
+                      ? `https://bookmytailor-backend.onrender.com${item.image}`
                       : item.image || "/placeholder.jpg"
                   }
                   alt={item.name}

@@ -123,7 +123,7 @@ const EditPostForm = ({
 
             try {
               await axios.put(
-                `http://localhost:5000/users/post/${editingPostId}`,
+                `https://bookmytailor-backend.onrender.com/users/post/${editingPostId}`,
                 formData,
                 {
                   headers: {

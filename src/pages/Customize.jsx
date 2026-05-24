@@ -31,7 +31,7 @@ const Customize = () => {
 
   const fetchRequests = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/users/profile", {
+      const res = await axios.get("https://bookmytailor-backend.onrender.com/users/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const all = res.data.customDressRequests || [];
@@ -81,7 +81,7 @@ const Customize = () => {
         fd.append("tailorId", finalData.tailorId);
       }
 
-      await axios.post("http://localhost:5000/custom/request", fd, {
+      await axios.post("https://bookmytailor-backend.onrender.com/custom/request", fd, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -107,7 +107,7 @@ const Customize = () => {
   const handleConfirm = async (id) => {
     try {
       await axios.put(
-        `http://localhost:5000/custom/request/${id}/confirm`,
+        `https://bookmytailor-backend.onrender.com/custom/request/${id}/confirm`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -158,7 +158,7 @@ const Customize = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/custom/request/${id}`, {
+      await axios.delete(`https://bookmytailor-backend.onrender.com/custom/request/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Request deleted");
@@ -219,7 +219,7 @@ const Customize = () => {
       fd.append("measurements", JSON.stringify(req.measurements));
       if (req.image instanceof File) fd.append("image", req.image);
 
-      await axios.put(`http://localhost:5000/custom/request/${req._id}`, fd, {
+      await axios.put(`https://bookmytailor-backend.onrender.com/custom/request/${req._id}`, fd, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

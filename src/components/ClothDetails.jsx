@@ -74,7 +74,7 @@ const ClothDetails = ({
           <img
             src={
               resolvedCloth.image?.startsWith("/uploads")
-                ? `http://localhost:5000${resolvedCloth.image}`
+                ? `https://bookmytailor-backend.onrender.com${resolvedCloth.image}`
                 : "/placeholder.jpg"
             }
             alt={resolvedCloth.name}

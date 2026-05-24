@@ -218,7 +218,7 @@ const RequestUploadForm = ({
               <div className="flex items-center justify-between border border-brown-primary rounded p-3 bg-yellow-primary mt-2">
                 <div className="flex items-center gap-3">
                   <img
-                    src={`http://localhost:5000/${t.profileImage}`}
+                    src={`https://bookmytailor-backend.onrender.com/${t.profileImage}`}
                     alt="avatar"
                     className="w-12 h-12 rounded-full object-cover border border-brown-tertiary"
                   />
@@ -268,7 +268,7 @@ const RequestUploadForm = ({
                     >
                       <div className="flex items-center gap-2">
                         <img
-                          src={`http://localhost:5000/${t.profileImage}`}
+                          src={`https://bookmytailor-backend.onrender.com/${t.profileImage}`}
                           alt="avatar"
                           className="w-8 h-8 rounded-full object-cover border border-brown-primary"
                         />

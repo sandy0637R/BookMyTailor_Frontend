@@ -34,7 +34,7 @@ const TailorCard = ({
      <div className="flex items-center ">
        <div className="bg-yellow-tertiary mr-5 px-5 py-5  rounded-tl-xl rounded-br-[100px]">
         <img
-         src={`http://localhost:5000/${tailor.profileImage}`}
+         src={`https://bookmytailor-backend.onrender.com/${tailor.profileImage}`}
          alt="Profile"
          className="w-45 h-45 border-4 border-neutral-primary rounded-full object-cover  shadow-custom  "
        />

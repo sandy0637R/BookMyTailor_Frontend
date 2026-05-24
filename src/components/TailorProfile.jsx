@@ -76,7 +76,7 @@ const TailorProfile = () => {
         <img
           src={
             tailor.profileImage
-              ? `http://localhost:5000/${tailor.profileImage}`
+              ? `https://bookmytailor-backend.onrender.com/${tailor.profileImage}`
               : "/default-profile.png"
           }
           alt={tailor.name}

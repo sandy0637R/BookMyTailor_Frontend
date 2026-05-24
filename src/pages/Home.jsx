@@ -70,7 +70,7 @@ const Home = () => {
             <img
               src={
                 featuredTailor.profileImage
-                  ? `http://localhost:5000/${featuredTailor.profileImage.replaceAll("\\", "/")}`
+                  ? `https://bookmytailor-backend.onrender.com/${featuredTailor.profileImage.replaceAll("\\", "/")}`
                   : "/placeholder.jpg"
               }
               alt={featuredTailor.name}
@@ -121,7 +121,7 @@ const Home = () => {
         const imageUrl =
           cloth.image?.startsWith("http")
             ? cloth.image
-            : `http://localhost:5000${cloth.image.replaceAll("\\", "/")}`;
+            : `https://bookmytailor-backend.onrender.com${cloth.image.replaceAll("\\", "/")}`;
 
         const hasImage = cloth.image && cloth.image !== "";
 

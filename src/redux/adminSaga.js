@@ -22,7 +22,7 @@ updateOrderStatusFailure,
 } from "./adminSlice";
 import { toast } from "react-hot-toast";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://bookmytailor-backend.onrender.com";
 
 function* fetchStatsSaga() {
   try {

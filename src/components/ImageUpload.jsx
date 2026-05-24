@@ -17,7 +17,7 @@ const ImageUpload = ({ profileImage, setProfileImage }) => {
 
     if (profileImage) {
       try {
-        await axios.delete("http://localhost:5000/users/profile/image", {
+        await axios.delete("https://bookmytailor-backend.onrender.com/users/profile/image", {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -36,7 +36,7 @@ const ImageUpload = ({ profileImage, setProfileImage }) => {
     try {
       setUploading(true);
       const res = await axios.put(
-        "http://localhost:5000/users/profile",
+        "https://bookmytailor-backend.onrender.com/users/profile",
         formData,
         {
           withCredentials: true,
@@ -48,7 +48,7 @@ const ImageUpload = ({ profileImage, setProfileImage }) => {
       );
 
       const newImagePath = res.data.user.profileImage.replace(/\\/g, "/");
-      const fullUrl = `http://localhost:5000/${newImagePath}`;
+      const fullUrl = `https://bookmytailor-backend.onrender.com/${newImagePath}`;
 
       setProfileImage(fullUrl);
       dispatch(setProfile({ ...res.data.user, profileImage: newImagePath }));

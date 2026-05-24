@@ -26,7 +26,7 @@ const ClothEdit = ({ cloth, onCancel }) => {
       image: null,
     });
     setEditImagePreview(
-      cloth.image?.startsWith("/uploads") ? `http://localhost:5000${cloth.image}` : null
+      cloth.image?.startsWith("/uploads") ? `https://bookmytailor-backend.onrender.com${cloth.image}` : null
     );
   }, [cloth]);
 

@@ -17,7 +17,7 @@ import {
 } from "./authSlice";
 
 // Utility to get token from localStorage
-const BASE_URL = "http://localhost:5000/";
+const BASE_URL = "https://bookmytailor-backend.onrender.com/";
 const resolveImagePath = (path) =>
   path?.startsWith("http") ? path : BASE_URL + path;
 
@@ -26,38 +26,38 @@ const authHeader = () => ({ Authorization: `Bearer ${token()}` });
 
 // API calls
 const loginApi = (loginInfo) =>
-  axios.post("http://localhost:5000/users/login", loginInfo);
+  axios.post("https://bookmytailor-backend.onrender.com/users/login", loginInfo);
 
 const fetchProfileApi = () =>
-  axios.get("http://localhost:5000/users/profile", {
+  axios.get("https://bookmytailor-backend.onrender.com/users/profile", {
     headers: authHeader(),
   });
 
 const updateProfileApi = (profileData) =>
-  axios.put("http://localhost:5000/users/profile", profileData, {
+  axios.put("https://bookmytailor-backend.onrender.com/users/profile", profileData, {
     headers: authHeader(),
   });
 
 const getClothsApi = () =>
-  axios.get("http://localhost:5000/cloths/allcloths");
+  axios.get("https://bookmytailor-backend.onrender.com/cloths/allcloths");
 
 const getClothByIdApi = (id) =>                          // ✅ added
-  axios.get(`http://localhost:5000/cloths/${id}`);       // ✅ added
+  axios.get(`https://bookmytailor-backend.onrender.com/cloths/${id}`);       // ✅ added
 
 const addToWishlistApi = (itemId) =>
-  axios.post("http://localhost:5000/users/wishlist", { itemId }, { headers: authHeader() });
+  axios.post("https://bookmytailor-backend.onrender.com/users/wishlist", { itemId }, { headers: authHeader() });
 
 const removeFromWishlistApi = (itemId) =>
-  axios.delete(`http://localhost:5000/users/wishlist/${itemId}`, { headers: authHeader() });
+  axios.delete(`https://bookmytailor-backend.onrender.com/users/wishlist/${itemId}`, { headers: authHeader() });
 
 const addToCartApi = (itemId) =>
-  axios.post("http://localhost:5000/users/cart", { itemId }, { headers: authHeader() });
+  axios.post("https://bookmytailor-backend.onrender.com/users/cart", { itemId }, { headers: authHeader() });
 
 const removeFromCartApi = (itemId) =>
-  axios.delete(`http://localhost:5000/users/cart/${itemId}`, { headers: authHeader() });
+  axios.delete(`https://bookmytailor-backend.onrender.com/users/cart/${itemId}`, { headers: authHeader() });
 
 const clearCartApi = (userId) =>
-  axios.delete(`http://localhost:5000/users/cart/clear/${userId}`, {
+  axios.delete(`https://bookmytailor-backend.onrender.com/users/cart/clear/${userId}`, {
     headers: authHeader(),
   });
 

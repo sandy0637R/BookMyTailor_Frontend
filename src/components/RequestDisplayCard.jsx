@@ -131,7 +131,7 @@ const RequestDisplayCard = ({
           <img
             src={
               typeof req.image === "string"
-                ? `http://localhost:5000/uploads/customRequests/${req.image}`
+                ? `https://bookmytailor-backend.onrender.com/uploads/customRequests/${req.image}`
                 : URL.createObjectURL(req.image)
             }
             alt="Dress"
@@ -219,7 +219,7 @@ const RequestDisplayCard = ({
           <img
             src={
               tailor?.profileImage
-                ? `http://localhost:5000/${tailor.profileImage}`
+                ? `https://bookmytailor-backend.onrender.com/${tailor.profileImage}`
                 : "/default-profile.png"
             }
             alt="avatar"

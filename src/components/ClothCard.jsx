@@ -6,7 +6,7 @@ const ClothCard = ({ cloth, onEdit, onDelete }) => {
       <img
         src={
           cloth.image?.startsWith("/uploads")
-            ? `http://localhost:5000${cloth.image}`
+            ? `https://bookmytailor-backend.onrender.com${cloth.image}`
             : "/placeholder.jpg"
         }
         alt={cloth.name}

@@ -32,7 +32,7 @@ const ChatBox = ({ currentUser, selectedUser }) => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const newSocket = io("http://localhost:5000", {
+    const newSocket = io("https://bookmytailor-backend.onrender.com", {
       auth: { token, userId: currentUser._id },
       transports: ["websocket"],
     });

@@ -95,7 +95,7 @@ const CustomOrder = () => {
             {" "}
             {req.image && (
               <img
-                src={`http://localhost:5000/uploads/customRequests/${req.image}`}
+                src={`https://bookmytailor-backend.onrender.com/uploads/customRequests/${req.image}`}
                 alt="Dress"
                 className="w-48 h-48 object-cover my-2 border-3 border-brown-primary rounded-lg"
               />

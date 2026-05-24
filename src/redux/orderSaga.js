@@ -27,7 +27,7 @@ function* placeOrderSaga(action) {
 
     yield call(
       axios.post,
-      "http://localhost:5000/orders/place",
+      "https://bookmytailor-backend.onrender.com/orders/place",
       orderData,
       config
     );
@@ -55,7 +55,7 @@ function* fetchOrdersSaga(action) {
 
     const res = yield call(
       axios.get,
-      "http://localhost:5000/orders/my",
+      "https://bookmytailor-backend.onrender.com/orders/my",
       config
     );
 
@@ -78,7 +78,7 @@ function* deleteOrderSaga(action) {
 
     yield call(
       axios.delete,
-      `http://localhost:5000/orders/delete/${orderId}`,
+      `https://bookmytailor-backend.onrender.com/orders/delete/${orderId}`,
       config
     );
     yield put(deleteOrderSuccess(orderId));
@@ -95,7 +95,7 @@ function* fetchTopClothsSaga() {
   try {
     const res = yield call(
       axios.get,
-      "http://localhost:5000/orders/top-cloths"
+      "https://bookmytailor-backend.onrender.com/orders/top-cloths"
     );
     yield put(fetchTopClothsSuccess(res.data));
   } catch (error) {

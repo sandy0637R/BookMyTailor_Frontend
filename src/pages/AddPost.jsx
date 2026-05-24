@@ -21,7 +21,7 @@ const AddPost = () => {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/users/posts", {
+      const res = await axios.get("https://bookmytailor-backend.onrender.com/users/posts", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts(res.data);

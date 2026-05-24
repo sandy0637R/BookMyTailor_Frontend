@@ -19,7 +19,7 @@ const Register = () => {
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/users/admin-exists");
+        const res = await axios.get("https://bookmytailor-backend.onrender.com/users/admin-exists");
         if (!res.data.exists) {
           setShowRoleSelect(true);
         }
@@ -51,7 +51,7 @@ const Register = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/users/register",
+        "https://bookmytailor-backend.onrender.com/users/register",
         formData,
         { withCredentials: true }
       );

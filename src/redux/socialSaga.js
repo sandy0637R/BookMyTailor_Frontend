@@ -15,7 +15,7 @@ import {
   setSelectedUser, // ✅ NEW
 } from "./socialSlice";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://bookmytailor-backend.onrender.com";
 
 function* fetchTailorsSaga() {
   try {

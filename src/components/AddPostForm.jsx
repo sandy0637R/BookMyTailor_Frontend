@@ -49,7 +49,7 @@ const AddPostForm = ({ fetchPosts, token }) => {
       formData.append("productLink", productLink);
       images.forEach((img) => formData.append("images", img));
 
-      await axios.post("http://localhost:5000/users/post", formData, {
+      await axios.post("https://bookmytailor-backend.onrender.com/users/post", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
