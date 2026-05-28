@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   FaHeart,
   FaTrashAlt,
@@ -21,7 +22,8 @@ const ClothDetails = ({
   onCartToggle,
 }) => {
   const dispatch = useDispatch();
-  const { singleCloth, loading, error, cart } = useSelector(
+  const navigate = useNavigate();
+  const { singleCloth, loading, error, cart, isLoggedIn } = useSelector(
     (state) => state.auth
   );
 
@@ -41,14 +43,32 @@ const ClothDetails = ({
   };
 
   const handleWishlistToggle = () => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to manage your wishlist. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
     onWishlistToggle(id);
   };
 
   const handleAddToCart = () => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to manage your cart. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
     onCartToggle(id, "add");
   };
 
   const handleRemoveFromCart = () => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to manage your cart. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
     onCartToggle(id, "remove");
   };
 

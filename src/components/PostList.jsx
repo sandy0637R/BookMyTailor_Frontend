@@ -54,7 +54,12 @@ const deletePost = async (postId) => {
   if (!confirmed) return;
 
   try {
-    await axios.delete(`https://bookmytailor-backend.onrender.com/users/post/${postId}`, {
+    const apiURL =
+      window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://localhost:5000"
+        : "https://bookmytailor-backend.onrender.com";
+        
+    await axios.delete(`${apiURL}/users/post/${postId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     await new Promise((resolve) => {

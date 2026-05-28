@@ -17,7 +17,10 @@ import {
 } from "./chatSlice";
 import { toast } from "react-hot-toast";
 
-const BASE_URL = "https://bookmytailor-backend.onrender.com";
+const BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://bookmytailor-backend.onrender.com";
 
 // ✅ Helper: check valid Mongo ObjectId
 const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);

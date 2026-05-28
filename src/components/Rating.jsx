@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Rating = ({
   tailorId,
@@ -8,6 +9,8 @@ const Rating = ({
   userRateValue,
 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const submittingRatingId = useSelector((state) => state.social.submittingRatingId);
   const [ratingModeId, setRatingModeId] = useState(null);
   const [selectedRating, setSelectedRating] = useState(0);
@@ -17,6 +20,13 @@ const Rating = ({
   const submitting = submittingRatingId === tailorId;
 
   const handleRateClick = async () => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to rate a tailor. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
+
   const proceed = await new Promise((resolve) => {
     if (tailorId === currentUserId) {
       resolve(window.alert("You cannot rate yourself."));

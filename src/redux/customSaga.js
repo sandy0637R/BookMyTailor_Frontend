@@ -11,7 +11,10 @@ import {
 } from "./customSlice";
 import { toast } from "react-hot-toast";
 
-const BASE_URL = "https://bookmytailor-backend.onrender.com";
+const BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://bookmytailor-backend.onrender.com";
 
 function* fetchUploadedRequestsSaga() {
   try {
@@ -112,7 +115,7 @@ function* updateStatusSaga(action) {
 }
 
 function* updateTimersSaga() {
-  const acceptedRequests = yield select((state) => state.custom.acceptedRequests);
+  const acceptedRequests = yield select((state) => state.custom.acceptedRequests || []);
   const statusPhases = ["Accepted", "Ready", "Out for Delivery", "Delivered"];
   const ratios = [0.5, 0.25, 0.2, 0.05];
   const now = Date.now();
@@ -154,6 +157,14 @@ function* updateTimersSaga() {
     else if (timeLeft <= phaseTotal * 0.5) color = "text-yellow-500";
 
     timers[_id] = { timeLeft: format(timeLeft), progress, color };
+  }
+
+  // Throttle check: avoid dispatching empty timers if state is already empty
+  if (Object.keys(timers).length === 0) {
+    const currentTimers = yield select((state) => state.custom.timers);
+    if (Object.keys(currentTimers || {}).length === 0) {
+      return; // Skip dispatch entirely
+    }
   }
 
   yield put(setTimers(timers));

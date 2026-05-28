@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   getClothsRequest,
   addToWishlist,
@@ -13,10 +14,12 @@ import { IoMdRefresh } from "react-icons/io";
 
 const Cloths = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cloths = useSelector((state) => state.auth.cloths);
   const wishlist = useSelector((state) => state.auth.wishlist);
   const cart = useSelector((state) => state.auth.cart);
   const loading = useSelector((state) => state.auth.loading);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [expandedId, setExpandedId] = useState(null);
 
   // Pagination
@@ -46,10 +49,30 @@ const Cloths = () => {
     cart.find((entry) => entry.item === id)?.quantity || 0;
 
   const handleCartToggle = (id, action) => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to manage your cart. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
     if (action === "add") {
       dispatch(addToCart(id));
     } else {
       dispatch(removeFromCart(id));
+    }
+  };
+
+  const handleWishlistToggle = (id) => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to manage your wishlist. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
+    if (isInWishlist(id)) {
+      dispatch(removeFromWishlist(id));
+    } else {
+      dispatch(addToWishlist(id));
     }
   };
 
@@ -203,11 +226,7 @@ const Cloths = () => {
                   isInCart={isInCart(cloth._id)}
                   quantity={getCartQuantity(cloth._id)}
                   handleCartToggle={handleCartToggle}
-                  onWishlistToggle={(id) =>
-                    isInWishlist(id)
-                      ? dispatch(removeFromWishlist(id))
-                      : dispatch(addToWishlist(id))
-                  }
+                  onWishlistToggle={handleWishlistToggle}
                   onCartToggle={handleCartToggle}
                 />
               ))}

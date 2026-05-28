@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaComments } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const PostComment = ({
   post,
@@ -10,7 +11,9 @@ const PostComment = ({
   setSelectedCommentId,
 }) => {
   const dispatch = useDispatch();
-  const userId = useSelector((state) => state.post.userId);
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const userId = useSelector((state) => state.auth.profile?._id);
 
   const [open, setOpen] = React.useState(false);
 
@@ -18,7 +21,21 @@ const PostComment = ({
     setCommentTexts((prev) => ({ ...prev, [postId]: text }));
   };
 
+  const handleInputFocus = () => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to comment on a post. Would you like to log in now?")) {
+        navigate("/login");
+      }
+    }
+  };
+
   const handleCommentSubmit = (postId) => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to comment on a post. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
     const text = commentTexts[postId];
     if (!text) return;
     dispatch({ type: "COMMENT_POST", payload: { postId, text } });
@@ -110,6 +127,7 @@ const PostComment = ({
                 placeholder="Add a comment"
                 value={commentTexts[post._id] || ""}
                 onChange={(e) => handleCommentChange(post._id, e.target.value)}
+                onFocus={handleInputFocus}
                 className="flex-1 border border-yellow-tertiary bg-yellow-primary rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brown-primary"
               />
               <button

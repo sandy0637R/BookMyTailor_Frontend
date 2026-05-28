@@ -16,8 +16,8 @@ const TailorPost = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    dispatch({ type: "FETCH_POSTS" });
     if (token) {
-      dispatch({ type: "FETCH_POSTS" });
       dispatch({ type: "SET_USER_FROM_TOKEN" });
     }
   }, [token, dispatch]);

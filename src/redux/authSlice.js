@@ -201,6 +201,21 @@ const authSlice = createSlice({
       state.role = action.payload;
       localStorage.setItem("role", action.payload);
     },
+    setWishlist: (state, action) => {
+      state.wishlist = action.payload;
+      saveToLocalStorage(state);
+    },
+    setCartAndWishlist: (state, action) => {
+      const { cart = [], wishlist } = action.payload;
+      if (wishlist !== undefined) {
+        state.wishlist = wishlist;
+      }
+      state.cart = cart.map((entry) => ({
+        item: entry.item,
+        quantity: entry.quantity,
+      }));
+      saveToLocalStorage(state);
+    },
     addToWishlist: (state, action) => {},
     removeFromWishlist: (state, action) => {},
     addToCart: (state, action) => {},
@@ -228,6 +243,8 @@ export const {
   setLoading,
   clearError,
   setRole,
+  setWishlist,
+  setCartAndWishlist,
   getClothsRequest,
   setCloths,
   setClothsError,

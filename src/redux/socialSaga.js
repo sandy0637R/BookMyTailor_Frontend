@@ -15,7 +15,10 @@ import {
   setSelectedUser, // ✅ NEW
 } from "./socialSlice";
 
-const BASE_URL = "https://bookmytailor-backend.onrender.com";
+const BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://bookmytailor-backend.onrender.com";
 
 function* fetchTailorsSaga() {
   try {
@@ -28,27 +31,11 @@ function* fetchTailorsSaga() {
     yield put(setTailors(tailors));
 
     const ratings = {};
-    const userRatings = {};
     for (const tailor of tailors) {
-      try {
-        const ratingResponse = yield call(
-          axios.get,
-          `${BASE_URL}/tailors/ratings/${tailor._id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (ratingResponse.data.averageRating !== undefined) {
-          ratings[tailor._id] = ratingResponse.data.averageRating;
-        }
-        if (ratingResponse.data.userRating !== undefined) {
-          userRatings[tailor._id] = ratingResponse.data.userRating;
-        }
-      } catch (err) {
-        console.error(`Failed to fetch ratings for tailor ${tailor._id}:`, err);
-      }
+      ratings[tailor._id] = tailor.tailorDetails?.averageRating || 0;
     }
 
     yield put(setRatings(ratings));
-    yield put(setUserRating(userRatings));
   } catch (err) {
     console.error("Fetch Tailors Failed:", err);
   }

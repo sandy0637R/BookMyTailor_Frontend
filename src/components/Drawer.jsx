@@ -85,6 +85,9 @@ export default function Drawer() {
 
           {!isLoggedIn && (
             <>
+              <Link to="/tailors">
+                <li className={getLinkClass("/tailors")}>Posts</li>
+              </Link>
               <Link to="/login">
                 <li className={getLinkClass("/login")}>Login</li>
               </Link>

@@ -14,10 +14,15 @@ import {
 } from "./measurementSlice";
 import { toast } from "react-hot-toast";
 
+const BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://bookmytailor-backend.onrender.com";
+
 // GET
 function* fetchMeasurementsSaga(action) {
   try {
-    const res = yield call(axios.get, "https://bookmytailor-backend.onrender.com/measurements/", {
+    const res = yield call(axios.get, `${BASE_URL}/measurements/`, {
       headers: { Authorization: `Bearer ${action.payload}` },
     });
     yield put(fetchMeasurementsSuccess(res.data || []));
@@ -30,7 +35,7 @@ function* fetchMeasurementsSaga(action) {
 // POST
 function* addMeasurementSaga(action) {
   try {
-    yield call(axios.post, "https://bookmytailor-backend.onrender.com/measurements/", action.payload.formData, {
+    yield call(axios.post, `${BASE_URL}/measurements/`, action.payload.formData, {
       headers: { Authorization: `Bearer ${action.payload.token}` },
     });
     yield put(addMeasurementSuccess());
@@ -45,7 +50,7 @@ function* addMeasurementSaga(action) {
 // DELETE
 function* deleteMeasurementSaga(action) {
   try {
-    yield call(axios.delete, `https://bookmytailor-backend.onrender.com/measurements/${action.payload.id}`, {
+    yield call(axios.delete, `${BASE_URL}/measurements/${action.payload.id}`, {
       headers: { Authorization: `Bearer ${action.payload.token}` },
     });
     yield put(deleteMeasurementSuccess());
@@ -62,7 +67,7 @@ function* updateMeasurementSaga(action) {
   try {
     yield call(
       axios.put,
-      `https://bookmytailor-backend.onrender.com/measurements/${action.payload.id}`,
+      `${BASE_URL}/measurements/${action.payload.id}`,
       action.payload.formData,
       {
         headers: { Authorization: `Bearer ${action.payload.token}` },

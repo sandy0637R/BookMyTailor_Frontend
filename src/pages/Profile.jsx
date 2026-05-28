@@ -4,6 +4,7 @@ import {
   fetchProfileRequest,
   logout,
   updateProfileRequest,
+  setRole,
 } from "../redux/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -130,6 +131,7 @@ const handleLogout = async() => {
       if (profile?.roles?.includes("tailor") && profile.tailorDetails) {
         setCurrentRole("tailor");
         localStorage.setItem("role", "tailor");
+        dispatch(setRole("tailor"));
         toast.success("Switched to Tailor mode");
       } else {
         setShowTailorConfirm(true);
@@ -138,6 +140,7 @@ const handleLogout = async() => {
       dispatch(updateProfileRequest({ roles: ["customer"] }));
       setCurrentRole("customer");
       localStorage.setItem("role", "customer");
+      dispatch(setRole("customer"));
       toast.success("Switched to Customer mode");
     }
   };
@@ -172,6 +175,7 @@ const handleLogout = async() => {
     setShowTailorForm(false);
     setCurrentRole("tailor");
     localStorage.setItem("role", "tailor");
+    dispatch(setRole("tailor"));
   };
 
   const handleEditSubmit = () => {

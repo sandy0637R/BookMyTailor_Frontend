@@ -14,6 +14,11 @@ import {
 import { clearCartRequest } from "./authSlice";
 import { toast } from "react-hot-toast";
 
+const BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://bookmytailor-backend.onrender.com";
+
 // POST: Place Order
 function* placeOrderSaga(action) {
   try {
@@ -27,7 +32,7 @@ function* placeOrderSaga(action) {
 
     yield call(
       axios.post,
-      "https://bookmytailor-backend.onrender.com/orders/place",
+      `${BASE_URL}/orders/place`,
       orderData,
       config
     );
@@ -55,7 +60,7 @@ function* fetchOrdersSaga(action) {
 
     const res = yield call(
       axios.get,
-      "https://bookmytailor-backend.onrender.com/orders/my",
+      `${BASE_URL}/orders/my`,
       config
     );
 
@@ -78,7 +83,7 @@ function* deleteOrderSaga(action) {
 
     yield call(
       axios.delete,
-      `https://bookmytailor-backend.onrender.com/orders/delete/${orderId}`,
+      `${BASE_URL}/orders/delete/${orderId}`,
       config
     );
     yield put(deleteOrderSuccess(orderId));
@@ -95,7 +100,7 @@ function* fetchTopClothsSaga() {
   try {
     const res = yield call(
       axios.get,
-      "https://bookmytailor-backend.onrender.com/orders/top-cloths"
+      `${BASE_URL}/orders/top-cloths`
     );
     yield put(fetchTopClothsSuccess(res.data));
   } catch (error) {

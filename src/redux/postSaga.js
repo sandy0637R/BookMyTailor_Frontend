@@ -10,7 +10,10 @@ import {
 } from "./postSlice";
 import { jwtDecode } from "jwt-decode";
 
-const BASE_URL = "https://bookmytailor-backend.onrender.com";
+const BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://bookmytailor-backend.onrender.com";
 
 // Fetch posts with comments
 function* fetchPostsSaga() {

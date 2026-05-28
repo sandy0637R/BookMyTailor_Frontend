@@ -26,13 +26,18 @@ const ChatBox = ({ currentUser, selectedUser }) => {
     );
   }, [dispatch, currentUser?._id, selectedUser?._id, selectedUser?.chatId]);
 
-  // 🔌 Socket connection (init once per currentUser)
+  // 🔌 Socket connection (init once per currentUser session)
   useEffect(() => {
     if (!currentUser?._id) return;
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const newSocket = io("https://bookmytailor-backend.onrender.com", {
+    const socketURL =
+      window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://localhost:5000"
+        : "https://bookmytailor-backend.onrender.com";
+
+    const newSocket = io(socketURL, {
       auth: { token, userId: currentUser._id },
       transports: ["websocket"],
     });
@@ -43,12 +48,25 @@ const ChatBox = ({ currentUser, selectedUser }) => {
       console.error("⚠️ Socket error:", err)
     );
 
-    // 📥 Listen for new messages (only refresh if for this chat)
-    newSocket.on("newMessage", (msg) => {
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [currentUser?._id]);
+
+  // 📥 Listen for new messages (dynamic listener, cleanup and register on selectedUser change)
+  useEffect(() => {
+    if (!socket || !selectedUser?._id) return;
+
+    const handleNewMessage = (msg) => {
+      // Resolve sender and receiver IDs (handles both string ID or populated object ID formats)
+      const msgSenderId = typeof msg.sender === "object" ? msg.sender?._id : msg.sender;
+      const msgReceiverId = typeof msg.receiver === "object" ? msg.receiver?._id : msg.receiver;
+
       const inThisChat =
-        (msg.sender === selectedUser?._id &&
-          msg.receiver === currentUser._id) ||
-        (msg.sender === currentUser._id && msg.receiver === selectedUser?._id);
+        (msgSenderId === selectedUser._id && msgReceiverId === currentUser._id) ||
+        (msgSenderId === currentUser._id && msgReceiverId === selectedUser._id);
 
       if (inThisChat) {
         dispatch(
@@ -59,11 +77,14 @@ const ChatBox = ({ currentUser, selectedUser }) => {
           )
         );
       }
-    });
+    };
 
-    setSocket(newSocket);
-    return () => newSocket.disconnect();
-  }, [currentUser?._id, selectedUser?._id, selectedUser?.chatId, dispatch]);
+    socket.on("newMessage", handleNewMessage);
+
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+    };
+  }, [socket, currentUser?._id, selectedUser?._id, selectedUser?.chatId, dispatch]);
 
   // 👁️ Mark unread messages as read
   useEffect(() => {

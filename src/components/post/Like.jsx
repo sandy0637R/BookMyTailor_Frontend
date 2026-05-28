@@ -3,12 +3,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { BiSolidLike } from "react-icons/bi";
 
 
+import { useNavigate } from "react-router-dom";
+
+
 const Like = ({ post }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const userId = useSelector((state) => state.post.userId);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
   const handleLike = () => {
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to like a post. Would you like to log in now?")) {
+        navigate("/login");
+      }
+      return;
+    }
     dispatch({ type: "LIKE_POST", payload: { postId: post._id } });
   };
 

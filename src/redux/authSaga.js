@@ -13,11 +13,16 @@ import {
   setSingleCloth,        
   setSingleClothError,
   clearCart, 
-  clearCartRequest,    
+  clearCartRequest,
+  setWishlist,
+  setCartAndWishlist,
 } from "./authSlice";
 
 // Utility to get token from localStorage
-const BASE_URL = "https://bookmytailor-backend.onrender.com/";
+const BASE_URL =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000/"
+    : "https://bookmytailor-backend.onrender.com/";
 const resolveImagePath = (path) =>
   path?.startsWith("http") ? path : BASE_URL + path;
 
@@ -85,8 +90,8 @@ function* getClothByIdSaga(action) {
 
 function* addToWishlistSaga(action) {
   try {
-    yield call(addToWishlistApi, action.payload);
-    yield put(fetchProfileRequest());
+    const response = yield call(addToWishlistApi, action.payload);
+    yield put(setWishlist(response.data.wishlist));
   } catch (err) {
     yield put(setError(err.message));
   }
@@ -94,8 +99,8 @@ function* addToWishlistSaga(action) {
 
 function* removeFromWishlistSaga(action) {
   try {
-    yield call(removeFromWishlistApi, action.payload);
-    yield put(fetchProfileRequest());
+    const response = yield call(removeFromWishlistApi, action.payload);
+    yield put(setWishlist(response.data.wishlist));
   } catch (err) {
     yield put(setError(err.message));
   }
@@ -103,9 +108,12 @@ function* removeFromWishlistSaga(action) {
 
 function* addToCartSaga(action) {
   try {
-    yield call(addToCartApi, action.payload);
-    yield call(removeFromWishlistApi, action.payload);
-    yield put(fetchProfileRequest());
+    const response = yield call(addToCartApi, action.payload);
+    // Note: The backend addToCart API automatically handles pulling from wishlist
+    yield put(setCartAndWishlist({ 
+      cart: response.data.cart, 
+      wishlist: response.data.wishlist 
+    }));
   } catch (err) {
     yield put(setError(err.message));
   }
@@ -113,8 +121,8 @@ function* addToCartSaga(action) {
 
 function* removeFromCartSaga(action) {
   try {
-    yield call(removeFromCartApi, action.payload);
-    yield put(fetchProfileRequest());
+    const response = yield call(removeFromCartApi, action.payload);
+    yield put(setCartAndWishlist({ cart: response.data.cart }));
   } catch (err) {
     yield put(setError(err.message));
   }
@@ -124,7 +132,6 @@ function* clearCartSaga(action) {
   try {
     yield call(clearCartApi, action.payload); // payload is userId
     yield put(clearCart());                   // clear Redux state
-    yield put(fetchProfileRequest());         // refresh profile
   } catch (err) {
     yield put(setError(err.message));
   }

@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const FollowerButton = ({
   tailorId,
@@ -7,6 +8,8 @@ const FollowerButton = ({
   followerName,
 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const loadingFollowId = useSelector((state) => state.social.loadingFollowId);
   const isFollowing = followers?.some(
     (f) => f._id.toString() === currentUserId?.toString()
@@ -14,8 +17,10 @@ const FollowerButton = ({
   const loading = loadingFollowId === tailorId;
 
   const toggleFollow = async () => {
-    if (!currentUserId || !followerName) {
-      await alert("User info missing. Please log in again.");
+    if (!isLoggedIn) {
+      if (window.confirm("You must be logged in to follow a tailor. Would you like to log in now?")) {
+        navigate("/login");
+      }
       return;
     }
 
