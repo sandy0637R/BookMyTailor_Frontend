@@ -27,54 +27,47 @@ const PostContent = ({ post }) => {
   }, []);
 
   return (
-    <div ref={captionRef}>
-
-      <p className="text-lg text-brown-secondary mb-1 font-medium">
-        <span className="font-semibold text-brown-tertiary">Posted by:</span>{" "}
-        {post.postedBy?.name || "Unknown"}
+    <div ref={captionRef} className="space-y-2 mt-1">
+      <p className="text-[14.5px] text-brown-secondary break-words whitespace-pre-wrap leading-relaxed">
+        <span className="font-bold text-brown-tertiary mr-1.5">Caption:</span>
+        {expandedCaption ? (
+          <>
+            {post.caption}{" "}
+            {hasMoreCaption && (
+              <span
+                onClick={() => setExpandedCaption(false)}
+                className="text-yellow-tertiary font-bold cursor-pointer hover:underline ml-1"
+              >
+                less
+              </span>
+            )}
+          </>
+        ) : (
+          <>
+            {shortCaption}
+            {hasMoreCaption && (
+              <span
+                onClick={() => setExpandedCaption(true)}
+                className="text-yellow-tertiary font-bold cursor-pointer hover:underline ml-1"
+              >
+                ... more
+              </span>
+            )}
+          </>
+        )}
       </p>
-      
-
-        <p className="text-[15px] text-brown-secondary break-words whitespace-pre-wrap mb-1">
-          <span className="font-medium text-brown-tertiary">Caption:</span>{" "}
-          {expandedCaption ? (
-            <>
-              {post.caption}{" "}
-              {hasMoreCaption && (
-                <span
-                  onClick={() => setExpandedCaption(false)}
-                  className="text-yellow-tertiary cursor-pointer ml-1"
-                >
-                  ..less
-                </span>
-              )}
-            </>
-          ) : (
-            <>
-              {shortCaption}
-              {hasMoreCaption && (
-                <span
-                  onClick={() => setExpandedCaption(true)}
-                  className="text-yellow-tertiary cursor-pointer ml-1"
-                >
-                  ..more
-                </span>
-              )}
-            </>
-          )}
-        </p>
-      <p className="text-sm text-brown-primary mb-1">
-        <span className="font-medium text-brown-secondary">Hashtags:</span>{" "}
-        <span className="break-words whitespace-pre-wrap">
+      {hashtagsText && (
+        <p className="text-[13px] font-semibold text-yellow-tertiary tracking-wide">
+          <span className="text-brown-primary/60 font-bold mr-1.5">Hashtags:</span>
           {expandedHashtags ? (
             <>
               {hashtagsText}{" "}
               {hasMoreHashtags && (
                 <span
                   onClick={() => setExpandedHashtags(false)}
-                  className="text-yellow-tertiary cursor-pointer ml-1"
+                  className="text-brown-secondary font-bold cursor-pointer hover:underline ml-1"
                 >
-                  ..less
+                  less
                 </span>
               )}
             </>
@@ -84,23 +77,15 @@ const PostContent = ({ post }) => {
               {hasMoreHashtags && (
                 <span
                   onClick={() => setExpandedHashtags(true)}
-                  className="text-yellow-tertiary cursor-pointer ml-1"
+                  className="text-brown-secondary font-bold cursor-pointer hover:underline ml-1"
                 >
-                  ..more
+                  ... more
                 </span>
               )}
             </>
           )}
-        </span>
-      </p>
-      <p className="text-sm text-brown-secondary">
-        <span className="font-medium text-brown-tertiary">Posted on:</span>{" "}
-        {new Date(post.createdAt).toLocaleDateString()}{" "}
-        {new Date(post.createdAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </p>
+        </p>
+      )}
     </div>
   );
 };

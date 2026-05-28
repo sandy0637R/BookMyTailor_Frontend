@@ -131,36 +131,27 @@ const Cloths = () => {
       <h2 className="text-3xl font-bold text-center mb-8 text-brown-secondary">Cloths</h2>
 
       {/* Search & Filter Section */}
-      <div className="flex flex-wrap  items-center relative">
-        {/* Search Icon */}
-        <label
-          htmlFor="productSearchInput"
-          className="rounded-tl-xl rounded-bl-xl pl-4 py-4 text-[21px] border-y-2 border-l-2 bg-yellow-primary cursor-pointer border-brown-primary text-brown-primary"
-        >
-          <FaSearch />
-        </label>
-
-        {/* Search Input */}
-        <div className="relative">
+      <div className="flex flex-wrap items-center gap-4 mb-8 bg-brown-tertiary/5 p-4 rounded-xl border border-brown-primary/10">
+        <div className="flex items-center flex-1 min-w-[250px] relative">
+          <span className="absolute left-4 text-brown-primary/60 text-base">
+            <FaSearch />
+          </span>
           <input
             id="productSearchInput"
             type="text"
-            placeholder="Search here..."
+            placeholder="Search clothes, designers, brands..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setStartIndex(0);
             }}
-            className="px-4 py-4 text-[14px] border-y-2 border-r-2 border-brown-primary text-brown-primary bg-yellow-primary w-64 focus:outline-none "
+            className="w-full !pl-11 !py-2.5 !rounded-lg !border-brown-primary/20"
           />
-
-          {/* No search results dropdown */}
-          {searchQuery.trim() !== "" &&
-            filteredCloths.length === 0 && (
-              <div className="absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded shadow text-gray-600 text-sm py-2 px-3">
-                No search found
-              </div>
-            )}
+          {searchQuery.trim() !== "" && filteredCloths.length === 0 && (
+            <div className="absolute left-0 right-0 top-full mt-1 bg-neutral-primary border border-brown-primary/20 rounded-lg shadow-premium text-brown-primary text-sm py-2.5 px-4 z-20">
+              No clothes found matching your search.
+            </div>
+          )}
         </div>
 
         {/* Sort by Price */}
@@ -170,11 +161,11 @@ const Cloths = () => {
             setSortOption(e.target.value);
             setStartIndex(0);
           }}
-          className="px-4 py-4 border-y-2 border-r-2 w-[150px] border-brown-primary font-semibold bg-yellow-primary text-brown-primary hover-common hover:bg-yellow-tertiary hover:text-neutral-primary"
+          className="min-w-[150px] !py-2.5 !rounded-lg !border-brown-primary/20 cursor-pointer font-semibold text-sm bg-neutral-primary text-brown-secondary"
         >
-          <option value="">Price</option>
-          <option value="low-high">Low to High</option>
-          <option value="high-low">High to Low</option>
+          <option value="">Sort Price</option>
+          <option value="low-high">Price: Low to High</option>
+          <option value="high-low">Price: High to Low</option>
         </select>
 
         {/* Gender Filter */}
@@ -184,9 +175,9 @@ const Cloths = () => {
             setGenderFilter(e.target.value);
             setStartIndex(0);
           }}
-          className="px-4 py-4 border-y-2 border-r-2 w-[150px] border-brown-primary font-semibold bg-yellow-primary text-brown-primary hover-common hover:bg-yellow-tertiary hover:text-neutral-primary"
+          className="min-w-[150px] !py-2.5 !rounded-lg !border-brown-primary/20 cursor-pointer font-semibold text-sm bg-neutral-primary text-brown-secondary"
         >
-          <option value="">Genders</option>
+          <option value="">Gender: All</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="unisex">Unisex</option>
@@ -195,7 +186,8 @@ const Cloths = () => {
         {/* Refresh Button */}
         <button
           onClick={handleResetFilters}
-          className="px-3 py-3 text-[28.8px] text-brown-primary bg-yellow-primary border-y-2 border-r-2 border-brown-primary font-semibold rounded-tr-xl rounded-br-xl hover-common hover:bg-yellow-tertiary hover:text-neutral-primary"
+          title="Refresh Catalog"
+          className="w-10 h-10 flex items-center justify-center text-xl text-neutral-primary bg-gradient-gold hover:opacity-95 rounded-lg transition shadow-sm active:scale-95 cursor-pointer"
         >
           <IoMdRefresh />
         </button>

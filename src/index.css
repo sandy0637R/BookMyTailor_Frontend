@@ -1,79 +1,143 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap");
 @import "tailwindcss";
 
 * {
-  font-family: "Inter", sans-serif;
-  scrollbar-width: none;
+  font-family: "Outfit", "Inter", sans-serif;
+  scrollbar-width: thin;
+  scrollbar-color: #91684A #2e221f;
   list-style: none;
   box-sizing: border-box;
 }
 
-:root{
-  --color-check: #573c28;
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #2e221f;
+}
+::-webkit-scrollbar-thumb {
+  background: #91684A;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E6B325;
 }
 
+:root {
+  --color-check: #573c28;
+  
+  /* Gradients */
+  --gradient-gold: linear-gradient(135deg, #E6B325 0%, #91684A 100%);
+  --gradient-gold-hover: linear-gradient(135deg, #fbf1a4 0%, #E6B325 100%);
+  --gradient-dark: linear-gradient(135deg, #2e221f 0%, #573c28 100%);
+  --gradient-cream: linear-gradient(135deg, #fffff3 0%, #fbf1a4 40%, #F2D974 100%);
+  --gradient-danger: linear-gradient(135deg, #fb2c36 0%, #cb000a 100%);
+}
 
 @theme {
---color-yellow-primary: #fbf1a4;
---color-yellow-secondary: #F2D974;
---color-yellow-tertiary: #E6B325;
---color-yellow-premium: oklch(85.2% 0.199 91.936);
+  --color-yellow-primary: #fbf1a4;
+  --color-yellow-secondary: #F2D974;
+  --color-yellow-tertiary: #E6B325;
+  --color-yellow-premium: oklch(85.2% 0.199 91.936);
 
---color-brown-primary: #91684A;
---color-brown-secondary: #573c28;
---color-brown-tertiary: #2e221f;
+  --color-brown-primary: #91684A;
+  --color-brown-secondary: #573c28;
+  --color-brown-tertiary: #2e221f;
 
---color-neutral-primary: #fffff3;
+  --color-neutral-primary: #fffff3;
 
---color-danger-primary: #fb2c36;
---color-danger-secondary: #cb000a;
+  --color-danger-primary: #fb2c36;
+  --color-danger-secondary: #cb000a;
 
-
-
-  --font-manrope: "Inter", sans-serif;
-
-
-  --shadow-custom: 0px 0px 4px #2e221f ;
-
+  --font-manrope: "Outfit", "Inter", sans-serif;
+  --shadow-custom: 0px 4px 20px rgba(46, 34, 31, 0.12);
+  --shadow-premium: 0px 10px 30px rgba(87, 60, 40, 0.08);
+  --shadow-glowing: 0px 0px 15px rgba(230, 179, 37, 0.25);
 }
 
+/* Global Form Control Overrides (Uniformity & Consistency) */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  background-color: #fffff3 !important;
+  border: 1.5px solid rgba(87, 60, 40, 0.2) !important;
+  border-radius: 8px !important;
+  color: #2e221f !important;
+  padding: 0.65rem 1rem !important;
+  font-size: 0.95rem !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  outline: none !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #E6B325 !important;
+  box-shadow: 0px 0px 0px 3px rgba(230, 179, 37, 0.25) !important;
+  background-color: #ffffff !important;
+}
+
+/* Premium Layout Components */
 .drawer-btn {
-  @apply mb-2 border-b-2 border-brown-secondary p-2 hover:text-yellow-tertiary hover:border-yellow-tertiary hover:bg-brown-tertiary hover:rounded-sm transition-all duration-200 ease-in-out;
+  @apply mb-2 border-b border-brown-secondary/30 p-2.5 hover:text-yellow-tertiary hover:border-yellow-tertiary hover:bg-brown-tertiary/60 hover:rounded-lg transition-all duration-200 ease-in-out font-medium tracking-wide;
 }
 
 .nav-btn {
-  @apply ml-2 mr-2 p-1 pr-3 pl-3 hover:text-yellow-tertiary hover:bg-brown-tertiary hover:rounded-sm transition-all duration-200 ease-in-out hover:shadow-[0_0_3px_#E6B325];
+  @apply ml-2 mr-2 p-1.5 px-4 font-medium tracking-wide hover:text-yellow-tertiary hover:bg-brown-tertiary/80 hover:rounded-lg transition-all duration-250 ease-in-out hover:shadow-[0_0_8px_rgba(230,179,37,0.25)];
 }
 
-.hover-common{
-  @apply hover:shadow-custom transition-all duration-200 ease-in-out
+.hover-common {
+  @apply hover:shadow-premium hover:-translate-y-0.5 transition-all duration-300 ease-out;
 }
 
-.shadow-common{
-  @apply  border border-gray-200 shadow-lg
+.shadow-common {
+  @apply border border-brown-primary/10 shadow-premium rounded-2xl bg-neutral-primary;
 }
 
-.cloth-card-btn{
-  @apply w-[100px] h-[40px] flex justify-center text-[15px] rounded text-neutral-primary
+.cloth-card-btn {
+  @apply w-[105px] h-[42px] flex justify-center items-center text-[13.5px] font-bold rounded-lg shadow-sm transition-all duration-200 active:scale-95 cursor-pointer;
 }
 
-.cloth-detail-btn{
-  @apply w-[49%] flex justify-center items-center h-[40px] rounded-sm text-neutral-primary
+.cloth-detail-btn {
+  @apply w-[49%] flex justify-center items-center h-[42px] rounded-lg font-bold transition-all duration-200 active:scale-95 shadow-sm cursor-pointer;
 }
 
-.customize-m-in-main-div{
-  @apply flex flex-col m-3
+.customize-m-in-main-div {
+  @apply flex flex-col m-3.5 space-y-1.5;
 }
 
-.customize-m-in-label{
-  @apply   px-1 text-sm font-medium  text-brown-primary 
+.customize-m-in-label {
+  @apply px-1 text-sm font-semibold tracking-wide text-brown-primary;
 }
 
-.post-sort-main{
-  @apply p-2 rounded border-2 border-brown-secondary flex justify-self-end items-center hover:bg-brown-secondary
+.post-sort-main {
+  @apply p-2 px-4 rounded-lg border border-brown-primary/20 flex justify-center items-center font-semibold text-sm hover:bg-brown-secondary hover:text-neutral-primary hover:border-brown-secondary transition-all duration-200 cursor-pointer;
 }
 
-
+/* Premium Gradients */
+.bg-gradient-gold {
+  background: var(--gradient-gold);
+}
+.bg-gradient-gold:hover {
+  background: var(--gradient-gold-hover);
+}
+.bg-gradient-dark {
+  background: var(--gradient-dark);
+}
+.bg-gradient-cream {
+  background: var(--gradient-cream);
+}
+.bg-gradient-danger {
+  background: var(--gradient-danger);
+}
 
 @keyframes scrub {
   0% {
@@ -85,4 +149,3 @@
     transform-origin: left;
   }  
 }
-

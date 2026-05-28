@@ -107,74 +107,72 @@ const Tailors = () => {
         setFollowerName={setFollowerName}
       />
 
-      {/* Search & Sort */}
-     {/* Search & Sort */}
-<div className="flex flex-wrap  items-center relative ">
-  <label htmlFor="searchInput" className=" text-brown-primary rounded-tl-xl rounded-bl-xl pl-4 py-4 text-[21px] border-y-2 border-l-2 bg-yellow-primary">
-      <FaSearch />
-    </label>
-  <div className="relative">
-    <input
-    id="searchInput"
-      type="text"
-      placeholder="Search here..."
-      value={searchQuery}
-      onChange={(e) => {
-        setSearchQuery(e.target.value);
-        setStartIndex(0);
-      }}
-      className="px-4 py-4 text-[14px] text-brown-primary border-y-2 border-r-2 bg-yellow-primary w-64  focus:outline-none "
-    />
+      {/* Search & Sort Section */}
+      <div className="flex flex-wrap items-center gap-4 mb-8 bg-brown-tertiary/5 p-4 rounded-xl border border-brown-primary/10">
+        <div className="flex items-center flex-1 min-w-[250px] relative">
+          <span className="absolute left-4 text-brown-primary/60 text-base">
+            <FaSearch />
+          </span>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search tailors by name or email..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setStartIndex(0);
+            }}
+            className="w-full !pl-11 !py-2.5 !rounded-lg !border-brown-primary/20"
+          />
+          {searchQuery.trim() !== "" && filteredAndSortedTailors.length === 0 && (
+            <div className="absolute left-0 right-0 top-full mt-1 bg-neutral-primary border border-brown-primary/20 rounded-lg shadow-premium text-brown-primary text-sm py-2.5 px-4 z-20">
+              No tailors found matching your search.
+            </div>
+          )}
+        </div>
 
-    {/* No search results dropdown */}
-    {searchQuery.trim() !== "" && filteredAndSortedTailors.length === 0 && (
-      <div className="absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded shadow text-gray-600 text-sm py-2 px-3">
-        No search found
+        {/* Fees Sort */}
+        <select
+          value={sortConfig.key === "fees" ? sortConfig.direction : ""}
+          onChange={(e) => handleSortChange("fees", e.target.value)}
+          className="min-w-[150px] !py-2.5 !rounded-lg !border-brown-primary/20 cursor-pointer font-semibold text-sm bg-neutral-primary text-brown-secondary"
+        >
+          <option value="">Sort Fees</option>
+          <option value="desc">Fees: High to Low</option>
+          <option value="asc">Fees: Low to High</option>
+        </select>
+
+        {/* Rating Sort */}
+        <select
+          value={sortConfig.key === "rating" ? sortConfig.direction : ""}
+          onChange={(e) => handleSortChange("rating", e.target.value)}
+          className="min-w-[150px] !py-2.5 !rounded-lg !border-brown-primary/20 cursor-pointer font-semibold text-sm bg-neutral-primary text-brown-secondary"
+        >
+          <option value="">Sort Rating</option>
+          <option value="desc">Rating: High to Low</option>
+          <option value="asc">Rating: Low to High</option>
+        </select>
+
+        {/* Followers Sort */}
+        <select
+          value={sortConfig.key === "followers" ? sortConfig.direction : ""}
+          onChange={(e) => handleSortChange("followers", e.target.value)}
+          className="min-w-[150px] !py-2.5 !rounded-lg !border-brown-primary/20 cursor-pointer font-semibold text-sm bg-neutral-primary text-brown-secondary"
+        >
+          <option value="">Sort Followers</option>
+          <option value="desc">Followers: High to Low</option>
+          <option value="asc">Followers: Low to High</option>
+        </select>
+
+        {/* Refresh Button */}
+        <button
+          onClick={handleReset}
+          title="Refresh Tailors"
+          className="w-10 h-10 flex items-center justify-center text-xl text-neutral-primary bg-gradient-gold hover:opacity-95 rounded-lg transition shadow-sm active:scale-95 cursor-pointer"
+        >
+          <IoMdRefresh />
+        </button>
       </div>
-    )}
-  </div>
-
-  {/* Fees Sort */}
-  <select
-    value={sortConfig.key === "fees" ? sortConfig.direction : ""}
-    onChange={(e) => handleSortChange("fees", e.target.value)}
-    className="px-4 py-4 border-y-2 border-r-2 w-[150px] border-brown-primary font-semibold bg-yellow-primary text-brown-primary hover-common hover:bg-yellow-tertiary hover:text-neutral-primary "
-  >
-    <option value=""> Fees</option>
-    <option value="desc">High to Low</option>
-    <option value="asc">Low to High</option>
-  </select>
-
-  {/* Rating Sort */}
-  <select
-    value={sortConfig.key === "rating" ? sortConfig.direction : ""}
-    onChange={(e) => handleSortChange("rating", e.target.value)}
-    className="px-4 py-4 border-y-2 border-r-2 w-[150px] border-brown-primary font-semibold bg-yellow-primary text-brown-primary hover-common hover:bg-yellow-tertiary hover:text-neutral-primary "
-  >
-    <option value=""> Rating</option>
-    <option value="desc">High to Low</option>
-    <option value="asc">Low to High</option>
-  </select>
-
-  {/* Followers Sort */}
-  <select
-    value={sortConfig.key === "followers" ? sortConfig.direction : ""}
-    onChange={(e) => handleSortChange("followers", e.target.value)}
-    className="px-4 py-4 border-y-2 border-r-2 w-[150px] border-brown-primary font-semibold bg-yellow-primary text-brown-primary hover-common hover:bg-yellow-tertiary hover:text-neutral-primary "
-  >
-    <option value=""> Followers</option>
-    <option value="desc">High to Low</option>
-    <option value="asc">Low to High</option>
-  </select>
-
-  {/* Refresh Button */}
-  <button
-    onClick={handleReset}
-    className="px-3 py-3 text-[29px] text-brown-primary bg-yellow-primary border-y-2 border-r-2 border-brown-primary font-semibold rounded-tr-xl rounded-br-xl hover-common hover:bg-yellow-tertiary hover:text-neutral-primary"
-  >
-    <IoMdRefresh />
-  </button>
-</div>
 
 
       <div className="relative ">

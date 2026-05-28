@@ -38,8 +38,8 @@ export default function Drawer() {
 
   const getLinkClass = (path) =>
     location.pathname === path
-      ? "drawer-btn bg-brown-tertiary text-yellow-tertiary rounded-sm"
-      : "drawer-btn";
+      ? "drawer-btn bg-yellow-tertiary text-brown-tertiary rounded-lg shadow-glowing scale-[1.02] font-extrabold border-l-4 border-brown-primary px-4 py-2.5 flex items-center justify-between"
+      : "drawer-btn text-neutral-primary/85 hover:text-yellow-tertiary hover:pl-4 hover:bg-brown-secondary/35 transition-all duration-200 px-3 py-2.5 rounded-lg flex items-center";
 
   const tailorLinks = [
     { to: "/addpost", label: "Add Posts" },
@@ -58,25 +58,25 @@ export default function Drawer() {
     <div className="relative" ref={drawerRef}>
       <button
         onClick={() => setOpen(true)}
-        className={`fixed top-2.5 left-2 bg-brown-tertiary text-neutral-primary w-8 h-8 transition-transform duration-300 flex 
-                    items-center justify-center rounded cursor-pointer z-50 shadow-[0_0px_3px_black]
+        className={`fixed top-2.5 left-4 bg-brown-tertiary text-yellow-tertiary w-9 h-9 border border-yellow-tertiary/20 hover:scale-105 active:scale-95 transition-all duration-200 flex 
+                    items-center justify-center rounded-lg cursor-pointer z-50 shadow-premium
                     ${open ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         aria-label="Open menu"
       >
-        <FiMenu size={24} />
+        <FiMenu size={20} />
       </button>
 
       <div
-        className={`fixed top-0 left-0 h-screen bg-brown-tertiary text-neutral-primary transform transition-transform duration-300 ease-in-out 
-                    ${open ? "translate-x-0" : "-translate-x-full"} w-[280px] p-4 z-40`}
+        className={`fixed top-0 left-0 h-screen bg-brown-tertiary/95 backdrop-blur-md text-neutral-primary transform transition-transform duration-300 ease-in-out border-r border-yellow-tertiary/10
+                    ${open ? "translate-x-0" : "-translate-x-full"} w-[280px] p-6 z-40 shadow-premium`}
       >
         <IoMdArrowDropright
-          className="absolute right-2 top-2 text-neutral-primary text-3xl cursor-pointer rotate-180 rounded-sm hover:text-yellow-tertiary 
-                     hover:scale-110 hover:border-t-2 hover:bg-brown-tertiary hover:border-yellow-tertiary"
+          className="absolute right-4 top-4 text-neutral-primary/80 text-3xl cursor-pointer rotate-180 rounded-lg hover:text-yellow-tertiary 
+                     hover:scale-110 transition"
           onClick={() => setOpen(false)}
         />
 
-        <h2 className="text-xl font-bold mb-4">Menu</h2>
+        <h2 className="text-sm font-extrabold mb-8 tracking-widest text-yellow-tertiary border-b border-yellow-tertiary/20 pb-3 uppercase">Navigation</h2>
 
         <ul className="space-y-2">
           <Link to="/">

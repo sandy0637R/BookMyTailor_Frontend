@@ -201,11 +201,16 @@ const handleLogout = async() => {
 
   return (
     <>
-      <div className="flex items-center  justify-center  w-screen">
-        <div className="w-[800px] p-6 bg-neutral-primary shadow-custom rounded-lg my-[50px] relative pb-10">
-          <h1 className="text-4xl font-semibold  mb-12  p-2 border-b-3 border-brown-primary">
-            Profile
-          </h1>
+      <div className="flex items-center justify-center w-screen py-10">
+        <div className="w-full max-w-[850px] p-8 bg-neutral-primary shadow-premium border border-brown-primary/10 rounded-2xl relative pb-12 mx-4">
+          <div className="mb-10 pb-4 border-b border-brown-primary/10 flex items-center justify-between">
+            <h1 className="text-2xl font-black text-brown-secondary tracking-widest uppercase">
+              Profile Center
+            </h1>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-yellow-tertiary bg-yellow-primary/50 px-3 py-1 rounded-full border border-yellow-tertiary/15">
+              Account Hub
+            </span>
+          </div>
 
           <div className="flex justify-between items-center ">
             <div>
